@@ -9,6 +9,7 @@ import '../../../l10n/app_localizations.dart';
 import '../../auth/presentation/problem_text.dart';
 import '../data/models.dart';
 import 'chama_screen.dart';
+import 'cash_screen.dart';
 import 'records_tab.dart';
 import 'widgets/rule_book_list.dart';
 
@@ -88,6 +89,10 @@ class _Overview extends ConsumerWidget {
                         Text(l.myPosition, style: text.titleMedium),
                         const SizedBox(height: JiraniSpace.s),
                         row(l.contributed, MoneyText(p.contributed)),
+                        if (p.opening.cents > 0)
+                          row(l.openingSavings, MoneyText(p.opening)),
+                        if (p.pendingCash.cents > 0)
+                          row(l.pendingCash, MoneyText(p.pendingCash)),
                         row(l.arrears, MoneyText(p.arrears)),
                         row(l.finesOwed, MoneyText(p.fines)),
                         if (p.credit.cents > 0) row(l.creditLabel, MoneyText(p.credit)),
@@ -116,10 +121,23 @@ class _Overview extends ConsumerWidget {
               ]),
             ),
           ),
+        _CashToConfirm(chamaId: chama.id, myId: me?.id),
         if (chama.mode == 'records_only') ...[
           const SizedBox(height: JiraniSpace.s),
           Notice(l.recordsOnlyNote),
         ],
+        const SizedBox(height: JiraniSpace.m),
+        OutlinedButton.icon(
+          icon: const Icon(Icons.payments_outlined),
+          label: Text(l.cashAtMeetings),
+          onPressed: () => context.push('/chamas/${chama.id}/cash'),
+        ),
+        const SizedBox(height: JiraniSpace.s),
+        OutlinedButton.icon(
+          icon: const Icon(Icons.menu_book_outlined),
+          label: Text(l.openingBalances),
+          onPressed: () => context.push('/chamas/${chama.id}/opening'),
+        ),
         if (chama.iAmOfficial || chama.myRole == 'auditor') ...[
           const SizedBox(height: JiraniSpace.m),
           OutlinedButton.icon(
@@ -135,6 +153,32 @@ class _Overview extends ConsumerWidget {
           ),
         ],
       ],
+    );
+  }
+}
+
+/// Tells a member that cash the treasurer recorded for them is waiting for their
+/// confirmation, so it is not left unconfirmed.
+class _CashToConfirm extends ConsumerWidget {
+  const _CashToConfirm({required this.chamaId, required this.myId});
+
+  final String chamaId;
+  final String? myId;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l = AppLocalizations.of(context);
+    final mine = ref.watch(cashProvider(chamaId)).value
+            ?.where((r) => r.state == 'recorded' && r.membershipId == myId)
+            .length ??
+        0;
+    if (mine == 0) return const SizedBox.shrink();
+    return Padding(
+      padding: const EdgeInsets.only(top: JiraniSpace.s),
+      child: InkWell(
+        onTap: () => context.push('/chamas/$chamaId/cash'),
+        child: Notice(l.cashToConfirm(mine), tone: NoticeTone.warning),
+      ),
     );
   }
 }

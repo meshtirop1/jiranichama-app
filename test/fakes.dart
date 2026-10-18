@@ -262,6 +262,108 @@ class FakeChamaRepository implements ChamaRepository {
       {String reason = '', required String idempotencyKey}) async {
     calls.add('notMe:$bankLineId');
   }
+
+  // Opening balances
+  String openingState = 'none';
+  List<Json> openingLines = [];
+
+  @override
+  Future<OpeningBalances> opening(String id) async => OpeningBalances(_openingJson);
+
+  @override
+  Future<OpeningBalances> saveOpening(String id, List<Json> lines) async {
+    calls.add('saveOpening:${lines.length}');
+    openingState = 'draft';
+    openingLines = [
+      for (final l in lines)
+        {...l, 'id': 'line-${l['membership_id']}', 'member_code': 'JC-4821-00?',
+         'objections': <String>[]},
+    ];
+    return OpeningBalances(_openingJson);
+  }
+
+  @override
+  Future<ChallengeSent> startConfirmOpening(String id) async {
+    if (myRole == 'treasurer') {
+      throw ApiProblem(code: 'second_official_required', detail: '', status: 403);
+    }
+    return _sent;
+  }
+
+  @override
+  Future<OpeningBalances> confirmOpening(String id,
+      {required String challengeId, required String code}) async {
+    _codeCheck(code);
+    openingState = 'confirmed';
+    calls.add('confirmOpening');
+    return OpeningBalances(_openingJson);
+  }
+
+  @override
+  Future<void> objectToOpening(String lineId, String reason) async {
+    calls.add('object:$lineId:$reason');
+    for (final l in openingLines) {
+      if (l['id'] == lineId) (l['objections'] as List).add(reason);
+    }
+  }
+
+  // Cash
+  final cash = <Json>[];
+
+  @override
+  Future<List<CashReceipt>> cashReceipts(String id) async => [for (final c in cash) CashReceipt(c)];
+
+  @override
+  Future<CashReceipt> recordCash(String id, {required String membershipId,
+      required int amountCents, required String idempotencyKey}) async {
+    calls.add('recordCash:$membershipId:$amountCents');
+    final r = {'id': 'cash-${cash.length + 1}', 'membership_id': membershipId,
+               'member_code': 'JC-4821-004', 'amount_cents': amountCents,
+               'received_on': '2026-03-04', 'state': 'recorded', 'overdue': false};
+    cash.add(r);
+    return CashReceipt(r);
+  }
+
+  @override
+  Future<ChallengeSent> startConfirmCash(String receiptId) async => _sent;
+
+  @override
+  Future<CashReceipt> confirmCash(String receiptId,
+      {required String challengeId, required String code}) async {
+    _codeCheck(code);
+    final r = cash.firstWhere((c) => c['id'] == receiptId)..['state'] = 'member_confirmed';
+    calls.add('confirmCash:$receiptId');
+    return CashReceipt(r);
+  }
+
+  @override
+  Future<CashReceipt> declineCash(String receiptId, {String reason = ''}) async {
+    final r = cash.firstWhere((c) => c['id'] == receiptId)..['state'] = 'declined';
+    calls.add('declineCash:$receiptId');
+    return CashReceipt(r);
+  }
+
+  @override
+  Future<void> bankCash(String bankLineId,
+      {required List<String> receiptIds, required String idempotencyKey}) async {
+    calls.add('bankCash:$bankLineId:${receiptIds.join(",")}');
+    for (final c in cash) {
+      if (receiptIds.contains(c['id'])) c['state'] = 'banked';
+    }
+    unmatchedList.removeWhere((t) => t['id'] == bankLineId);
+  }
+}
+
+extension on FakeChamaRepository {
+  Json get _openingJson => {
+        'state': openingState,
+        'proposed_by': openingState == 'none' ? null : 'Peter',
+        'confirmed_by': openingState == 'confirmed' ? 'Jane' : null,
+        'objection_until': openingState == 'confirmed'
+            ? DateTime.now().add(const Duration(days: 14)).toIso8601String()
+            : null,
+        'lines': openingLines,
+      };
 }
 
 class FakeFileSource implements FileSource {

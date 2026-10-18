@@ -34,6 +34,23 @@ abstract class ChamaRepository {
   Future<void> assign(String bankLineId, {required String membershipId, required String reason,
       required String idempotencyKey});
   Future<void> notMe(String bankLineId, {String reason, required String idempotencyKey});
+
+  Future<OpeningBalances> opening(String id);
+  Future<OpeningBalances> saveOpening(String id, List<Json> lines);
+  Future<ChallengeSent> startConfirmOpening(String id);
+  Future<OpeningBalances> confirmOpening(String id,
+      {required String challengeId, required String code});
+  Future<void> objectToOpening(String lineId, String reason);
+
+  Future<List<CashReceipt>> cashReceipts(String id);
+  Future<CashReceipt> recordCash(String id, {required String membershipId,
+      required int amountCents, required String idempotencyKey});
+  Future<ChallengeSent> startConfirmCash(String receiptId);
+  Future<CashReceipt> confirmCash(String receiptId,
+      {required String challengeId, required String code});
+  Future<CashReceipt> declineCash(String receiptId, {String reason});
+  Future<void> bankCash(String bankLineId,
+      {required List<String> receiptIds, required String idempotencyKey});
 }
 
 class HttpChamaRepository implements ChamaRepository {
@@ -158,5 +175,64 @@ class HttpChamaRepository implements ChamaRepository {
       {String reason = '', required String idempotencyKey}) async {
     await _api.post('/bank-transactions/$bankLineId/not-me/', auth: true,
         idempotencyKey: idempotencyKey, body: {'reason': reason});
+  }
+
+  @override
+  Future<OpeningBalances> opening(String id) async =>
+      OpeningBalances(await _api.get('/chamas/$id/opening-balances/') as Json);
+
+  @override
+  Future<OpeningBalances> saveOpening(String id, List<Json> lines) async =>
+      OpeningBalances(await _api.put('/chamas/$id/opening-balances/', {'lines': lines}));
+
+  @override
+  Future<ChallengeSent> startConfirmOpening(String id) async => ChallengeSent(
+      await _api.post('/chamas/$id/opening-balances/confirm/', auth: true, body: {}));
+
+  @override
+  Future<OpeningBalances> confirmOpening(String id,
+          {required String challengeId, required String code}) async =>
+      OpeningBalances(await _api.post('/chamas/$id/opening-balances/confirm/', auth: true,
+          body: {'challenge_id': challengeId, 'code': code}));
+
+  @override
+  Future<void> objectToOpening(String lineId, String reason) async {
+    await _api.post('/opening-balance-lines/$lineId/object/', auth: true,
+        body: {'reason': reason});
+  }
+
+  @override
+  Future<List<CashReceipt>> cashReceipts(String id) async => [
+        for (final r in await _api.get('/chamas/$id/cash-receipts/') as List)
+          CashReceipt(r as Json),
+      ];
+
+  @override
+  Future<CashReceipt> recordCash(String id, {required String membershipId,
+          required int amountCents, required String idempotencyKey}) async =>
+      CashReceipt(await _api.post('/chamas/$id/cash-receipts/', auth: true,
+          idempotencyKey: idempotencyKey,
+          body: {'membership_id': membershipId, 'amount_cents': amountCents}));
+
+  @override
+  Future<ChallengeSent> startConfirmCash(String receiptId) async => ChallengeSent(
+      await _api.post('/cash-receipts/$receiptId/confirm/', auth: true, body: {}));
+
+  @override
+  Future<CashReceipt> confirmCash(String receiptId,
+          {required String challengeId, required String code}) async =>
+      CashReceipt(await _api.post('/cash-receipts/$receiptId/confirm/', auth: true,
+          body: {'challenge_id': challengeId, 'code': code}));
+
+  @override
+  Future<CashReceipt> declineCash(String receiptId, {String reason = ''}) async =>
+      CashReceipt(await _api.post('/cash-receipts/$receiptId/decline/', auth: true,
+          body: {'reason': reason}));
+
+  @override
+  Future<void> bankCash(String bankLineId,
+      {required List<String> receiptIds, required String idempotencyKey}) async {
+    await _api.post('/bank-transactions/$bankLineId/bank-cash/', auth: true,
+        idempotencyKey: idempotencyKey, body: {'receipt_ids': receiptIds});
   }
 }

@@ -135,6 +135,8 @@ class Position {
   Kes get arrears => Kes(json['arrears_cents'] as int);
   Kes get fines => Kes(json['fines_cents'] as int);
   Kes get credit => Kes(json['credit_cents'] as int);
+  Kes get opening => Kes(json['opening_cents'] as int? ?? 0);
+  Kes get pendingCash => Kes(json['pending_cash_cents'] as int? ?? 0);
   String? get nextDuePeriod => json['next_due_period'] as String?;
   Kes get nextDue => Kes(json['next_due_cents'] as int);
 }
@@ -193,4 +195,47 @@ class BankLine {
   Kes get amount => Kes(json['amount_cents'] as int);
   String get valueDate => json['value_date'] as String;
   String get narration => json['narration'] as String? ?? '';
+}
+
+class OpeningLine {
+  OpeningLine(this.json);
+  final Json json;
+
+  String get id => json['id'] as String;
+  String get membershipId => json['membership_id'] as String;
+  String get memberCode => json['member_code'] as String? ?? '';
+  Kes get savings => Kes(json['savings_cents'] as int? ?? 0);
+  Kes get fines => Kes(json['fines_cents'] as int? ?? 0);
+  List<String> get objections => (json['objections'] as List? ?? const []).cast<String>();
+}
+
+class OpeningBalances {
+  OpeningBalances(this.json);
+  final Json json;
+
+  /// "none", "draft" or "confirmed".
+  String get state => json['state'] as String;
+  String? get proposedBy => json['proposed_by'] as String?;
+  String? get confirmedBy => json['confirmed_by'] as String?;
+  DateTime? get objectionUntil => json['objection_until'] == null
+      ? null
+      : DateTime.parse(json['objection_until'] as String);
+  List<OpeningLine> get lines => [for (final l in json['lines'] as List) OpeningLine(l as Json)];
+  bool get canObject =>
+      state == 'confirmed' && (objectionUntil?.isAfter(DateTime.now()) ?? false);
+}
+
+class CashReceipt {
+  CashReceipt(this.json);
+  final Json json;
+
+  String get id => json['id'] as String;
+  String get membershipId => json['membership_id'] as String;
+  String get memberCode => json['member_code'] as String? ?? '';
+  Kes get amount => Kes(json['amount_cents'] as int);
+  String get receivedOn => json['received_on'] as String;
+
+  /// recorded, member_confirmed, banked or declined.
+  String get state => json['state'] as String;
+  bool get overdue => json['overdue'] == true;
 }

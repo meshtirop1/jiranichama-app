@@ -6,9 +6,11 @@ import 'features/auth/application/session.dart';
 import 'features/auth/presentation/code_screen.dart';
 import 'features/auth/presentation/phone_screen.dart';
 import 'features/auth/presentation/pin_screen.dart';
+import 'features/chamas/presentation/cash_screen.dart';
 import 'features/chamas/presentation/chama_screen.dart';
 import 'features/chamas/presentation/create_chama_screen.dart';
 import 'features/chamas/presentation/join_screen.dart';
+import 'features/chamas/presentation/opening_screen.dart';
 import 'features/chamas/presentation/statements_screen.dart';
 import 'features/chamas/presentation/unmatched_screen.dart';
 import 'features/home/home_screen.dart';
@@ -49,6 +51,10 @@ final routerProvider = Provider<GoRouter>((ref) {
               builder: (_, state) => StatementsScreen(chamaId: state.pathParameters['id']!)),
           GoRoute(path: 'unmatched',
               builder: (_, state) => UnmatchedScreen(chamaId: state.pathParameters['id']!)),
+          GoRoute(path: 'opening',
+              builder: (_, state) => OpeningScreen(chamaId: state.pathParameters['id']!)),
+          GoRoute(path: 'cash',
+              builder: (_, state) => CashScreen(chamaId: state.pathParameters['id']!)),
         ],
       ),
       GoRoute(path: '/sign-in', builder: (_, _) => const PhoneScreen(), routes: [

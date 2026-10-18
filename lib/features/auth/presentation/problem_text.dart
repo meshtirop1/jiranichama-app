@@ -27,6 +27,8 @@ String problemText(AppLocalizations l, Object error) {
     'phone_required' => l.invitePhoneRequired,
     'not_allowed' || 'not_founding' => l.errNotAllowed,
     'file_too_large' => l.errFileTooLarge,
+    'amounts_differ' => l.errAmountsDiffer,
+    'objection_closed' => l.errObjectionClosed,
     _ => l.genericError,
   };
 }
