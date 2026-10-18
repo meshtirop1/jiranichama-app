@@ -6,6 +6,8 @@ import 'package:jiranichama/core/api/problem.dart';
 import 'package:jiranichama/core/providers.dart';
 import 'package:jiranichama/features/auth/data/auth_repository.dart';
 
+import 'fakes.dart';
+
 class FakeAuth implements AuthRepository {
   bool session = false;
   String? sentTo;
@@ -40,7 +42,10 @@ class FakeAuth implements AuthRepository {
 
 Future<void> _pumpApp(WidgetTester tester, FakeAuth auth) async {
   await tester.pumpWidget(ProviderScope(
-    overrides: [authRepositoryProvider.overrideWithValue(auth)],
+    overrides: [
+      authRepositoryProvider.overrideWithValue(auth),
+      chamaRepositoryProvider.overrideWithValue(FakeChamaRepository(state: 'none')),
+    ],
     child: const JiraniApp(),
   ));
   await tester.pumpAndSettle();

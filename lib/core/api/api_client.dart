@@ -1,21 +1,29 @@
+import 'dart:math';
+
 import 'package:dio/dio.dart';
 
 import 'problem.dart';
 import 'token_store.dart';
 
+/// A fresh key for one logical write. Create it once per user action and reuse it on
+/// retries, so a dropped connection never records the same thing twice.
+String newIdempotencyKey() {
+  final r = Random.secure();
+  return List.generate(16, (_) => r.nextInt(256).toRadixString(16).padLeft(2, '0')).join();
+}
+
 /// Thin JSON client for the JiraniChama API.
 ///
 /// Adds the access token, swaps an expired one for a new one once using the refresh
-/// token, and turns every failure into an [ApiProblem]. Phase 1 replaces the hand
-/// calls with a client generated from the OpenAPI schema; this class stays as its
-/// transport.
+/// token, and turns every failure into an [ApiProblem]. A client generated from the
+/// OpenAPI schema can replace the hand calls later; this class stays as its transport.
 class ApiClient {
   ApiClient({required String baseUrl, required this.tokens, Dio? dio})
       : _dio = dio ??
             Dio(BaseOptions(
               baseUrl: baseUrl,
               connectTimeout: const Duration(seconds: 10),
-              receiveTimeout: const Duration(seconds: 20),
+              receiveTimeout: const Duration(seconds: 30),
               contentType: Headers.jsonContentType,
               responseType: ResponseType.json,
             ));
@@ -23,37 +31,67 @@ class ApiClient {
   final Dio _dio;
   final TokenStore tokens;
 
+  Future<dynamic> get(String path, {Map<String, Object?>? query}) =>
+      _send('GET', path, query: query, auth: true);
+
   Future<Map<String, dynamic>> post(
     String path, {
     Map<String, Object?>? body,
     bool auth = false,
+    String? idempotencyKey,
   }) async {
-    final response = await _send(() async => _dio.post<Object?>(
-          path,
-          data: body,
-          options: Options(headers: await _headers(auth)),
-        ), auth: auth);
-    final data = response.data;
+    final data = await _send('POST', path, body: body, auth: auth, idempotencyKey: idempotencyKey);
     return data is Map<String, dynamic> ? data : const {};
   }
 
-  Future<Map<String, String>> _headers(bool auth) async {
-    if (!auth) return const {};
-    final t = await tokens.read();
-    return t == null ? const {} : {'Authorization': 'Bearer ${t.access}'};
+  Future<Map<String, dynamic>> put(String path, Map<String, Object?> body) async {
+    final data = await _send('PUT', path, body: body, auth: true);
+    return data is Map<String, dynamic> ? data : const {};
   }
 
-  Future<Response<Object?>> _send(
-    Future<Response<Object?>> Function() request, {
-    required bool auth,
+  Future<Map<String, dynamic>> upload(
+    String path, {
+    required String filename,
+    required List<int> bytes,
+    required String idempotencyKey,
   }) async {
+    final data = await _send('POST', path,
+        formData: () => FormData.fromMap(
+            {'file': MultipartFile.fromBytes(bytes, filename: filename)}),
+        auth: true,
+        idempotencyKey: idempotencyKey);
+    return data is Map<String, dynamic> ? data : const {};
+  }
+
+  Future<dynamic> _send(
+    String method,
+    String path, {
+    Object? body,
+    FormData Function()? formData,
+    Map<String, Object?>? query,
+    required bool auth,
+    String? idempotencyKey,
+  }) async {
+    Future<Response<Object?>> request() async {
+      final headers = <String, String>{'Idempotency-Key': ?idempotencyKey};
+      if (auth) {
+        final t = await tokens.read();
+        if (t != null) headers['Authorization'] = 'Bearer ${t.access}';
+      }
+      return _dio.request<Object?>(
+        path,
+        data: formData != null ? formData() : body,
+        queryParameters: query,
+        options: Options(method: method, headers: headers),
+      );
+    }
+
     try {
-      return await request();
+      return (await request()).data;
     } on DioException catch (e) {
-      final status = e.response?.statusCode;
-      if (auth && status == 401 && await _refresh()) {
+      if (auth && e.response?.statusCode == 401 && await _refresh()) {
         try {
-          return await request();
+          return (await request()).data;
         } on DioException catch (retry) {
           throw _problem(retry);
         }

@@ -11,19 +11,28 @@ For each entry the server sends, the phone:
 2. computes its SHA-256 fingerprint and compares it with the hash the server sent;
 3. checks the entry points at the fingerprint of the entry before it, and that the
    sequence has no gaps;
-4. remembers the last fingerprint it checked (its **trusted head**).
+4. (with the offline store, still to come) remembers the last fingerprint it checked, its
+   **trusted head**.
 
-On the next sync it checks only the new entries, starting from its trusted head. If the
-server's history no longer leads from that head, for example because an old entry was
-changed or removed, the check fails at that position.
+`verifyChain` already accepts a trusted head: given one, it checks only the new entries
+and fails if the server's history no longer leads from that head, for example because an
+old entry was changed or removed. Until the offline store exists, the app checks the whole
+chain from the start on every load.
 
-Phase 1 adds the platform signature check and stores the chain in the encrypted offline
-database; Phase 2 adds the nightly public anchor. A failed check shows a red banner and is
-reported to the server.
+It then checks **every platform signature** (`PlatformKey.verifyHash`): ECDSA P-256 over
+the 32-byte entry hash, against the public key from `GET /platform-key/`. A chain with
+matching fingerprints but a forged or swapped signature is caught. Records not signed yet
+(the server signs a few seconds after writing) are counted and shown as waiting.
+
+A failed check shows a red warning on the Records tab. Still to come: keeping the trusted
+head in the encrypted offline store between sessions (today the phone re-checks the whole
+chain each time), reporting a failure to the server, and the nightly public anchor
+(Phase 2).
 
 ## Why the phone and the server cannot disagree
 
-Both use the same canonical JSON rules and are tested against the same files:
+Both use the same canonical JSON and signature rules and are tested against the same
+files (including `platform_signatures.json`, made with a public test key):
 `packages/jirani_domain/test/vectors/` here, copied from `vectors/` in the API. The tests
 include the hard cases: keys sorted by UTF-16 code units, emoji, control characters,
 and the refusal of decimals (money is always whole cents).

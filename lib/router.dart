@@ -6,6 +6,11 @@ import 'features/auth/application/session.dart';
 import 'features/auth/presentation/code_screen.dart';
 import 'features/auth/presentation/phone_screen.dart';
 import 'features/auth/presentation/pin_screen.dart';
+import 'features/chamas/presentation/chama_screen.dart';
+import 'features/chamas/presentation/create_chama_screen.dart';
+import 'features/chamas/presentation/join_screen.dart';
+import 'features/chamas/presentation/statements_screen.dart';
+import 'features/chamas/presentation/unmatched_screen.dart';
 import 'features/home/home_screen.dart';
 
 typedef CodeArgs = ({String phone, String hint});
@@ -34,6 +39,18 @@ final routerProvider = Provider<GoRouter>((ref) {
     routes: [
       GoRoute(path: '/splash', builder: (_, _) => const _Splash()),
       GoRoute(path: '/', builder: (_, _) => const HomeScreen()),
+      GoRoute(path: '/create', builder: (_, _) => const CreateChamaScreen()),
+      GoRoute(path: '/join', builder: (_, _) => const JoinScreen()),
+      GoRoute(
+        path: '/chamas/:id',
+        builder: (_, state) => ChamaScreen(id: state.pathParameters['id']!),
+        routes: [
+          GoRoute(path: 'statements',
+              builder: (_, state) => StatementsScreen(chamaId: state.pathParameters['id']!)),
+          GoRoute(path: 'unmatched',
+              builder: (_, state) => UnmatchedScreen(chamaId: state.pathParameters['id']!)),
+        ],
+      ),
       GoRoute(path: '/sign-in', builder: (_, _) => const PhoneScreen(), routes: [
         GoRoute(
           path: 'code',

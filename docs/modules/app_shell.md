@@ -4,12 +4,16 @@
 | --- | --- |
 | `lib/config.dart` | `API_BASE_URL` and `FLAVOR` from `--dart-define`. Non-production builds show a corner banner |
 | `lib/router.dart` | go_router; redirects follow the session (see [sign-in](../flows/sign-in.md)) |
-| `lib/core/api/api_client.dart` | Dio wrapper: adds the token, refreshes once on 401, turns failures into `ApiProblem` |
+| `lib/core/api/api_client.dart` | Dio wrapper: GET, POST, PUT and multipart upload; adds the token and `Idempotency-Key`, refreshes once on 401, turns failures into `ApiProblem` |
 | `lib/core/api/token_store.dart` | Tokens in the platform keystore |
 | `lib/core/providers.dart` | Riverpod providers for the store, client and repositories; tests override these |
 | `lib/core/locale.dart` | The language the member picked (null follows the phone) |
 | `lib/features/auth/` | Sign-in data, session state and screens |
-| `lib/features/home/` | Placeholder home until Phase 1 |
+| `lib/features/home/` | The member's chamas |
+| `lib/features/chamas/data/` | Models and `ChamaRepository` (every Phase 1 endpoint) |
+| `lib/features/chamas/application/chain_check.dart` | Downloads and checks the whole chain on the phone |
+| `lib/features/chamas/presentation/` | Create, setup, join, adoption, active chama, records, statements, unmatched; the SMS-code sheet |
+| `lib/core/labels.dart` | The member's words for roles, types, states and record types |
 
 ## Languages
 
