@@ -72,6 +72,9 @@ class _JoinScreenState extends ConsumerState<JoinScreen> {
     final invite = _invite;
     return Scaffold(
       appBar: AppBar(title: Text(l.joinTitle)),
+      bottomNavigationBar: invite == null
+          ? null
+          : ActionBar(child: PrimaryButton(label: l.joinAccept, busy: _busy, onPressed: _accept)),
       body: ListView(
         padding: const EdgeInsets.all(JiraniSpace.l),
         children: [
@@ -95,14 +98,12 @@ class _JoinScreenState extends ConsumerState<JoinScreen> {
           ] else ...[
             Text(l.joinAs(invite.chamaName, roleLabel(l, invite.role)),
                 style: Theme.of(context).textTheme.titleMedium),
-            const SizedBox(height: JiraniSpace.m),
-            RuleBookList(invite.book),
             if (_error != null) ...[
               const SizedBox(height: JiraniSpace.m),
               Notice(_error!, tone: NoticeTone.critical),
             ],
-            const SizedBox(height: JiraniSpace.l),
-            PrimaryButton(label: l.joinAccept, busy: _busy, onPressed: _accept),
+            const SizedBox(height: JiraniSpace.m),
+            RuleBookList(invite.book),
           ],
         ],
       ),

@@ -9,17 +9,29 @@
   "sendCode": "Send code",
   "codeTitle": "Enter the code",
   "codeSentTo": "We sent a 6-digit code to {phone}.",
-  "@codeSentTo": {"placeholders": {"phone": {"type": "String"}}},
+  "@codeSentTo": {
+    "placeholders": {
+      "phone": {
+        "type": "String"
+      }
+    }
+  },
   "codeLabel": "6-digit code",
   "verify": "Continue",
   "codeWrong": "That code is not right. {left, plural, =0{No tries left: ask for a new code.} =1{1 try left.} other{{left} tries left.}}",
-  "@codeWrong": {"placeholders": {"left": {"type": "int"}}},
+  "@codeWrong": {
+    "placeholders": {
+      "left": {
+        "type": "int"
+      }
+    }
+  },
   "codeExpired": "This code has expired. Ask for a new one.",
   "codeLocked": "Too many wrong codes. Ask for a new one.",
   "tooManyCodes": "Too many codes requested. Wait 10 minutes and try again.",
   "resendCode": "Send a new code",
   "pinTitle": "Set your app PIN",
-  "pinBody": "You will use this 6-digit PIN to open JiraniChama on this phone.",
+  "pinBody": "Tell your chama who you are, and set the 6-digit PIN you will use to open JiraniChama on this phone.",
   "pinLabel": "New PIN",
   "pinConfirmLabel": "Type the PIN again",
   "pinMismatch": "The two PINs are not the same.",
@@ -67,10 +79,25 @@
   "routeBankEmail": "The bank emails them to the chama inbox",
   "routeUpload": "Officials upload them",
   "inboxExplain": "Ask the bank to send e-statements to {address}. Statements from the bank need no official to handle them.",
-  "@inboxExplain": {"placeholders": {"address": {"type": "String"}}},
+  "@inboxExplain": {
+    "placeholders": {
+      "address": {
+        "type": "String"
+      }
+    }
+  },
   "saveBank": "Save bank account",
   "bankSaved": "{bank}, account ending {last4}",
-  "@bankSaved": {"placeholders": {"bank": {"type": "String"}, "last4": {"type": "String"}}},
+  "@bankSaved": {
+    "placeholders": {
+      "bank": {
+        "type": "String"
+      },
+      "last4": {
+        "type": "String"
+      }
+    }
+  },
   "rulesSection": "Rules",
   "amountLabel": "Contribution each month (KES)",
   "dueDayLabel": "Due by this day of the month",
@@ -84,22 +111,55 @@
   "invitePhoneRequired": "Officials are invited by phone number.",
   "sendInvite": "Create invite",
   "inviteCreated": "Invite code {code}. Share it with the person you invited. It lasts 14 days.",
-  "@inviteCreated": {"placeholders": {"code": {"type": "String"}}},
+  "@inviteCreated": {
+    "placeholders": {
+      "code": {
+        "type": "String"
+      }
+    }
+  },
   "submitRules": "Send the rules for confirmation",
   "submitHelp": "You need a bank account, and every office must be filled.",
   "waitingFounder": "The founder is still setting up this chama.",
   "waitingOfficials": "Waiting for every office to be filled. Officials join with the invite code sent to them.",
   "adoptionProgress": "{confirmed} of {founding} founding members have confirmed. {needed} are needed, including every official.",
-  "@adoptionProgress": {"placeholders": {"confirmed": {"type": "int"}, "founding": {"type": "int"}, "needed": {"type": "int"}}},
+  "@adoptionProgress": {
+    "placeholders": {
+      "confirmed": {
+        "type": "int"
+      },
+      "founding": {
+        "type": "int"
+      },
+      "needed": {
+        "type": "int"
+      }
+    }
+  },
   "confirmRules": "Confirm these rules",
   "youConfirmed": "You have confirmed the rules.",
   "smsSheetTitle": "Enter the code we sent by SMS",
   "smsSentTo": "Sent to {phone}.",
-  "@smsSentTo": {"placeholders": {"phone": {"type": "String"}}},
+  "@smsSentTo": {
+    "placeholders": {
+      "phone": {
+        "type": "String"
+      }
+    }
+  },
   "joinTitle": "Join a chama",
   "inviteCodeLabel": "Invite code",
   "joinAs": "You are invited to join {chama} as {role}. Read the rules below.",
-  "@joinAs": {"placeholders": {"chama": {"type": "String"}, "role": {"type": "String"}}},
+  "@joinAs": {
+    "placeholders": {
+      "chama": {
+        "type": "String"
+      },
+      "role": {
+        "type": "String"
+      }
+    }
+  },
   "joinAccept": "Join and accept these rules",
   "inviteInvalid": "This invite is not valid or has expired.",
   "tabOverview": "Overview",
@@ -112,20 +172,68 @@
   "finesOwed": "Fines owed",
   "creditLabel": "Credit",
   "nextDue": "Next: {amount} for {period}",
-  "@nextDue": {"placeholders": {"amount": {"type": "String"}, "period": {"type": "String"}}},
+  "@nextDue": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "period": {
+        "type": "String"
+      }
+    }
+  },
   "howToPay": "How to pay",
   "payWithCode": "Pay into the {bank} account ending {last4}. Use your member code {code} as the reference.",
-  "@payWithCode": {"placeholders": {"bank": {"type": "String"}, "last4": {"type": "String"}, "code": {"type": "String"}}},
+  "@payWithCode": {
+    "placeholders": {
+      "bank": {
+        "type": "String"
+      },
+      "last4": {
+        "type": "String"
+      },
+      "code": {
+        "type": "String"
+      }
+    }
+  },
   "payPaybill": "M-Pesa: paybill {paybill}, account {code}.",
-  "@payPaybill": {"placeholders": {"paybill": {"type": "String"}, "code": {"type": "String"}}},
+  "@payPaybill": {
+    "placeholders": {
+      "paybill": {
+        "type": "String"
+      },
+      "code": {
+        "type": "String"
+      }
+    }
+  },
   "recordsOnlyNote": "This chama records money only. Payouts and loans are switched on once every official has passed the ID check.",
   "chainOk": "Checked on this phone: {count} records, unchanged and signed by JiraniChama.",
-  "@chainOk": {"placeholders": {"count": {"type": "int"}}},
+  "@chainOk": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "chainBad": "Warning: these records do not match what this phone checked. Do not rely on them until this is explained.",
   "chainUnsigned": "{count, plural, =1{1 new record is} other{{count} new records are}} waiting for JiraniChama's signature.",
-  "@chainUnsigned": {"placeholders": {"count": {"type": "int"}}},
+  "@chainUnsigned": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "receipt": "Receipt {code}",
-  "@receipt": {"placeholders": {"code": {"type": "String"}}},
+  "@receipt": {
+    "placeholders": {
+      "code": {
+        "type": "String"
+      }
+    }
+  },
   "entryContribution": "Contribution",
   "entryFineRaised": "Late fine",
   "entryFinePaid": "Fine paid",
@@ -144,12 +252,39 @@
   "statementHeld": "Held: the email could not be verified",
   "confirmStatement": "Confirm this statement",
   "statementSummary": "{from} to {to} · {lines} lines · closing {closing}",
-  "@statementSummary": {"placeholders": {"from": {"type": "String"}, "to": {"type": "String"}, "lines": {"type": "int"}, "closing": {"type": "String"}}},
+  "@statementSummary": {
+    "placeholders": {
+      "from": {
+        "type": "String"
+      },
+      "to": {
+        "type": "String"
+      },
+      "lines": {
+        "type": "int"
+      },
+      "closing": {
+        "type": "String"
+      }
+    }
+  },
   "fromTheBank": "From the bank",
   "uploadedBy": "Uploaded by {name}",
-  "@uploadedBy": {"placeholders": {"name": {"type": "String"}}},
+  "@uploadedBy": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
   "confirmedBy": "confirmed by {name}",
-  "@confirmedBy": {"placeholders": {"name": {"type": "String"}}},
+  "@confirmedBy": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
   "unmatched": "Unmatched payments",
   "unmatchedEmpty": "Every payment is matched to a member.",
   "assignTo": "Assign to a member",
@@ -164,5 +299,17 @@
   "errBankMissing": "Add the chama's bank account first.",
   "errRulesInvalid": "Some settings contradict each other or are out of range.",
   "errNotAllowed": "You cannot do this in your role.",
-  "errFileTooLarge": "The file is too large."
+  "errFileTooLarge": "The file is too large.",
+  "nameLabel": "Your name",
+  "nameHint": "As your chama knows you",
+  "nameRequired": "Enter your name.",
+  "reversedLabel": "Reversed",
+  "correctsReceipt": "Corrects receipt {code}",
+  "@correctsReceipt": {
+    "placeholders": {
+      "code": {
+        "type": "String"
+      }
+    }
+  }
 }

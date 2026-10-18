@@ -32,6 +32,7 @@ class RecordsTab extends ConsumerWidget {
       ]),
       data: (c) {
         final reversed = {for (final i in c.items) i.reverses}..remove(null);
+        final receiptOf = {for (final i in c.items) i.id: i.receiptCode};
         final myCode = bundle.chama.myMemberCode;
         return RefreshIndicator(
           onRefresh: () => ref.refresh(chainCheckProvider(bundle.chama.id).future),
@@ -50,6 +51,8 @@ class RecordsTab extends ConsumerWidget {
               for (final item in c.items.reversed)
                 _EntryTile(
                   item: item,
+                  isReversed: reversed.contains(item.id),
+                  correctsReceipt: item.reverses == null ? null : receiptOf[item.reverses],
                   canSendBack: item.memberCode == myCode &&
                       item.decision['method'] == 'treasurer' &&
                       item.type == 'contribution' &&
@@ -65,9 +68,12 @@ class RecordsTab extends ConsumerWidget {
 }
 
 class _EntryTile extends ConsumerStatefulWidget {
-  const _EntryTile({required this.item, required this.canSendBack, required this.onSentBack});
+  const _EntryTile({required this.item, required this.canSendBack, required this.onSentBack,
+      this.isReversed = false, this.correctsReceipt});
 
   final LedgerItem item;
+  final bool isReversed;
+  final String? correctsReceipt;
   final bool canSendBack;
   final VoidCallback onSentBack;
 
@@ -103,10 +109,20 @@ class _EntryTileState extends ConsumerState<_EntryTile> {
       if (i.memberCode != null) i.memberCode!,
       if (i.period != null) i.period!,
       l.receipt(i.receiptCode),
+      if (widget.correctsReceipt != null) l.correctsReceipt(widget.correctsReceipt!),
     ].join(' · ');
+    final muted = Theme.of(context).colorScheme.onSurfaceVariant;
     return Card(
       child: ListTile(
-        title: Text(entryLabel(l, i.type)),
+        // A reversed record stays in the list (nothing is deleted) but is marked and
+        // struck through, so nobody counts it twice.
+        title: Text.rich(TextSpan(children: [
+          TextSpan(text: entryLabel(l, i.type),
+              style: widget.isReversed ? TextStyle(decoration: TextDecoration.lineThrough,
+                  color: muted) : null),
+          if (widget.isReversed) TextSpan(text: '  ${l.reversedLabel}',
+              style: TextStyle(color: muted, fontSize: 12)),
+        ])),
         subtitle: Text(details),
         trailing: i.amount.cents == 0 ? null : MoneyText(i.amount),
         isThreeLine: widget.canSendBack,

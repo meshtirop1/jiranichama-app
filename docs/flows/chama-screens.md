@@ -57,6 +57,11 @@ choose the member and write why it belongs to them.
 
 ## Design notes
 
+- **The main action is pinned to the bottom** of the join, confirm-rules and setup
+  screens (`ActionBar` in `jirani_ui`), so it stays in reach above a long rule book.
+- **Reversed records stay visible but are struck through and marked**, and each
+  correction names the receipt it corrects. Nothing is ever deleted.
+
 - **SMS codes**: one bottom sheet for every confirmation. Wrong codes show the tries left.
   The screen behind is busy only while the code is being sent, never while the member
   types it.

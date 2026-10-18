@@ -139,6 +139,9 @@ class _SetupViewState extends ConsumerState<SetupView> {
 
     return Scaffold(
       appBar: AppBar(title: Text(chama.name)),
+      bottomNavigationBar: founder && chama.state == ChamaState.setup
+          ? ActionBar(child: PrimaryButton(label: l.submitRules, busy: _busy, onPressed: _submit))
+          : null,
       body: ListView(
         padding: const EdgeInsets.all(JiraniSpace.m),
         children: [
@@ -216,6 +219,7 @@ class _SetupViewState extends ConsumerState<SetupView> {
           if (founder)
             section(l.inviteSection, [
               DropdownButtonFormField<String>(
+                key: const ValueKey('invite-role'),
                 initialValue: _inviteRole,
                 decoration: InputDecoration(labelText: l.inviteRoleLabel),
                 items: [
@@ -225,7 +229,8 @@ class _SetupViewState extends ConsumerState<SetupView> {
                 onChanged: (v) => setState(() => _inviteRole = v ?? _inviteRole),
               ),
               const SizedBox(height: JiraniSpace.s),
-              TextField(controller: _invitePhone, keyboardType: TextInputType.phone,
+              TextField(key: const ValueKey('invite-phone'), controller: _invitePhone,
+                  keyboardType: TextInputType.phone,
                   decoration: InputDecoration(labelText: l.invitePhoneLabel,
                       hintText: l.phoneHint)),
               if (_lastInvite != null) ...[
@@ -243,8 +248,6 @@ class _SetupViewState extends ConsumerState<SetupView> {
           if (founder && chama.state == ChamaState.setup) ...[
             const SizedBox(height: JiraniSpace.m),
             Text(l.submitHelp, style: text.bodySmall),
-            const SizedBox(height: JiraniSpace.s),
-            PrimaryButton(label: l.submitRules, busy: _busy, onPressed: _submit),
           ],
         ],
       ),

@@ -7,8 +7,9 @@
 2. **Code.** The server sends a 6-digit code by SMS. The screen shows only a hint of the
    number (`+2547••• ••• 678`). A wrong code shows how many tries are left; after 5 the
    code is locked and the member asks for a new one.
-3. **PIN.** A new member sets a 6-digit app PIN, typed twice. Very common PINs are refused
-   by the server.
+3. **Name and PIN.** A new member gives the name their chama knows them by (other members
+   see it on statements and lists) and sets a 6-digit app PIN, typed twice. Very common
+   PINs are refused by the server.
 4. **Home.** From then on the app opens straight to home. Signing out ends the session on
    the server and clears the tokens on the phone, even when offline.
 

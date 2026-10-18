@@ -66,6 +66,20 @@ class FakeChamaRepository implements ChamaRepository {
     ];
   }
 
+  /// Appends a correction that reverses the first entry, linked into the chain.
+  void addReversalOfFirst() {
+    final first = ledgerItems.first;
+    final doc = <String, Object?>{
+      ...Map<String, Object?>.from(first['document'] as Map),
+      'seq': 2, 'type': 'reversal', 'amount_cents': -30000, 'reverses': first['id'],
+      'decision': {'reason': 'member says this payment was not theirs'},
+      'prev_hash': first['hash'],
+    };
+    final h = entryHash(doc);
+    ledgerItems.add({'id': 'e2', 'document': doc, 'hash': h, 'receipt_code': receiptCode(h),
+                     'platform_sig': null, 'key_id': null});
+  }
+
   Json get _chamaJson => {
         'id': 'c1', 'name': 'Umoja Women Group', 'type': 'merry_go_round', 'state': state,
         'mode': 'records_only', 'member_code_prefix': 'JC-4821', 'my_role': myRole,

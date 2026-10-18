@@ -9,6 +9,10 @@ it touches.
 - [Checking the chain on the phone](flows/chain-check.md): how a phone catches changed history.
 - [Chama screens](flows/chama-screens.md): home, create and set up, join, confirm the rules, the active chama, statements, unmatched payments.
 
+## Operations
+
+- [End-to-end test on a device](operations/end-to-end.md): the full Phase 1 walk against a real API, with screenshots.
+
 ## Modules
 
 - [jirani_domain](modules/jirani_domain.md): canonical JSON, hashing, money, phones.

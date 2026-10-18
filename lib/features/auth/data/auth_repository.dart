@@ -19,6 +19,7 @@ abstract class AuthRepository {
   Future<CodeSent> requestCode(String phone, {required String language});
   Future<SignedIn> verifyCode(String phone, String code);
   Future<void> setPin(String pin);
+  Future<void> setProfile({required String name, required String language});
   Future<void> signOut();
 }
 
@@ -51,6 +52,11 @@ class HttpAuthRepository implements AuthRepository {
   @override
   Future<void> setPin(String pin) async {
     await _api.post('/auth/pin/', body: {'pin': pin}, auth: true);
+  }
+
+  @override
+  Future<void> setProfile({required String name, required String language}) async {
+    await _api.patch('/auth/me/', {'display_name': name, 'language': language});
   }
 
   @override

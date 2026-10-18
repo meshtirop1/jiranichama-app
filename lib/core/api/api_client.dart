@@ -49,6 +49,11 @@ class ApiClient {
     return data is Map<String, dynamic> ? data : const {};
   }
 
+  Future<Map<String, dynamic>> patch(String path, Map<String, Object?> body) async {
+    final data = await _send('PATCH', path, body: body, auth: true);
+    return data is Map<String, dynamic> ? data : const {};
+  }
+
   Future<Map<String, dynamic>> upload(
     String path, {
     required String filename,

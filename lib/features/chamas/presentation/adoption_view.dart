@@ -56,24 +56,28 @@ class _AdoptionViewState extends ConsumerState<AdoptionView> {
     final status = b.chama.adoption;
     final me = b.me;
     final lang = Localizations.localeOf(context).languageCode;
+    final canConfirm = me != null && me.isFounding && !me.adoptedRules;
     return Scaffold(
       appBar: AppBar(title: Text(b.chama.name)),
+      bottomNavigationBar: canConfirm
+          ? ActionBar(child: PrimaryButton(label: l.confirmRules, busy: _busy,
+              onPressed: _confirm))
+          : null,
       body: ListView(
         padding: const EdgeInsets.all(JiraniSpace.l),
         children: [
           if (status != null)
             Notice(l.adoptionProgress(status.confirmed, status.founding, status.needed)),
-          const SizedBox(height: JiraniSpace.m),
-          RuleBookList(b.rules.clauses(lang)),
+          if (me != null && me.adoptedRules) ...[
+            const SizedBox(height: JiraniSpace.s),
+            Notice(l.youConfirmed),
+          ],
           if (_error != null) ...[
-            const SizedBox(height: JiraniSpace.m),
+            const SizedBox(height: JiraniSpace.s),
             Notice(_error!, tone: NoticeTone.critical),
           ],
-          const SizedBox(height: JiraniSpace.l),
-          if (me != null && me.isFounding && !me.adoptedRules)
-            PrimaryButton(label: l.confirmRules, busy: _busy, onPressed: _confirm)
-          else if (me != null && me.adoptedRules)
-            Notice(l.youConfirmed),
+          const SizedBox(height: JiraniSpace.m),
+          RuleBookList(b.rules.clauses(lang)),
         ],
       ),
     );

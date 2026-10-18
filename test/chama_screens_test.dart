@@ -18,6 +18,8 @@ class _SignedIn implements AuthRepository {
   @override
   Future<void> setPin(String pin) async {}
   @override
+  Future<void> setProfile({required String name, required String language}) async {}
+  @override
   Future<void> signOut() async {}
 }
 
@@ -185,6 +187,20 @@ void main() {
     await tester.pumpAndSettle();
     expect(repo.calls, contains('notMe:txn-9'));
     expect(find.text('Sent back to the treasurer.'), findsOneWidget);
+  });
+
+  testWidgets('a reversed record is marked, and its correction names the receipt',
+      (tester) async {
+    final repo = FakeChamaRepository(myRole: 'chair')..useAssignedChain();
+    repo.addReversalOfFirst();
+    await _pump(tester, repo);
+    await _openChama(tester);
+    await tester.tap(find.text('Records'));
+    await tester.pumpAndSettle();
+    expect(find.textContaining('Reversed'), findsOneWidget);
+    final receipt = repo.ledgerItems.first['receipt_code'];
+    expect(find.textContaining('Corrects receipt $receipt'), findsOneWidget);
+    expect(find.textContaining('Checked on this phone: 2 records'), findsOneWidget);
   });
 
   testWidgets('an official uploads a statement and another confirms it', (tester) async {
