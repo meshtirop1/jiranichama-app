@@ -30,6 +30,9 @@ String problemText(AppLocalizations l, Object error) {
     'amounts_differ' => l.errAmountsDiffer,
     'objection_closed' => l.errObjectionClosed,
     'bad_dates' => l.errBadDates,
+    'typed_lines_do_not_add_up' => l.errTypedDoNotAddUp,
+    'typed_lines_incomplete' => l.errTypedIncomplete,
+    'typed_line_invalid' => l.errTypedInvalid,
     _ => l.genericError,
   };
 }

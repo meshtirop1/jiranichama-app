@@ -185,6 +185,27 @@ class Statement {
       [for (final p in json['problems'] as List? ?? const []) (p as Map)['message'] as String];
   List<String> get flags =>
       [for (final p in json['flags'] as List? ?? const []) (p as Map)['message'] as String];
+  List<UnreadableRow> get unreadableLines => [
+        for (final u in json['unreadable_lines'] as List? ?? const []) UnreadableRow(u as Json)
+      ];
+  List<Json> get typedLines =>
+      [for (final t in json['typed_lines'] as List? ?? const []) t as Json];
+}
+
+/// A statement row the parser could not read, as the cells in the bank's file.
+class UnreadableRow {
+  UnreadableRow(this.json);
+  final Json json;
+
+  int get lineNo => json['line_no'] as int;
+  List<String> get cells => [for (final c in json['cells'] as List) '$c'];
+
+  /// The cell most likely to be the description: the longest one with letters in it.
+  String get likelyNarration {
+    final words = cells.where((c) => RegExp('[A-Za-z]{3,}').hasMatch(c)).toList()
+      ..sort((a, b) => b.length.compareTo(a.length));
+    return words.isEmpty ? '' : words.first;
+  }
 }
 
 class BankLine {
@@ -195,6 +216,7 @@ class BankLine {
   Kes get amount => Kes(json['amount_cents'] as int);
   String get valueDate => json['value_date'] as String;
   String get narration => json['narration'] as String? ?? '';
+  bool get typedIn => json['typed_in'] == true;
 }
 
 class OpeningLine {

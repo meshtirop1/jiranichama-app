@@ -9,6 +9,7 @@ import '../../../l10n/app_localizations.dart';
 import '../../auth/presentation/problem_text.dart';
 import '../data/models.dart';
 import 'chama_screen.dart';
+import 'type_lines_screen.dart';
 import 'widgets/sms_code_sheet.dart';
 
 final statementsProvider = FutureProvider.autoDispose.family<List<Statement>, String>(
@@ -26,7 +27,17 @@ class StatementsScreen extends ConsumerStatefulWidget {
 
 class _StatementsScreenState extends ConsumerState<StatementsScreen> {
   String? _error;
+  String? _info;
   bool _busy = false;
+
+  Future<void> _typeLines(Statement s) async {
+    final saved = await Navigator.of(context).push<bool>(
+        MaterialPageRoute(builder: (_) => TypeLinesScreen(statement: s)));
+    if (saved == true && mounted) {
+      setState(() => _info = AppLocalizations.of(context).typedLinesSaved);
+      ref.invalidate(statementsProvider(widget.chamaId));
+    }
+  }
 
   Future<void> _run(Future<void> Function() action) async {
     setState(() {
@@ -81,6 +92,10 @@ class _StatementsScreenState extends ConsumerState<StatementsScreen> {
             const SizedBox(height: JiraniSpace.m),
             Notice(_error!, tone: NoticeTone.critical),
           ],
+          if (_info != null) ...[
+            const SizedBox(height: JiraniSpace.m),
+            Notice(_info!),
+          ],
           const SizedBox(height: JiraniSpace.m),
           ...list.when(
             loading: () => [const Center(child: CircularProgressIndicator())],
@@ -114,6 +129,18 @@ class _StatementsScreenState extends ConsumerState<StatementsScreen> {
           for (final f in s.flags) ...[
             const SizedBox(height: JiraniSpace.xs),
             Notice(f, tone: NoticeTone.warning),
+          ],
+          if (s.typedLines.isNotEmpty) ...[
+            const SizedBox(height: JiraniSpace.xs),
+            Notice(l.typedLinesBy('${s.typedLines.length}',
+                '${s.typedLines.first['typed_by'] ?? ''}'), tone: NoticeTone.warning),
+          ],
+          if (s.state == 'needs_typing') ...[
+            const SizedBox(height: JiraniSpace.xs),
+            Notice(l.typeLinesNotice('${s.unreadableLines.length}'), tone: NoticeTone.warning),
+            const SizedBox(height: JiraniSpace.s),
+            OutlinedButton(onPressed: _busy ? null : () => _typeLines(s),
+                child: Text(l.typeLinesButton)),
           ],
           if (s.state == 'awaiting_confirmation') ...[
             const SizedBox(height: JiraniSpace.s),

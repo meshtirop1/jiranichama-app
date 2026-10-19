@@ -46,6 +46,7 @@ String statementStateLabel(AppLocalizations l, String state) => switch (state) {
       'awaiting_confirmation' => l.statementAwaiting,
       'accepted' => l.statementAccepted,
       'needs_parser' => l.statementNeedsParser,
+      'needs_typing' => l.statementNeedsTyping,
       'held_mail_check' => l.statementHeld,
       _ => l.statementRejected,
     };

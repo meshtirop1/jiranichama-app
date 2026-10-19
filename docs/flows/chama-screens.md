@@ -50,6 +50,17 @@ closing balance, who uploaded and who confirmed it, and any problems or flags. A
 statement waiting for confirmation has **Confirm this statement** (SMS code). The server
 refuses the treasurer as uploader, and the uploader as confirmer, and the app shows why.
 
+### A line the app could not read
+
+If a row in the bank's file is damaged, the statement shows **Lines to type in** with
+how many rows. **Type in lines** opens one card per row: what the file had (so the
+official can find it on the bank's copy), then date (with a calendar), money in or money
+out, amount, description (filled from the file), and reference and balance if shown.
+**Save typed lines** sends them all at once. The API refuses them, saying so, unless the
+whole statement then adds up. Afterwards an official who neither uploaded nor typed
+confirms as usual. The statement then says "1 line(s) typed in by …", and the payment
+shows **Typed in** on Unmatched payments and the records.
+
 ## Opening balances
 
 For a chama moving from a notebook. The treasurer enters each member's savings and unpaid
