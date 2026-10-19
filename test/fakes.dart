@@ -94,7 +94,8 @@ class FakeChamaRepository implements ChamaRepository {
 
   Json get _chamaJson => {
         'id': 'c1', 'name': 'Umoja Women Group', 'type': 'merry_go_round', 'state': state,
-        'mode': 'records_only', 'member_code_prefix': 'JC-4821', 'my_role': myRole,
+        'mode': moneyOutOn ? 'money_out' : 'records_only', 'member_code_prefix': 'JC-4821',
+        'my_role': myRole,
         'my_member_code': myRole == 'member' ? 'JC-4821-004' : 'JC-4821-001',
         'i_am_founder': founder, 'statement_inbox': 'jc-4821-ab12@statements.example',
         'bank_account': {'bank': 'equity', 'account_name': 'UMOJA', 'account_no_last4': '9012',
@@ -384,6 +385,127 @@ class FakeChamaRepository implements ChamaRepository {
       if (receiptIds.contains(c['id'])) c['state'] = 'banked';
     }
     unmatchedList.removeWhere((t) => t['id'] == bankLineId);
+  }
+
+  // Money out
+  bool moneyOutOn = false;
+  int consents = 0;
+  final proposalsList = <Json>[];
+  final unapprovedList = <Json>[];
+
+  @override
+  Future<MoneyOutStatus> moneyOut(String id) async => MoneyOutStatus({
+        'mode': moneyOutOn ? 'money_out' : 'records_only', 'consents': consents,
+        'needed': 2, 'available_cents': 10000000});
+
+  @override
+  Future<ChallengeSent> startEnableMoneyOut(String id) async => _sent;
+
+  @override
+  Future<MoneyOutStatus> enableMoneyOut(String id,
+      {required String challengeId, required String code}) async {
+    _codeCheck(code);
+    consents++;
+    moneyOutOn = consents >= 2;
+    calls.add('enableMoneyOut');
+    return moneyOut(id);
+  }
+
+  @override
+  Future<List<Proposal>> proposals(String id) async =>
+      [for (final p in proposalsList) Proposal(p)];
+
+  Json _proposalJson(Json body) {
+    final toMember = body['kind'] == 'payout';
+    final refused = body['amount_cents'] as int > 5000000;
+    return {
+      'id': 'prop-${proposalsList.length + 1}', 'kind': body['kind'],
+      'state': refused ? 'refused' : 'collecting_approvals',
+      'state_reason': '', 'amount_cents': body['amount_cents'],
+      'payee_name': toMember ? 'Wanjiru' : body['payee_name'],
+      'payee_member_code': toMember ? 'JC-4821-004' : null,
+      'payee_account': body['payee_account'] ?? '', 'purpose': body['purpose'],
+      'proposed_by': 'Jane', 'proposed_by_code': 'JC-4821-001',
+      'needs_officials': 2, 'approved': 0, 'approvals': <Json>[],
+      'refusal': refused ? {'code': 'member_vote_needed', 'rule': '4.2'} : <String, dynamic>{},
+      'deadline_at': '2026-03-13T10:00:00Z', 'bank_reference': '', 'paid_at': null,
+      'can_answer': !refused && myRole != 'member', 'seal_receipt': null,
+    };
+  }
+
+  @override
+  Future<Proposal> propose(String id, Json body, {required String idempotencyKey}) async {
+    calls.add('propose:${body['kind']}:${body['amount_cents']}');
+    final p = _proposalJson(body);
+    proposalsList.insert(0, p);
+    return Proposal(p);
+  }
+
+  @override
+  Future<ChallengeSent> startApprove(String proposalId) async => _sent;
+
+  Json _prop(String id) => proposalsList.firstWhere((p) => p['id'] == id);
+
+  @override
+  Future<Proposal> approve(String proposalId,
+      {required String challengeId, required String code}) async {
+    _codeCheck(code);
+    final p = _prop(proposalId);
+    (p['approvals'] as List).add(
+        {'name': 'Jane', 'role': 'chair', 'decision': 'approve', 'reason': '', 'at': 'x'});
+    p['approved'] = (p['approved'] as int) + 1;
+    p['can_answer'] = false;
+    if (p['approved'] as int >= 2) p['state'] = 'approved';
+    calls.add('approve:$proposalId');
+    return Proposal(p);
+  }
+
+  @override
+  Future<Proposal> declineProposal(String proposalId, String reason) async {
+    final p = _prop(proposalId);
+    (p['approvals'] as List).add(
+        {'name': 'Jane', 'role': 'chair', 'decision': 'decline', 'reason': reason, 'at': 'x'});
+    p['can_answer'] = false;
+    calls.add('decline:$proposalId:$reason');
+    return Proposal(p);
+  }
+
+  @override
+  Future<Proposal> cancelProposal(String proposalId, String reason) async {
+    final p = _prop(proposalId)..['state'] = 'cancelled';
+    return Proposal(p);
+  }
+
+  @override
+  Future<Proposal> markPaid(String proposalId, String bankReference,
+      {required String idempotencyKey}) async {
+    final p = _prop(proposalId)
+      ..['state'] = 'paid_pending_match'
+      ..['bank_reference'] = bankReference;
+    calls.add('paid:$proposalId:$bankReference');
+    return Proposal(p);
+  }
+
+  @override
+  Future<List<UnapprovedDebit>> unapprovedDebits(String id) async =>
+      [for (final d in unapprovedList) UnapprovedDebit(d)];
+
+  @override
+  Future<UnapprovedDebit> linkDebit(String debitId, String proposalId) async {
+    final d = unapprovedList.firstWhere((d) => d['id'] == debitId)
+      ..['state'] = 'linked'
+      ..['resolved_by'] = 'Peter';
+    return UnapprovedDebit(d);
+  }
+
+  @override
+  Future<UnapprovedDebit> explainDebit(String debitId, String explanation) async {
+    final d = unapprovedList.firstWhere((d) => d['id'] == debitId)
+      ..['state'] = 'explained'
+      ..['explanation'] = explanation
+      ..['resolved_by'] = 'Jane';
+    calls.add('explain:$debitId:$explanation');
+    return UnapprovedDebit(d);
   }
 
   // Typed-in statement lines

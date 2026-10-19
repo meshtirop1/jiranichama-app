@@ -118,6 +118,27 @@ it carries; the button only works when they add up to the deposit exactly.
 Officials see payments the app could not match. Only the treasurer has **Assign**:
 choose the member and write why it belongs to them.
 
+## Money out
+
+A **Money out** button on the overview, for every member.
+- **Switching on**: while it is off, the screen explains what changes, shows how many
+  officials have agreed (two are needed) and lets an official agree by SMS code.
+- **Proposing** (officials): *Propose a payment*, to a member (picked from the list) or
+  to someone else (typed in), with their account if known, amount and what it is for.
+  The API answers at once: waiting for approvals, or refused, with the rule named
+  ("Rule 4.2: this amount needs a members' vote…").
+- **A proposal**: payee, amount, purpose, who proposed, how many approvals of how many,
+  and each official's answer. An official who may answer sees **Decline** (with a
+  reason) and **Approve** (SMS code naming exactly what is paid). The member being paid
+  is told they do not approve. When approved, an official taps **Mark as paid at the
+  bank** with the bank reference; when the statement shows the debit it becomes **Paid
+  and matched to the bank**. The proposer can cancel before payment.
+- **Money out with no approval**: shown in red to every member, on the overview and the
+  Money out screen ("KES 45,000 left the bank on … with no approval. Every member was
+  told."). Officials **Explain** it or **Link** it to an approved payment of the same
+  amount; the explanation or link then shows to everyone.
+- The overview also says when payments are waiting for your approval.
+
 ## Design notes
 
 - **The main action is pinned to the bottom** of the join, confirm-rules and setup

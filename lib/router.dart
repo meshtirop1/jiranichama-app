@@ -10,6 +10,7 @@ import 'features/chamas/presentation/cash_screen.dart';
 import 'features/chamas/presentation/chama_screen.dart';
 import 'features/chamas/presentation/create_chama_screen.dart';
 import 'features/chamas/presentation/join_screen.dart';
+import 'features/chamas/presentation/money_out_screen.dart';
 import 'features/chamas/presentation/opening_screen.dart';
 import 'features/chamas/presentation/rules_editor_screen.dart';
 import 'features/chamas/presentation/statement_screens.dart';
@@ -59,6 +60,8 @@ final routerProvider = Provider<GoRouter>((ref) {
               builder: (_, state) => CashScreen(chamaId: state.pathParameters['id']!)),
           GoRoute(path: 'rules/edit',
               builder: (_, state) => RulesEditorScreen(chamaId: state.pathParameters['id']!)),
+          GoRoute(path: 'money-out',
+              builder: (_, state) => MoneyOutScreen(chamaId: state.pathParameters['id']!)),
           GoRoute(path: 'statement',
               builder: (_, state) =>
                   ChamaStatementScreen(chamaId: state.pathParameters['id']!)),

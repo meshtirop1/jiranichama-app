@@ -11,7 +11,9 @@ uploads a later statement that repeats the day's lines and adds the cash deposit
 the treasurer link that deposit to the cash. Finally the member opens their statement,
 gets the sealed PDF, and the test checks its code on the public check endpoint, then
 opens the chama statement. Last, a statement with a damaged row: the secretary types the
-row in and the chair confirms. Screenshots land in `build/e2e_screenshots/`; the last
+row in and the chair confirms. Then money out: two officials switch it on, the treasurer
+proposes the member's payout, the treasurer and chair approve, the chair marks it paid,
+and the next statement's debit matches it. Screenshots land in `build/e2e_screenshots/`; the last
 passing run is kept in [screenshots/phase1](../screenshots/phase1/).
 
 It is not part of CI, because it needs a running API and a device.
