@@ -31,7 +31,10 @@ String stateLabel(AppLocalizations l, ChamaState s) => switch (s) {
 
 String entryLabel(AppLocalizations l, String type) => switch (type) {
       'contribution' => l.entryContribution,
+      'opening_balance' => l.entryOpening,
+      'contribution_pending_cash' => l.entryPendingCash,
       'fine_raised' => l.entryFineRaised,
+      'fine_waived' => l.entryFineWaived,
       'fine_paid' => l.entryFinePaid,
       'reversal' || 'correction' => l.entryReversal,
       'membership' => l.entryMembership,

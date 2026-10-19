@@ -87,6 +87,16 @@ void main() {
     // first/last finder over no matches throws even when printed.
     Future<void> tap(Finder finder, {bool last = false}) async {
       debugPrint('E2E tap $finder');
+      await tester.pumpAndSettle();
+      if (finder.evaluate().isEmpty && find.byType(ListView).evaluate().isNotEmpty) {
+        // Lists build lazily: a button far down the screen is not in the tree yet.
+        try {
+          await tester.dragUntilVisible(finder, find.byType(ListView).first,
+              const Offset(0, -300), maxIteration: 8);
+        } catch (_) {
+          // Not in this list; it may still appear (a network call), so wait below.
+        }
+      }
       await waitFor(finder);
       final target = last ? finder.last : finder.first;
       await tester.ensureVisible(target);
@@ -425,5 +435,28 @@ void main() {
     await signInAgain(member);
     await waitFor(find.text('Brought in (opening)'));
     await screenshot('member_position_with_opening');
+
+    // 14. The member takes their statement away as a sealed PDF, and anyone holding it
+    // can check it without signing in.
+    await tap(find.text('See my statement'));
+    await waitFor(find.text('My statement'));
+    await screenshot('member_statement');
+    await tap(find.text('Get PDF statement'));
+    await waitFor(find.byKey(const ValueKey('check-code')), seconds: 60);
+    await screenshot('member_statement_pdf');
+    final shown = tester.widget<Text>(find.byKey(const ValueKey('check-code'))).data!;
+    final code = RegExp(r'([0-9A-Z]{5}-[0-9A-Z]{5})').firstMatch(shown)!.group(1)!;
+    final check = await (await client.getUrl(Uri.parse('$_host/api/v1/verify/$code/')))
+        .close();
+    final checked = jsonDecode(await check.transform(utf8.decoder).join()) as Map;
+    expect(checked['sealed'], isTrue);
+    expect(checked['member_code'] as String, endsWith('-004'));
+
+    // 15. The chama statement: every member, and the bank side.
+    await tester.pageBack();
+    await tester.pumpAndSettle();
+    await tap(find.text('Chama statement'));
+    await waitFor(find.textContaining('Bank statement reconciled to'));
+    await screenshot('chama_statement');
   });
 }

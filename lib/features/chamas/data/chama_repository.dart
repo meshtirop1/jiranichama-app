@@ -51,6 +51,14 @@ abstract class ChamaRepository {
   Future<CashReceipt> declineCash(String receiptId, {String reason});
   Future<void> bankCash(String bankLineId,
       {required List<String> receiptIds, required String idempotencyKey});
+
+  Future<MemberStatement> memberStatement(String membershipId, {String? from});
+  Future<ChamaStatement> chamaStatement(String id, {String? from});
+  Future<IssuedDocument> issueMemberStatementPdf(String membershipId,
+      {String? from, required String language, required String idempotencyKey});
+  Future<IssuedDocument> issueChamaStatementPdf(String id,
+      {String? from, required String language, required String idempotencyKey});
+  Future<List<int>> documentFile(String documentId);
 }
 
 class HttpChamaRepository implements ChamaRepository {
@@ -235,4 +243,31 @@ class HttpChamaRepository implements ChamaRepository {
     await _api.post('/bank-transactions/$bankLineId/bank-cash/', auth: true,
         idempotencyKey: idempotencyKey, body: {'receipt_ids': receiptIds});
   }
+
+  @override
+  Future<MemberStatement> memberStatement(String membershipId, {String? from}) async =>
+      MemberStatement(await _api.get('/memberships/$membershipId/statement/',
+          query: {'from': ?from}) as Json);
+
+  @override
+  Future<ChamaStatement> chamaStatement(String id, {String? from}) async =>
+      ChamaStatement(await _api.get('/chamas/$id/statement/', query: {'from': ?from}) as Json);
+
+  @override
+  Future<IssuedDocument> issueMemberStatementPdf(String membershipId,
+          {String? from, required String language, required String idempotencyKey}) async =>
+      IssuedDocument(await _api.post('/memberships/$membershipId/statement/pdf/',
+          body: {'language': language, 'period_from': ?from},
+          auth: true, idempotencyKey: idempotencyKey));
+
+  @override
+  Future<IssuedDocument> issueChamaStatementPdf(String id,
+          {String? from, required String language, required String idempotencyKey}) async =>
+      IssuedDocument(await _api.post('/chamas/$id/statement/pdf/',
+          body: {'language': language, 'period_from': ?from},
+          auth: true, idempotencyKey: idempotencyKey));
+
+  @override
+  Future<List<int>> documentFile(String documentId) =>
+      _api.getBytes('/documents/$documentId/file/');
 }

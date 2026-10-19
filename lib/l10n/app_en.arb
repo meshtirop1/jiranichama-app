@@ -387,5 +387,93 @@
   "noConfirmedCash": "No confirmed cash is waiting for the bank.",
   "errAmountsDiffer": "The cash receipts must add up to the deposit exactly.",
   "errObjectionClosed": "The time to object has passed.",
-  "recordButton": "Record"
+  "recordButton": "Record",
+  "myStatement": "My statement",
+  "seeMyStatement": "See my statement",
+  "memberStatement": "Member statement",
+  "chamaStatement": "Chama statement",
+  "periodAll": "Since joining",
+  "periodYear": "This year",
+  "periodQuarter": "Last 3 months",
+  "periodRange": "{from} to {to}",
+  "@periodRange": {
+    "placeholders": {
+      "from": {
+        "type": "String"
+      },
+      "to": {
+        "type": "String"
+      }
+    }
+  },
+  "inThisPeriod": "In this period",
+  "positionOn": "Position on {date}",
+  "@positionOn": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "finesRaised": "Fines raised",
+  "finesPaid": "Fines paid",
+  "finesWaived": "Fines waived",
+  "totalSavings": "Total savings",
+  "noLinesInPeriod": "Nothing was recorded in this period.",
+  "reversalOf": "Reversal of {receipt}",
+  "@reversalOf": {
+    "placeholders": {
+      "receipt": {
+        "type": "String"
+      }
+    }
+  },
+  "entryOpening": "Opening balance",
+  "entryPendingCash": "Cash at a meeting (waiting for the bank)",
+  "entryFineWaived": "Fine waived",
+  "getPdf": "Get PDF statement",
+  "pdfReady": "The PDF statement is ready.",
+  "checkCode": "Check code: {code}",
+  "@checkCode": {
+    "placeholders": {
+      "code": {
+        "type": "String"
+      }
+    }
+  },
+  "anyoneCanCheck": "Whoever you give it to can check it is genuine at {url}",
+  "@anyoneCanCheck": {
+    "placeholders": {
+      "url": {
+        "type": "String"
+      }
+    }
+  },
+  "sharePdf": "Share PDF",
+  "pdfOnlyForMember": "Only the member or an official can get this member's PDF statement.",
+  "bankHeading": "Bank",
+  "reconciledTo": "Bank statement reconciled to {date}",
+  "@reconciledTo": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "closingOnStatement": "Closing balance on that statement",
+  "noBankStatementYet": "No bank statement has been accepted yet.",
+  "unmatchedSummary": "{count} payment(s) not yet matched: {amount}",
+  "@unmatchedSummary": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      },
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "cashNotBanked": "Cash confirmed, not yet banked",
+  "totalLabel": "Total",
+  "errBadDates": "Choose a period that ends today or earlier."
 }

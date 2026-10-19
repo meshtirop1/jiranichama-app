@@ -1,6 +1,8 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:flutter/widgets.dart';
+import 'package:flutter_test/flutter_test.dart';
 import 'package:jirani_domain/jirani_domain.dart';
 import 'package:jiranichama/core/api/problem.dart';
 import 'package:jiranichama/core/providers.dart';
@@ -8,6 +10,16 @@ import 'package:jiranichama/features/chamas/data/chama_repository.dart';
 import 'package:jiranichama/features/chamas/data/models.dart';
 
 const smsCode = '424242';
+
+/// Scrolls the visible list until [target] is built, then brings it on screen. Lists
+/// build lazily, so a button far down the overview is not in the tree until scrolled to.
+Future<void> scrollTo(WidgetTester tester, Finder target) async {
+  if (target.evaluate().isEmpty) {
+    await tester.dragUntilVisible(target, find.byType(ListView).first, const Offset(0, -300));
+  }
+  await tester.ensureVisible(target);
+  await tester.pumpAndSettle();
+}
 
 Json _vectors(String name) => jsonDecode(
     File('packages/jirani_domain/test/vectors/$name').readAsStringSync()) as Json;
@@ -352,6 +364,96 @@ class FakeChamaRepository implements ChamaRepository {
     }
     unmatchedList.removeWhere((t) => t['id'] == bankLineId);
   }
+
+  // Member and chama statements
+  final statementFroms = <String?>[];
+  int documentsIssued = 0;
+
+  @override
+  Future<MemberStatement> memberStatement(String membershipId, {String? from}) async {
+    statementFroms.add(from);
+    return MemberStatement({
+      'from': from ?? '2026-01-01', 'to': '2026-03-10',
+      'member': {'code': 'JC-4821-004', 'name': 'Wanjiru', 'role': 'member'},
+      'lines': from != null ? <Json>[] : [
+        {'date': '2026-01-08', 'seq': 3, 'receipt': 'K7Q2M9AB', 'type': 'fine_raised',
+         'period': '2026-01', 'amount_cents': 20000, 'reversed': false,
+         'reverses_receipt': null},
+        {'date': '2026-02-03', 'seq': 5, 'receipt': 'P3XW8RT2', 'type': 'contribution',
+         'period': '2026-01', 'amount_cents': 100000, 'reversed': true,
+         'reverses_receipt': null},
+        {'date': '2026-02-04', 'seq': 6, 'receipt': 'ZZ4Q8M1C', 'type': 'reversal',
+         'period': '2026-01', 'amount_cents': -100000, 'reversed': false,
+         'reverses_receipt': 'P3XW8RT2'},
+      ],
+      'totals': {'opening_cents': 0, 'contributed_cents': 0, 'fines_raised_cents': 20000,
+                 'fines_paid_cents': 0, 'fines_waived_cents': 0},
+      'position': {'on': '2026-03-10', 'contributed_cents': 200000, 'opening_cents': 0,
+                   'pending_cash_cents': 0, 'arrears_cents': 100000, 'fines_cents': 20000,
+                   'credit_cents': 0, 'next_due_period': '2026-04', 'next_due_cents': 100000},
+      'records_to_seq': 6,
+    });
+  }
+
+  @override
+  Future<ChamaStatement> chamaStatement(String id, {String? from}) async => ChamaStatement({
+        'from': from ?? '2026-01-01', 'to': '2026-03-10',
+        'members': [
+          {'code': 'JC-4821-001', 'name': 'Jane', 'role': 'chair', 'contributed_cents': 300000,
+           'savings_cents': 300000, 'arrears_cents': 0, 'fines_cents': 0},
+          {'code': 'JC-4821-004', 'name': 'Wanjiru', 'role': 'member',
+           'contributed_cents': 200000, 'savings_cents': 200000, 'arrears_cents': 100000,
+           'fines_cents': 20000},
+        ],
+        'totals': {'contributed_cents': 500000, 'savings_cents': 500000,
+                   'arrears_cents': 100000, 'fines_cents': 20000},
+        'bank': {'reconciled_to': '2026-03-05', 'closing_cents': 530000,
+                 'unmatched_count': 1, 'unmatched_cents': 30000, 'cash_waiting_cents': 0},
+      });
+
+  IssuedDocument _doc(String kind, String language) {
+    documentsIssued++;
+    return IssuedDocument({
+      'id': 'doc-$documentsIssued', 'kind': kind, 'language': language,
+      'verify_code': '7KQ2M9XB4D', 'verify_url': 'https://api.jiranichama.co.ke/verify/7KQ2M9XB4D/',
+      'fingerprint': 'ab' * 32, 'sha256': 'cd' * 32, 'seal_receipt': 'SEAL1234',
+    });
+  }
+
+  @override
+  Future<IssuedDocument> issueMemberStatementPdf(String membershipId,
+      {String? from, required String language, required String idempotencyKey}) async {
+    calls.add('memberPdf:$membershipId:$language');
+    return _doc('member_statement', language);
+  }
+
+  @override
+  Future<IssuedDocument> issueChamaStatementPdf(String id,
+      {String? from, required String language, required String idempotencyKey}) async {
+    calls.add('chamaPdf:$id:$language');
+    return _doc('chama_statement', language);
+  }
+
+  @override
+  Future<List<int>> documentFile(String documentId) async {
+    calls.add('download:$documentId');
+    return utf8.encode('%PDF-1.4 fake');
+  }
+}
+
+/// Keeps "saved" PDFs in memory and records what was shared.
+class FakeDocumentSaver implements DocumentSaver {
+  final saved = <String, List<int>>{};
+  final shared = <String>[];
+
+  @override
+  Future<String> save(String filename, List<int> bytes) async {
+    saved[filename] = bytes;
+    return '/fake/$filename';
+  }
+
+  @override
+  Future<void> share(String path, {required String text}) async => shared.add('$path|$text');
 }
 
 extension on FakeChamaRepository {
