@@ -93,12 +93,15 @@ class FakeChamaRepository implements ChamaRepository {
                      'platform_sig': null, 'key_id': null});
   }
 
+  bool loansOn = false;
+
   Json get _chamaJson => {
         'id': 'c1', 'name': 'Umoja Women Group', 'type': 'merry_go_round', 'state': state,
         'mode': moneyOutOn ? 'money_out' : 'records_only', 'member_code_prefix': 'JC-4821',
         'my_role': myRole,
         'my_member_code': myRole == 'member' ? 'JC-4821-004' : 'JC-4821-001',
         'i_am_founder': founder, 'statement_inbox': 'jc-4821-ab12@statements.example',
+        'loans_on': loansOn,
         'bank_account': {'bank': 'equity', 'account_name': 'UMOJA', 'account_no_last4': '9012',
                          'paybill': '247247', 'till': '', 'statement_route': 'upload'},
         if (state == 'awaiting_adoption')
@@ -575,6 +578,114 @@ class FakeChamaRepository implements ChamaRepository {
     calls.add('signedBallot:$voteId:${body['signature']}');
     _castFake(voteId, body['choice'] as String);
     return VoteInfo(_voteJson(voteId));
+  }
+
+  // Loans
+  final loansList = <Json>[];
+
+  Json _loanJson(String id) => loansList.firstWhere((x) => x['id'] == id);
+
+  List<Json> _schedule(int amount, int months) => [
+        for (var i = 1; i <= months; i++)
+          {'no': i, 'due': '2026-${(10 + i).toString().padLeft(2, '0')}-05',
+           'principal_cents': amount ~/ months, 'interest_cents': amount ~/ 100,
+           'total_cents': amount ~/ months + amount ~/ 100},
+      ];
+
+  Json newLoan({String id = 'loan-1', String state = 'awaiting_guarantors', bool mine = false,
+          bool iGuarantee = false}) =>
+      {
+        'id': id, 'borrower': mine ? 'Me' : 'Mary', 'borrower_id': mine ? 'm4' : 'm3',
+        'mine': mine, 'amount_cents': 3000000, 'term_months': 3, 'purpose': 'Stock',
+        'terms': {'guarantors': 2, 'interest': 'flat', 'monthly_rate_bp': 100},
+        'schedule': _schedule(3000000, 3), 'state': state, 'state_reason': '',
+        'proposal_id': null, 'disbursed_on': null, 'expires_at': 'x',
+        'guarantees': [
+          {'id': 'g1', 'guarantor': 'Jane', 'guarantor_id': 'm1', 'share_cents': 1500000,
+           'state': 'requested', 'answered_at': null, 'expires_at': 'x', 'mine': iGuarantee},
+          {'id': 'g2', 'guarantor': 'Peter', 'guarantor_id': 'm2', 'share_cents': 1500000,
+           'state': 'requested', 'answered_at': null, 'expires_at': 'x', 'mine': false},
+        ],
+        'balance': {'principal_cents': 0, 'interest_charged_cents': 0, 'repaid_cents': 0,
+                    'outstanding_cents': 0, 'due_now_cents': 0, 'next': null},
+        'created_at': 'x',
+      };
+
+  @override
+  Future<List<LoanInfo>> loans(String id) async => [for (final x in loansList) LoanInfo(x)];
+
+  @override
+  Future<LoanQuote> loanQuote(String id, {required int amountCents, required int termMonths})
+      async {
+    calls.add('quote:$amountCents:$termMonths');
+    final over = amountCents > 6000000;
+    return LoanQuote({
+      'eligible': !over,
+      'reasons': [if (over) {'code': 'over_limit', 'rule': '12.1', 'message': 'x'}],
+      'savings_cents': 2000000, 'limit_cents': 6000000,
+      'terms': {'interest': 'flat', 'monthly_rate_bp': 100, 'guarantors': 2},
+      'guarantors_needed': 2, 'share_cents': amountCents ~/ 2,
+      'schedule': _schedule(amountCents, termMonths),
+      'total_interest_cents': termMonths * (amountCents ~/ 100),
+      'total_cents': amountCents + termMonths * (amountCents ~/ 100),
+    });
+  }
+
+  @override
+  Future<LoanInfo> requestLoan(String id, Json body, {required String idempotencyKey})
+      async {
+    calls.add('requestLoan:${body['amount_cents']}:${body['purpose']}:'
+        '${(body['guarantor_ids'] as List).join(',')}');
+    final x = newLoan(id: 'loan-${loansList.length + 1}', mine: true)
+      ..['amount_cents'] = body['amount_cents'];
+    loansList.insert(0, x);
+    return LoanInfo(x);
+  }
+
+  @override
+  Future<LoanInfo> cancelLoan(String loanId) async {
+    calls.add('cancelLoan:$loanId');
+    return LoanInfo(_loanJson(loanId)..['state'] = 'cancelled');
+  }
+
+  @override
+  Future<LoanInfo> replaceGuarantor(String loanId,
+      {required String guaranteeId, required String membershipId}) async {
+    calls.add('replace:$guaranteeId:$membershipId');
+    return LoanInfo(_loanJson(loanId));
+  }
+
+  @override
+  Future<ChallengeSent> startGuarantee(String guaranteeId) async => _sent;
+
+  @override
+  Future<LoanInfo> acceptGuarantee(String guaranteeId,
+      {required String challengeId, required String code}) async {
+    _codeCheck(code);
+    calls.add('acceptGuarantee:$guaranteeId');
+    for (final x in loansList) {
+      for (final g in x['guarantees'] as List) {
+        if ((g as Map)['id'] == guaranteeId) {
+          g['state'] = 'accepted';
+          return LoanInfo(x);
+        }
+      }
+    }
+    throw StateError('no guarantee');
+  }
+
+  @override
+  Future<LoanInfo> declineGuarantee(String guaranteeId) async {
+    calls.add('declineGuarantee:$guaranteeId');
+    for (final x in loansList) {
+      for (final g in x['guarantees'] as List) {
+        if ((g as Map)['id'] == guaranteeId) {
+          g['state'] = 'declined';
+          return LoanInfo(x);
+        }
+      }
+    }
+    throw StateError('no guarantee');
   }
 
   // Meetings

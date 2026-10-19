@@ -62,6 +62,7 @@ class Chama {
   bool get inSetup => state == ChamaState.setup || state == ChamaState.awaitingOfficials;
   bool get iAmOfficial => officialRoles.contains(myRole);
   bool get iAmTreasurer => myRole == 'treasurer';
+  bool get loansOn => json['loans_on'] == true;
 }
 
 class Clause {
@@ -595,4 +596,74 @@ class CheckInCode {
   String get code => json['code'] as String;
   String get qr => json['qr'] as String;
   int get changesInSeconds => json['changes_in_seconds'] as int;
+}
+
+/// A loan (jiranichama-api docs/flows/loans.md). Shown only where loans are switched on.
+class LoanInfo {
+  LoanInfo(this.json);
+  final Json json;
+
+  String get id => json['id'] as String;
+  String get borrower => json['borrower'] as String;
+  String get borrowerId => json['borrower_id'] as String;
+  bool get mine => json['mine'] == true;
+  int get amountCents => json['amount_cents'] as int;
+  int get termMonths => json['term_months'] as int;
+  String get purpose => json['purpose'] as String;
+  String get state => json['state'] as String;
+  String get stateReason => json['state_reason'] as String? ?? '';
+  int get guarantorsNeeded => (json['terms'] as Map)['guarantors'] as int;
+  bool get open => const ['awaiting_guarantors', 'awaiting_approval', 'approved', 'repaying',
+        'in_arrears', 'defaulted'].contains(state);
+  List<Json> get schedule => [for (final r in json['schedule'] as List) r as Json];
+  List<LoanGuarantee> get guarantees =>
+      [for (final g in json['guarantees'] as List) LoanGuarantee(g as Json)];
+  LoanBalance get balance => LoanBalance(json['balance'] as Json);
+}
+
+class LoanGuarantee {
+  LoanGuarantee(this.json);
+  final Json json;
+
+  String get id => json['id'] as String;
+  String get guarantor => json['guarantor'] as String;
+  String get guarantorId => json['guarantor_id'] as String;
+  int get shareCents => json['share_cents'] as int;
+  String get state => json['state'] as String;
+  bool get mine => json['mine'] == true;
+}
+
+class LoanBalance {
+  LoanBalance(this.json);
+  final Json json;
+
+  int get principalCents => json['principal_cents'] as int;
+  int get interestChargedCents => json['interest_charged_cents'] as int;
+  int get repaidCents => json['repaid_cents'] as int;
+  int get outstandingCents => json['outstanding_cents'] as int;
+  int get dueNowCents => json['due_now_cents'] as int;
+}
+
+class LoanQuote {
+  LoanQuote(this.json);
+  final Json json;
+
+  bool get eligible => json['eligible'] == true;
+  List<({String code, String rule, String message})> get reasons => [
+        for (final r in json['reasons'] as List)
+          (code: (r as Map)['code'] as String, rule: r['rule'] as String,
+           message: r['message'] as String),
+      ];
+  int get savingsCents => json['savings_cents'] as int;
+  int get limitCents => json['limit_cents'] as int;
+  int get guarantorsNeeded => json['guarantors_needed'] as int;
+  int get shareCents => json['share_cents'] as int;
+  bool get flat => (json['terms'] as Map)['interest'] == 'flat';
+  String get ratePct {
+    final bp = (json['terms'] as Map)['monthly_rate_bp'] as int;
+    return bp % 100 == 0 ? '${bp ~/ 100}' : (bp / 100).toStringAsFixed(2);
+  }
+  List<Json> get schedule => [for (final r in json['schedule'] as List) r as Json];
+  int get totalInterestCents => json['total_interest_cents'] as int;
+  int get totalCents => json['total_cents'] as int;
 }

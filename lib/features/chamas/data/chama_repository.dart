@@ -75,6 +75,16 @@ abstract class ChamaRepository {
   Future<List<VoteInfo>> votes(String id);
   Future<List<RuleProposal>> ruleProposals(String id);
   Future<List<Meeting>> meetings(String id);
+  Future<List<LoanInfo>> loans(String id);
+  Future<LoanQuote> loanQuote(String id, {required int amountCents, required int termMonths});
+  Future<LoanInfo> requestLoan(String id, Json body, {required String idempotencyKey});
+  Future<LoanInfo> cancelLoan(String loanId);
+  Future<LoanInfo> replaceGuarantor(String loanId,
+      {required String guaranteeId, required String membershipId});
+  Future<ChallengeSent> startGuarantee(String guaranteeId);
+  Future<LoanInfo> acceptGuarantee(String guaranteeId,
+      {required String challengeId, required String code});
+  Future<LoanInfo> declineGuarantee(String guaranteeId);
   Future<Meeting> scheduleMeeting(String id, Json body, {required String idempotencyKey});
   Future<Meeting> cancelMeeting(String meetingId, String reason);
   Future<Meeting> apologise(String meetingId, String reason);
@@ -446,6 +456,44 @@ class HttpChamaRepository implements ChamaRepository {
   @override
   Future<List<VoteInfo>> votes(String id) async =>
       [for (final v in await _api.get('/chamas/$id/votes/') as List) VoteInfo(v as Json)];
+
+  @override
+  Future<List<LoanInfo>> loans(String id) async =>
+      [for (final x in await _api.get('/chamas/$id/loans/') as List) LoanInfo(x as Json)];
+
+  @override
+  Future<LoanQuote> loanQuote(String id, {required int amountCents, required int termMonths})
+      async => LoanQuote(await _api.get('/chamas/$id/loans/quote/',
+          query: {'amount_cents': amountCents, 'term_months': termMonths}) as Json);
+
+  @override
+  Future<LoanInfo> requestLoan(String id, Json body, {required String idempotencyKey})
+      async => LoanInfo(await _api.post('/chamas/$id/loans/', body: body, auth: true,
+          idempotencyKey: idempotencyKey));
+
+  @override
+  Future<LoanInfo> cancelLoan(String loanId) async =>
+      LoanInfo(await _api.post('/loans/$loanId/cancel/', body: {}, auth: true));
+
+  @override
+  Future<LoanInfo> replaceGuarantor(String loanId,
+          {required String guaranteeId, required String membershipId}) async =>
+      LoanInfo(await _api.post('/loans/$loanId/guarantors/', auth: true,
+          body: {'guarantee_id': guaranteeId, 'membership_id': membershipId}));
+
+  @override
+  Future<ChallengeSent> startGuarantee(String guaranteeId) async => ChallengeSent(
+      await _api.post('/guarantees/$guaranteeId/accept/', body: {}, auth: true));
+
+  @override
+  Future<LoanInfo> acceptGuarantee(String guaranteeId,
+          {required String challengeId, required String code}) async =>
+      LoanInfo(await _api.post('/guarantees/$guaranteeId/accept/', auth: true,
+          body: {'challenge_id': challengeId, 'sms_code': code}));
+
+  @override
+  Future<LoanInfo> declineGuarantee(String guaranteeId) async =>
+      LoanInfo(await _api.post('/guarantees/$guaranteeId/decline/', body: {}, auth: true));
 
   @override
   Future<List<Meeting>> meetings(String id) async =>
