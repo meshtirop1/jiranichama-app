@@ -217,6 +217,26 @@ The rules of an active chama change only by a members' vote (API
   the API checks the complete result, so a change that clashes with another setting is
   caught before anyone votes.
 
+## Loans (5.8, switched off for now)
+
+Shown only where the chama data says `loans_on` (the API's `loans` flag, off until the
+lending opinion; API `docs/flows/loans.md`).
+- **Overview**: a Loans card with my open loan and what I owe, and a warning line for
+  every request asking me to guarantee a loan.
+- **Loans**: the chama's loan book. Every member sees every loan.
+- **Request a loan**: enter the amount and months, then **See the terms**. The screen shows
+  the limit and savings, the interest, every reason the rules refuse (with its rule
+  number, in the member's language), and the whole schedule with totals, all before
+  anything is sent. Then the purpose and the guarantors (exactly as many as the rules
+  need), and **Ask the guarantors**.
+- **A loan**: where it stands, the balance (owed, repaid, interest so far, due now), the
+  guarantors and their answers, and the schedule. The borrower can cancel while
+  guarantors are answering, and can choose someone else in place of a guarantor who
+  declined or did not answer.
+- **Guaranteeing**: the guarantor reads the amount and their share, and that the rules can
+  recover it from their savings. They accept with an SMS code (which names both amounts)
+  or decline.
+
 ## Meetings (5.11)
 
 API flow: `docs/flows/meetings.md`.

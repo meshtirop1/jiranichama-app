@@ -3,6 +3,16 @@ import '../../../l10n/app_localizations.dart';
 
 /// The member's own words for an API problem. Never shows server text directly, so
 /// every message exists in both languages.
+/// Why a member may not borrow (loans quote reasons and request refusals).
+String loanReasonText(AppLocalizations l, String code) => switch (code) {
+      'too_new' => l.loanWhyTooNew,
+      'in_arrears' => l.loanWhyArrears,
+      'loan_open' => l.loanWhyOpen,
+      'over_limit' => l.loanWhyOverLimit,
+      'term_too_long' => l.loanWhyTerm,
+      _ => l.genericError,
+    };
+
 String problemText(AppLocalizations l, Object error) {
   if (error is! ApiProblem) return l.genericError;
   // Field errors come as a map from form validation, but as a list from the rules check
@@ -29,6 +39,13 @@ String problemText(AppLocalizations l, Object error) {
     'rules_invalid' => l.errRulesInvalid,
     'no_change' => l.errNoRuleChange,
     'meeting_state' => l.errMeetingState,
+    'loans_off' => l.errLoansOff,
+    'too_new' || 'in_arrears' || 'loan_open' || 'over_limit' || 'term_too_long' =>
+      loanReasonText(l, error.code),
+    'guarantors_needed' => l.errGuarantorsNeeded,
+    'invalid_guarantor' => l.errInvalidGuarantor,
+    'guarantor_cannot_cover' => l.errGuarantorCannotCover,
+    'loan_state' || 'not_replaceable' => l.errLoanState,
     'place_required' => l.errPlaceRequired,
     'too_late' => l.errTooLate,
     'too_early' => l.errTooEarly,

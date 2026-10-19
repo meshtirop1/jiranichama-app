@@ -1213,5 +1213,163 @@
   "rulesLateFine": "Fine for arriving late (KES, 0 for none)",
   "rulesLateAfter": "Late after (minutes)",
   "rulesApologyExcuses": "An apology before the meeting avoids the fine",
-  "rulesObjectionDays": "Days to object to the minutes"
+  "rulesObjectionDays": "Days to object to the minutes",
+  "loansTitle": "Loans",
+  "loansNone": "No loans yet.",
+  "loanOwed": "{amount} owed",
+  "@loanOwed": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "loanRequest": "Request a loan",
+  "loanIntro": "Enter the amount and months, then see the terms: your limit, the interest and every instalment, before you send anything.",
+  "loanAmountLabel": "Amount (KES)",
+  "loanTermLabel": "Months to repay",
+  "loanPurposeLabel": "What is the loan for?",
+  "loanSeeTerms": "See the terms",
+  "loanSend": "Ask the guarantors",
+  "loanLimit": "You can borrow up to {limit} (your savings: {savings}).",
+  "@loanLimit": {
+    "placeholders": {
+      "limit": {
+        "type": "String"
+      },
+      "savings": {
+        "type": "String"
+      }
+    }
+  },
+  "loanTerms": "Interest {rate}% a month, {how}.",
+  "@loanTerms": {
+    "placeholders": {
+      "rate": {
+        "type": "String"
+      },
+      "how": {
+        "type": "String"
+      }
+    }
+  },
+  "loanFlat": "on the amount borrowed",
+  "loanReducing": "on what is still owed",
+  "loanReason": "Rule {rule}: {message}",
+  "@loanReason": {
+    "placeholders": {
+      "rule": {
+        "type": "String"
+      },
+      "message": {
+        "type": "String"
+      }
+    }
+  },
+  "loanTotals": "Interest {interest} · total to repay {total}",
+  "@loanTotals": {
+    "placeholders": {
+      "interest": {
+        "type": "String"
+      },
+      "total": {
+        "type": "String"
+      }
+    }
+  },
+  "loanPickGuarantors": "Choose {count} guarantors. Each guarantees {share}.",
+  "@loanPickGuarantors": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "share": {
+        "type": "String"
+      }
+    }
+  },
+  "loanColDue": "Due",
+  "loanColPrincipal": "Principal",
+  "loanColInterest": "Interest",
+  "loanColTotal": "Total",
+  "loanAwaitingGuarantors": "Waiting for guarantors",
+  "loanAwaitingApproval": "With the officials for approval",
+  "loanApproved": "Approved, to be paid at the bank",
+  "loanRepaying": "Repaying",
+  "loanInArrears": "Behind on repayments",
+  "loanDefaulted": "In default",
+  "loanRepaid": "Repaid",
+  "loanDeclined": "Declined",
+  "loanExpired": "Expired",
+  "loanCancelled": "Cancelled",
+  "guaranteeRequested": "Asked, no answer yet",
+  "guaranteeAccepted": "Accepted",
+  "guaranteeDeclined": "Declined",
+  "guaranteeExpired": "No answer in time",
+  "guaranteeCalled": "Called: the loan is in default",
+  "guaranteeReleased": "Released",
+  "guaranteeAsked": "{name} asks you to guarantee a loan of {amount}",
+  "@guaranteeAsked": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "guaranteeExplain": "{name} asks you to guarantee {amount}. Your share is {share}: if the loan is not repaid, the rules can recover it from your savings.",
+  "@guaranteeExplain": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "amount": {
+        "type": "String"
+      },
+      "share": {
+        "type": "String"
+      }
+    }
+  },
+  "guaranteeAccept": "Guarantee (SMS code)",
+  "guaranteeDecline": "Decline",
+  "loanBalance": "Owed {owed} · repaid {repaid} · interest so far {interest}",
+  "@loanBalance": {
+    "placeholders": {
+      "owed": {
+        "type": "String"
+      },
+      "repaid": {
+        "type": "String"
+      },
+      "interest": {
+        "type": "String"
+      }
+    }
+  },
+  "loanDueNow": "Due now: {amount}",
+  "@loanDueNow": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "loanGuarantors": "Guarantors",
+  "loanReplace": "Choose someone else",
+  "loanPickReplacement": "Who should guarantee instead?",
+  "loanCancel": "Cancel the request",
+  "loanSchedule": "Schedule",
+  "errLoansOff": "Loans are not switched on for this chama.",
+  "errGuarantorsNeeded": "Choose the number of guarantors the rules need.",
+  "errInvalidGuarantor": "Choose guarantors who are members of this chama.",
+  "errGuarantorCannotCover": "That guarantor's savings cannot cover their share.",
+  "errLoanState": "Not possible at this stage of the loan.",
+  "loanWhyTooNew": "You have not been a member long enough to borrow yet.",
+  "loanWhyArrears": "Your contributions are behind. Catch up first.",
+  "loanWhyOpen": "You already have a loan. One loan at a time.",
+  "loanWhyOverLimit": "That is more than you can borrow now.",
+  "loanWhyTerm": "That is longer than the rules allow."
 }
