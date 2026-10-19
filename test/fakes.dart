@@ -365,6 +365,24 @@ class FakeChamaRepository implements ChamaRepository {
     unmatchedList.removeWhere((t) => t['id'] == bankLineId);
   }
 
+  // Typed-in statement lines
+  List<Json>? typedSubmitted;
+
+  @override
+  Future<Statement> submitTypedLines(String statementId, List<Json> lines,
+      {required String idempotencyKey}) async {
+    if (lines.any((l) => l['credit_cents'] != 30000)) {
+      throw ApiProblem(code: 'typed_lines_do_not_add_up', detail: '', status: 400);
+    }
+    typedSubmitted = lines;
+    final st = statementsList.firstWhere((x) => x['id'] == statementId)
+      ..['state'] = 'awaiting_confirmation'
+      ..['typed_lines'] = [
+        for (final l in lines) {...l, 'typed_by': 'Akinyi'},
+      ];
+    return Statement(st);
+  }
+
   // Member and chama statements
   final statementFroms = <String?>[];
   int documentsIssued = 0;

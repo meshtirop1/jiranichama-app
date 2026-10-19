@@ -475,5 +475,48 @@
   },
   "cashNotBanked": "Cash confirmed, not yet banked",
   "totalLabel": "Total",
-  "errBadDates": "Choose a period that ends today or earlier."
+  "errBadDates": "Choose a period that ends today or earlier.",
+  "statementNeedsTyping": "Lines to type in",
+  "typeLinesNotice": "{count} line(s) could not be read. Type them in from the bank's own statement.",
+  "@typeLinesNotice": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "typeLinesButton": "Type in lines",
+  "typeLinesTitle": "Type in unreadable lines",
+  "typeLinesIntro": "Copy each line exactly from the bank's statement. The whole statement must then add up, and a different official confirms it. Every member will see these lines were typed in.",
+  "lineInFile": "Line {n} in the file",
+  "@lineInFile": {
+    "placeholders": {
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "dateLabel": "Date (YYYY-MM-DD)",
+  "moneyIn": "Money in",
+  "moneyOut": "Money out",
+  "descriptionLabel": "Description",
+  "referenceOptional": "Reference (if shown)",
+  "balanceOptional": "Balance after this line, KES (if shown)",
+  "saveTypedLines": "Save typed lines",
+  "errTypedDoNotAddUp": "With these lines the statement does not add up. Check the amounts and dates against the bank's statement.",
+  "errTypedIncomplete": "Type in every line.",
+  "errTypedInvalid": "Check each line: a date, and an amount of money in or money out.",
+  "typedLinesBy": "{count} line(s) typed in by {name}",
+  "@typedLinesBy": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      },
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "typedIn": "Typed in",
+  "typedLinesSaved": "Saved. Another official now confirms the statement."
 }

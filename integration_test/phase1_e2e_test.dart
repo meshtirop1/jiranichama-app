@@ -458,5 +458,40 @@ void main() {
     await tap(find.text('Chama statement'));
     await waitFor(find.textContaining('Bank statement reconciled to'));
     await screenshot('chama_statement');
+
+    // 16. A statement with a line the app cannot read: the secretary types it in from
+    // the bank's copy, and the chair confirms.
+    file.bytes = utf8.encode([
+      'Account Number:,0123456789012',
+      'Opening Balance:,5000.00',
+      'Closing Balance:,8000.00',
+      '',
+      'Value Date,Narration,Reference,Debit,Credit,Balance',
+      '${d(today)},MPESA C2B $founder JANE,E2E1$run,,1000.00,6000.00',
+      '${d(today)},MPESA DEPOSIT $member WANJIRU,E2E2$run,,1000.00,7000.00',
+      '${d(today)},CASH DEPOSIT,E2E3$run,,300.00,7300.00',
+      '${d(today)},CASH DEPOSIT MEETING,E2E4$run,,500.00,7800.00',
+      '##/##/####,CASH DEPOSIT LATE,E2E5$run,,200.00,8000.00',
+    ].join('\n'));
+    await tester.pageBack();
+    await tester.pumpAndSettle();
+    await signInAgain(secretary);
+    await tap(find.text('Bank statements'));
+    await tap(find.text('Upload a statement (CSV)'));
+    await waitFor(find.text('Type in lines'));
+    await screenshot('statement_needs_typing');
+    await tap(find.text('Type in lines'));
+    await type(keyEndingWith('date-', ''), today.toIso8601String().substring(0, 10));
+    await type(keyEndingWith('amount-', ''), '200');
+    await type(keyEndingWith('reference-', ''), 'E2E5$run');
+    await screenshot('typing_a_line');
+    await tap(find.text('Save typed lines'));
+    await waitFor(find.textContaining('Another official now confirms'));
+    await signInAgain(founder);
+    await tap(find.text('Bank statements'));
+    await tap(find.text('Confirm this statement'));
+    await confirmSms(founder);
+    await waitFor(find.textContaining('typed in by'));
+    await screenshot('typed_statement_accepted');
   });
 }

@@ -30,6 +30,8 @@ abstract class ChamaRepository {
   Future<ChallengeSent> startStatementConfirm(String statementId);
   Future<Statement> confirmStatement(String statementId,
       {required String challengeId, required String code});
+  Future<Statement> submitTypedLines(String statementId, List<Json> lines,
+      {required String idempotencyKey});
   Future<List<BankLine>> unmatched(String id);
   Future<void> assign(String bankLineId, {required String membershipId, required String reason,
       required String idempotencyKey});
@@ -155,6 +157,12 @@ class HttpChamaRepository implements ChamaRepository {
           required List<int> bytes, required String idempotencyKey}) async =>
       Statement(await _api.upload('/chamas/$id/statements/',
           filename: filename, bytes: bytes, idempotencyKey: idempotencyKey));
+
+  @override
+  Future<Statement> submitTypedLines(String statementId, List<Json> lines,
+          {required String idempotencyKey}) async =>
+      Statement(await _api.post('/statements/$statementId/typed-lines/',
+          body: {'lines': lines}, auth: true, idempotencyKey: idempotencyKey));
 
   @override
   Future<ChallengeSent> startStatementConfirm(String statementId) async =>

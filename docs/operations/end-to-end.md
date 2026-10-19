@@ -10,7 +10,8 @@ treasurer, confirmed by the chair), records cash at a meeting that the member co
 uploads a later statement that repeats the day's lines and adds the cash deposit, and has
 the treasurer link that deposit to the cash. Finally the member opens their statement,
 gets the sealed PDF, and the test checks its code on the public check endpoint, then
-opens the chama statement. Screenshots land in `build/e2e_screenshots/`; the last
+opens the chama statement. Last, a statement with a damaged row: the secretary types the
+row in and the chair confirms. Screenshots land in `build/e2e_screenshots/`; the last
 passing run is kept in [screenshots/phase1](../screenshots/phase1/).
 
 It is not part of CI, because it needs a running API and a device.
