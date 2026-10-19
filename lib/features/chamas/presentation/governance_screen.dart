@@ -8,18 +8,34 @@ import '../../../core/providers.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../auth/presentation/problem_text.dart';
 import '../data/models.dart';
+import 'support_screen.dart';
 import 'widgets/sms_code_sheet.dart';
 
 final disputesProvider = FutureProvider.autoDispose.family<List<DisputeInfo>, String>(
-    (ref, id) => ref.watch(chamaRepositoryProvider).disputes(id));
+    (ref, id) {
+  ref.cacheFor(const Duration(minutes: 5));
+  return ref.watch(chamaRepositoryProvider).disputes(id);
+});
 final electionsProvider = FutureProvider.autoDispose.family<ElectionsInfo, String>(
-    (ref, id) => ref.watch(chamaRepositoryProvider).elections(id));
+    (ref, id) {
+  ref.cacheFor(const Duration(minutes: 5));
+  return ref.watch(chamaRepositoryProvider).elections(id);
+});
 final newPhonesProvider = FutureProvider.autoDispose.family<List<WaitingPhone>, String>(
-    (ref, id) => ref.watch(chamaRepositoryProvider).newPhones(id));
+    (ref, id) {
+  ref.cacheFor(const Duration(minutes: 5));
+  return ref.watch(chamaRepositoryProvider).newPhones(id);
+});
 final exitsProvider = FutureProvider.autoDispose.family<List<ExitInfo>, String>(
-    (ref, id) => ref.watch(chamaRepositoryProvider).exits(id));
+    (ref, id) {
+  ref.cacheFor(const Duration(minutes: 5));
+  return ref.watch(chamaRepositoryProvider).exits(id);
+});
 final _membersProvider = FutureProvider.autoDispose.family<List<Member>, String>(
-    (ref, id) => ref.watch(chamaRepositoryProvider).members(id));
+    (ref, id) {
+  ref.cacheFor(const Duration(minutes: 5));
+  return ref.watch(chamaRepositoryProvider).members(id);
+});
 
 String _kes(int cents) => Kes(cents).format();
 
@@ -107,6 +123,7 @@ class GovernanceCard extends ConsumerWidget {
     return Padding(
       padding: const EdgeInsets.only(top: JiraniSpace.s),
       child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+        SupportNotice(chamaId: chama.id),
         for (final n in notes)
           Padding(padding: const EdgeInsets.only(bottom: JiraniSpace.xs),
               child: Notice(n, tone: NoticeTone.warning)),
@@ -216,6 +233,7 @@ class _GovernanceScreenState extends ConsumerState<GovernanceScreen> {
     return Scaffold(
       appBar: AppBar(title: Text(l.govTitle)),
       body: ListView(padding: const EdgeInsets.all(JiraniSpace.m), children: [
+        SupportNotice(chamaId: _id),
         if (_error != null) Notice(_error!, tone: NoticeTone.critical),
         if (elections != null && elections.electionNeeded)
           Notice(l.govElectionNeeded, tone: NoticeTone.warning),
@@ -301,6 +319,17 @@ class _GovernanceScreenState extends ConsumerState<GovernanceScreen> {
         else if (!official && !exits.any((e) => e.mine))
           OutlinedButton(key: const ValueKey('exit-leave'),
               onPressed: _busy ? null : _leave, child: Text(l.exitLeave)),
+        if (official) ...[
+          const SizedBox(height: JiraniSpace.m),
+          Text(l.supportTitle, style: text.titleMedium),
+          OutlinedButton.icon(
+            key: const ValueKey('get-help'),
+            icon: const Icon(Icons.support_agent_outlined),
+            label: Text(l.supportGetHelp),
+            onPressed: () => Navigator.of(context).push(MaterialPageRoute(
+                builder: (_) => SupportScreen(chama: widget.chama))),
+          ),
+        ],
         if (official)
           TextButton.icon(
             key: const ValueKey('record-death'),

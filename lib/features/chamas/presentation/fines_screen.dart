@@ -10,7 +10,10 @@ import '../data/models.dart';
 import 'widgets/sms_code_sheet.dart';
 
 final finesProvider = FutureProvider.autoDispose.family<List<FineInfo>, String>(
-    (ref, chamaId) => ref.watch(chamaRepositoryProvider).fines(chamaId));
+    (ref, chamaId) {
+  ref.cacheFor(const Duration(minutes: 5));
+  return ref.watch(chamaRepositoryProvider).fines(chamaId);
+});
 
 String _kes(int cents) => Kes(cents).format();
 

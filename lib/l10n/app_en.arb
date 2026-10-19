@@ -1783,5 +1783,62 @@
   "refRefused": "Members did not agree",
   "refWithdrawn": "Withdrawn",
   "refSent": "Sent to the partner",
-  "errPurchaseNotPaid": "Link a money-out payment that has been paid."
+  "errPurchaseNotPaid": "Link a money-out payment that has been paid.",
+  "chainChecking": "Checking {count} records on this phone…",
+  "@chainChecking": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "supportTitle": "Help from JiraniChama",
+  "supportGetHelp": "Get help",
+  "supportIntro": "JiraniChama staff cannot see your chama's records. If you need help, you can let them read some of them for a while. Another official must confirm, every member is told, and they can only read.",
+  "supportWhat": "What may support read?",
+  "supportHowLong": "For how long?",
+  "supportReason": "What do you need help with?",
+  "supportAsk": "Ask for help",
+  "supportConfirm": "Confirm (second official)",
+  "supportRevoke": "End support access",
+  "supportWaiting": "Waiting for a second official to confirm (asked by {code})",
+  "@supportWaiting": {
+    "placeholders": {
+      "code": {
+        "type": "String"
+      }
+    }
+  },
+  "supportActive": "JiraniChama support can read {areas} until {until}.",
+  "@supportActive": {
+    "placeholders": {
+      "areas": {
+        "type": "String"
+      },
+      "until": {
+        "type": "String"
+      }
+    }
+  },
+  "areaStatements": "bank statements",
+  "areaRules": "rules",
+  "areaLedger": "records",
+  "areaMembers": "members",
+  "areaDisputes": "disputes",
+  "hoursN": "{n} hours",
+  "@hoursN": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "daysN": "{n} days",
+  "@daysN": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  }
 }

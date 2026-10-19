@@ -11,17 +11,32 @@ import '../application/chain_check.dart';
 import '../data/models.dart';
 import 'chama_screen.dart';
 
+/// The records as the server sends them, shown at once while the phone checks them.
+final ledgerItemsProvider = FutureProvider.autoDispose.family<List<LedgerItem>, String>(
+    (ref, chamaId) {
+  ref.cacheFor(const Duration(minutes: 5));
+  return loadLedger(ref.watch(chamaRepositoryProvider), chamaId);
+});
+
+/// The phone's own check of those records, on a background isolate.
+final chainCheckProvider = FutureProvider.autoDispose.family<ChainCheck, String>(
+    (ref, chamaId) async {
+  ref.cacheFor(const Duration(minutes: 5));
+  final items = await ref.watch(ledgerItemsProvider(chamaId).future);
+  return checkChain(ref.watch(chamaRepositoryProvider), chamaId, items: items,
+      trust: ref.watch(trustStoreProvider), run: ref.watch(chainRunnerProvider));
+});
+
 final anchorCheckProvider = FutureProvider.autoDispose.family<AnchorCheck?, String>(
     (ref, chamaId) async {
+  ref.cacheFor(const Duration(minutes: 5));
   final chain = await ref.watch(chainCheckProvider(chamaId).future);
   return checkAnchor(ref.watch(chamaRepositoryProvider), chamaId, chain);
 });
 
-final chainCheckProvider = FutureProvider.autoDispose.family<ChainCheck, String>(
-    (ref, chamaId) => checkChain(ref.watch(chamaRepositoryProvider), chamaId));
-
-/// Every record in the chama, newest first, after the phone has checked the whole
-/// chain itself. A record the treasurer assigned to me can be sent back.
+/// Every record in the chama, newest first. They show as soon as they arrive; the notice
+/// at the top says when the phone has finished checking them itself. A record the
+/// treasurer assigned to me can be sent back.
 class RecordsTab extends ConsumerWidget {
   const RecordsTab({super.key, required this.bundle});
 
@@ -30,51 +45,71 @@ class RecordsTab extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l = AppLocalizations.of(context);
-    final check = ref.watch(chainCheckProvider(bundle.chama.id));
-    return check.when(
-      loading: () => const Center(child: CircularProgressIndicator()),
+    final id = bundle.chama.id;
+    final ledger = ref.watch(ledgerItemsProvider(id));
+    return ledger.when(
+      skipLoadingOnRefresh: true,
+      loading: () => const _RecordsSkeleton(),
       error: (e, _) => ListView(padding: const EdgeInsets.all(JiraniSpace.m), children: [
         Notice(problemText(l, e), tone: NoticeTone.critical),
       ]),
-      data: (c) {
-        final reversed = {for (final i in c.items) i.reverses}..remove(null);
-        final receiptOf = {for (final i in c.items) i.id: i.receiptCode};
+      data: (items) {
+        final check = ref.watch(chainCheckProvider(id));
+        final reversed = {for (final i in items) i.reverses}..remove(null);
+        final receiptOf = {for (final i in items) i.id: i.receiptCode};
         final myCode = bundle.chama.myMemberCode;
-        return RefreshIndicator(
-          onRefresh: () => ref.refresh(chainCheckProvider(bundle.chama.id).future),
-          child: ListView(
-            padding: const EdgeInsets.all(JiraniSpace.m),
-            children: [
-              Notice(
-                c.ok ? l.chainOk(c.entries) : l.chainBad,
-                tone: c.ok ? NoticeTone.info : NoticeTone.critical,
-              ),
-              ...switch (ref.watch(anchorCheckProvider(bundle.chama.id)).value) {
-                null => const <Widget>[],
-                final a => [
-                    const SizedBox(height: JiraniSpace.s),
-                    Notice(a.ok ? l.anchorOk(a.at.substring(0, 10), '${a.seq}')
-                        : l.anchorBad(a.at.substring(0, 10)),
-                        tone: a.ok ? NoticeTone.info : NoticeTone.critical),
-                  ],
-              },
-              if (c.ok && c.unsigned > 0) ...[
+        final newestFirst = items.reversed.toList();
+        final header = <Widget>[
+          AnimatedSwitcher(
+            duration: const Duration(milliseconds: 250),
+            child: switch (check) {
+              AsyncData(:final value) => Notice(
+                  key: ValueKey('chain-${value.ok}'),
+                  value.ok ? l.chainOk(value.entries) : l.chainBad,
+                  tone: value.ok ? NoticeTone.info : NoticeTone.critical),
+              AsyncError() => Notice(key: const ValueKey('chain-error'), l.chainBad,
+                  tone: NoticeTone.critical),
+              _ => Notice(key: const ValueKey('chain-checking'),
+                  l.chainChecking(items.length)),
+            },
+          ),
+          ...switch (ref.watch(anchorCheckProvider(id)).value) {
+            null => const <Widget>[],
+            final a => [
                 const SizedBox(height: JiraniSpace.s),
-                Notice(l.chainUnsigned(c.unsigned), tone: NoticeTone.warning),
+                Notice(a.ok ? l.anchorOk(a.at.substring(0, 10), '${a.seq}')
+                    : l.anchorBad(a.at.substring(0, 10)),
+                    tone: a.ok ? NoticeTone.info : NoticeTone.critical),
               ],
-              const SizedBox(height: JiraniSpace.s),
-              for (final item in c.items.reversed)
-                _EntryTile(
-                  item: item,
-                  isReversed: reversed.contains(item.id),
-                  correctsReceipt: item.reverses == null ? null : receiptOf[item.reverses],
-                  canSendBack: item.memberCode == myCode &&
-                      item.decision['method'] == 'treasurer' &&
-                      item.type == 'contribution' &&
-                      !reversed.contains(item.id),
-                  onSentBack: () => ref.invalidate(chainCheckProvider(bundle.chama.id)),
-                ),
-            ],
+          },
+          if (check.value case final c? when c.ok && c.unsigned > 0) ...[
+            const SizedBox(height: JiraniSpace.s),
+            Notice(l.chainUnsigned(c.unsigned), tone: NoticeTone.warning),
+          ],
+          const SizedBox(height: JiraniSpace.s),
+        ];
+        return RefreshIndicator(
+          onRefresh: () => ref.refresh(ledgerItemsProvider(id).future),
+          // Built lazily: a chama with thousands of records scrolls as smoothly as one
+          // with ten.
+          child: ListView.builder(
+            padding: const EdgeInsets.all(JiraniSpace.m),
+            itemCount: header.length + newestFirst.length,
+            itemBuilder: (context, index) {
+              if (index < header.length) return header[index];
+              final item = newestFirst[index - header.length];
+              return _EntryTile(
+                key: ValueKey(item.id),
+                item: item,
+                isReversed: reversed.contains(item.id),
+                correctsReceipt: item.reverses == null ? null : receiptOf[item.reverses],
+                canSendBack: item.memberCode == myCode &&
+                    item.decision['method'] == 'treasurer' &&
+                    item.type == 'contribution' &&
+                    !reversed.contains(item.id),
+                onSentBack: () => ref.invalidate(ledgerItemsProvider(id)),
+              );
+            },
           ),
         );
       },
@@ -82,8 +117,31 @@ class RecordsTab extends ConsumerWidget {
   }
 }
 
+/// Grey placeholders the size of real records, so the screen does not jump when they
+/// arrive.
+class _RecordsSkeleton extends StatelessWidget {
+  const _RecordsSkeleton();
+
+  @override
+  Widget build(BuildContext context) {
+    final grey = Theme.of(context).colorScheme.surfaceContainerHighest;
+    return ListView(
+      physics: const NeverScrollableScrollPhysics(),
+      padding: const EdgeInsets.all(JiraniSpace.m),
+      children: [
+        for (var i = 0; i < 7; i++)
+          Container(
+            height: i == 0 ? 56 : 76,
+            margin: const EdgeInsets.only(bottom: JiraniSpace.s),
+            decoration: BoxDecoration(color: grey, borderRadius: BorderRadius.circular(12)),
+          ),
+      ],
+    );
+  }
+}
+
 class _EntryTile extends ConsumerStatefulWidget {
-  const _EntryTile({required this.item, required this.canSendBack, required this.onSentBack,
+  const _EntryTile({super.key, required this.item, required this.canSendBack, required this.onSentBack,
       this.isReversed = false, this.correctsReceipt});
 
   final LedgerItem item;

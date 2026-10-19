@@ -21,6 +21,7 @@ class ChamaBundle {
 
 final chamaBundleProvider =
     FutureProvider.autoDispose.family<ChamaBundle, String>((ref, id) async {
+  ref.cacheFor(const Duration(minutes: 5));
   final repo = ref.watch(chamaRepositoryProvider);
   final results = await Future.wait([repo.get(id), repo.members(id), repo.rules(id)]);
   return ChamaBundle(results[0] as Chama, results[1] as List<Member>, results[2] as RuleBook);

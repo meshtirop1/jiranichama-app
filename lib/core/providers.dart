@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:file_picker/file_picker.dart';
@@ -9,6 +10,7 @@ import 'package:share_plus/share_plus.dart';
 
 import '../config.dart';
 import '../features/auth/data/auth_repository.dart';
+import '../features/chamas/application/chain_check.dart';
 import '../features/chamas/data/chama_repository.dart';
 import 'api/api_client.dart';
 import 'api/token_store.dart';
@@ -143,3 +145,58 @@ class DevicePhoneSigner implements PhoneSigner {
 }
 
 final phoneSignerProvider = Provider<PhoneSigner>((ref) => DevicePhoneSigner());
+
+
+/// Keeps a screen's data for a while after the screen closes, so going back or switching
+/// tabs shows it at once instead of loading it again. Anything that changes the data
+/// still refreshes it straight away (ref.invalidate).
+extension CacheFor on Ref {
+  void cacheFor(Duration duration) {
+    // A new sign-in starts with nothing cached from the person before.
+    watch(signInEpochProvider);
+    final link = keepAlive();
+    final timer = Timer(duration, link.close);
+    onDispose(timer.cancel);
+  }
+}
+
+/// The last record this phone checked in each chama, kept in the phone's secure storage.
+class SecureTrustStore implements TrustStore {
+  static const _storage = FlutterSecureStorage();
+
+  @override
+  Future<TrustedHead?> read(String chamaId) async {
+    try {
+      final raw = await _storage.read(key: 'chain_head_$chamaId');
+      if (raw == null) return null;
+      final [seq, hash] = raw.split(':');
+      return (seq: int.parse(seq), hash: hash);
+    } catch (_) {
+      return null; // no trusted head: everything is checked again
+    }
+  }
+
+  @override
+  Future<void> write(String chamaId, TrustedHead head) async {
+    try {
+      await _storage.write(key: 'chain_head_$chamaId', value: '${head.seq}:${head.hash}');
+    } catch (_) {
+      // Not kept: the next check simply checks everything again.
+    }
+  }
+}
+
+final trustStoreProvider = Provider<TrustStore>((ref) => SecureTrustStore());
+
+
+/// Changes at every sign-in and sign-out, which drops every cached screen's data.
+class SignInEpoch extends Notifier<int> {
+  @override
+  int build() => 0;
+
+  void bump() => state++;
+}
+
+final signInEpochProvider = NotifierProvider<SignInEpoch, int>(SignInEpoch.new);
+
+final chainRunnerProvider = Provider<ChainRunner>((ref) => isolateRunner);

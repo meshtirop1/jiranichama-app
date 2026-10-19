@@ -18,11 +18,20 @@ import 'vote_screen.dart';
 import 'widgets/sms_code_sheet.dart';
 
 final moneyOutProvider = FutureProvider.autoDispose.family<MoneyOutStatus, String>(
-    (ref, id) => ref.watch(chamaRepositoryProvider).moneyOut(id));
+    (ref, id) {
+  ref.cacheFor(const Duration(minutes: 5));
+  return ref.watch(chamaRepositoryProvider).moneyOut(id);
+});
 final proposalsProvider = FutureProvider.autoDispose.family<List<Proposal>, String>(
-    (ref, id) => ref.watch(chamaRepositoryProvider).proposals(id));
+    (ref, id) {
+  ref.cacheFor(const Duration(minutes: 5));
+  return ref.watch(chamaRepositoryProvider).proposals(id);
+});
 final unapprovedProvider = FutureProvider.autoDispose.family<List<UnapprovedDebit>, String>(
-    (ref, id) => ref.watch(chamaRepositoryProvider).unapprovedDebits(id));
+    (ref, id) {
+  ref.cacheFor(const Duration(minutes: 5));
+  return ref.watch(chamaRepositoryProvider).unapprovedDebits(id);
+});
 
 String proposalStateLabel(AppLocalizations l, String state) => switch (state) {
       'collecting_approvals' => l.stCollecting,

@@ -12,7 +12,10 @@ import 'chama_screen.dart';
 import 'widgets/sms_code_sheet.dart';
 
 final cashProvider = FutureProvider.autoDispose.family<List<CashReceipt>, String>(
-    (ref, chamaId) => ref.watch(chamaRepositoryProvider).cashReceipts(chamaId));
+    (ref, chamaId) {
+  ref.cacheFor(const Duration(minutes: 5));
+  return ref.watch(chamaRepositoryProvider).cashReceipts(chamaId);
+});
 
 String cashStateLabel(AppLocalizations l, CashReceipt r) => switch (r.state) {
       'recorded' => l.cashRecorded,

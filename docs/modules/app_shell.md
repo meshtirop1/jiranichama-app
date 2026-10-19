@@ -42,3 +42,21 @@ unavailable and the app uses SMS codes.
 hand in a code). `qr_flutter` draws the secretary's code. `FileSource.pickPhoto` picks a
 photo of handwritten minutes. The camera permission comes from the scanner plugin's
 manifest.
+
+## Caching and smoothness
+
+Screens' data providers call `ref.cacheFor(5 minutes)` (`core/providers.dart`): going back
+or switching tabs shows the data at once instead of a spinner; anything that changes the
+data still refreshes it (`ref.invalidate`). Every sign-in and sign-out bumps
+`signInEpochProvider`, which drops all cached data, so nobody sees the previous person's.
+Long lists are built lazily (`ListView.builder`). The ledger check runs on a background
+isolate behind `chainRunnerProvider` (tests run it inline) with its trusted head in
+`trustStoreProvider` (secure storage).
+
+## Branding
+
+Android launcher icon: an adaptive icon (`mipmap-anydpi-v26/ic_launcher.xml`) with the
+mark (members around a common pot, `drawable/ic_launcher_foreground.xml`, a vector) on
+brand green. Splash: brand green with the mark (`values-v31/styles.xml` for Android 12+,
+`launch_background.xml` before), and the app's own background behind Flutter while it
+starts, so there is no white flash.

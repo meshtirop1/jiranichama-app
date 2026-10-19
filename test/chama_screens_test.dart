@@ -5,6 +5,8 @@ import 'package:jiranichama/app.dart';
 import 'package:jiranichama/core/providers.dart';
 import 'package:jiranichama/features/auth/data/auth_repository.dart';
 
+import 'package:jiranichama/features/chamas/application/chain_check.dart';
+
 import 'fakes.dart';
 
 class _SignedIn implements AuthRepository {
@@ -31,6 +33,9 @@ Future<void> _pump(WidgetTester tester, FakeChamaRepository repo) async {
     overrides: [
       authRepositoryProvider.overrideWithValue(_SignedIn()),
       chamaRepositoryProvider.overrideWithValue(repo),
+      // The chain check runs inline here: the test clock does not wait for isolates.
+      chainRunnerProvider.overrideWithValue((work) async => work()),
+      trustStoreProvider.overrideWithValue(MemoryTrustStore()),
       fileSourceProvider.overrideWithValue(FakeFileSource()),
     ],
     child: const JiraniApp(),

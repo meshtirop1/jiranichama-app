@@ -10,7 +10,10 @@ import 'rules_editor_screen.dart';
 import 'vote_screen.dart';
 
 final ruleProposalsProvider = FutureProvider.autoDispose.family<List<RuleProposal>, String>(
-    (ref, chamaId) => ref.watch(chamaRepositoryProvider).ruleProposals(chamaId));
+    (ref, chamaId) {
+  ref.cacheFor(const Duration(minutes: 5));
+  return ref.watch(chamaRepositoryProvider).ruleProposals(chamaId);
+});
 
 String ruleProposalStateLabel(AppLocalizations l, String state) => switch (state) {
       'notice' => l.rpNotice,

@@ -12,7 +12,10 @@ import 'cash_screen.dart';
 import 'chama_screen.dart';
 
 final unmatchedProvider = FutureProvider.autoDispose.family<List<BankLine>, String>(
-    (ref, chamaId) => ref.watch(chamaRepositoryProvider).unmatched(chamaId));
+    (ref, chamaId) {
+  ref.cacheFor(const Duration(minutes: 5));
+  return ref.watch(chamaRepositoryProvider).unmatched(chamaId);
+});
 
 /// Payments the app could not match to a member (5.3). Officials see them; only the
 /// treasurer assigns one, with a reason every member can read.

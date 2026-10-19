@@ -11,7 +11,10 @@ import '../data/models.dart';
 import 'widgets/sms_code_sheet.dart';
 
 final loansProvider = FutureProvider.autoDispose.family<List<LoanInfo>, String>(
-    (ref, chamaId) => ref.watch(chamaRepositoryProvider).loans(chamaId));
+    (ref, chamaId) {
+  ref.cacheFor(const Duration(minutes: 5));
+  return ref.watch(chamaRepositoryProvider).loans(chamaId);
+});
 
 String loanStateLabel(AppLocalizations l, String state) => switch (state) {
       'awaiting_guarantors' => l.loanAwaitingGuarantors,

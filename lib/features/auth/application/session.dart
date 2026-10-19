@@ -19,8 +19,10 @@ class SessionController extends Notifier<SessionStatus> {
     state = has ? SessionStatus.signedIn : SessionStatus.signedOut;
   }
 
-  void signedIn({required bool hasPin}) =>
-      state = hasPin ? SessionStatus.signedIn : SessionStatus.needsPin;
+  void signedIn({required bool hasPin}) {
+    ref.read(signInEpochProvider.notifier).bump();
+    state = hasPin ? SessionStatus.signedIn : SessionStatus.needsPin;
+  }
 
   void pinSet() => state = SessionStatus.signedIn;
 
@@ -28,6 +30,7 @@ class SessionController extends Notifier<SessionStatus> {
     await ref.read(authRepositoryProvider).signOut();
     // Not awaited: sign-out never waits on the keystore.
     unawaited(ref.read(phoneSignerProvider).forget());
+    ref.read(signInEpochProvider.notifier).bump();
     state = SessionStatus.signedOut;
   }
 }

@@ -13,7 +13,10 @@ import 'type_lines_screen.dart';
 import 'widgets/sms_code_sheet.dart';
 
 final statementsProvider = FutureProvider.autoDispose.family<List<Statement>, String>(
-    (ref, chamaId) => ref.watch(chamaRepositoryProvider).statements(chamaId));
+    (ref, chamaId) {
+  ref.cacheFor(const Duration(minutes: 5));
+  return ref.watch(chamaRepositoryProvider).statements(chamaId);
+});
 
 /// Bank statements (5.5): upload one, and confirm one another official uploaded.
 class StatementsScreen extends ConsumerStatefulWidget {
