@@ -393,6 +393,9 @@ class Proposal {
   String get bankReference => json['bank_reference'] as String? ?? '';
   bool get canAnswer => json['can_answer'] == true;
   String? get receipt => json['seal_receipt'] as String?;
+  bool get needsVote => json['needs_vote'] == true;
+  String? get voteId => json['vote_id'] as String?;
+  String? get voteState => json['vote_state'] as String?;
 }
 
 /// Money that left the bank account with no approval. Every member was told by SMS.
@@ -459,4 +462,28 @@ class Reconciliation {
   String? get gapOpenedOn => json['gap_opened_on'] as String?;
   int get daysOpen => json['days_open'] as int;
   int get breachAfterDays => json['breach_after_days'] as int;
+}
+
+/// A members' vote (jiranichama-api docs/flows/votes.md).
+class VoteInfo {
+  VoteInfo(this.json);
+  final Json json;
+
+  String get id => json['id'] as String;
+  String get subject => json['subject'] as String;
+  String get question => json['question'] as String;
+  String get state => json['state'] as String;
+  String get closesAt => json['closes_at'] as String;
+  bool get secret => json['secret'] == true;
+  int get eligible => json['eligible'] as int;
+  int get passPct => json['pass_pct'] as int;
+  int get quorumNeeded => json['quorum_needed'] as int;
+  int get cast => json['cast'] as int;
+  int? get yes => json['yes'] as int?;
+  int? get no => json['no'] as int?;
+  List<String> get voted => (json['voted'] as List).cast<String>();
+  bool get iCanVote => json['i_can_vote'] == true;
+  bool get iVoted => json['i_voted'] == true;
+  String? get myChoice => json['my_choice'] as String?;
+  String? get receipt => json['result_receipt'] as String?;
 }

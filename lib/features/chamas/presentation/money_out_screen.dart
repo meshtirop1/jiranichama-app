@@ -14,6 +14,7 @@ import '../../../l10n/app_localizations.dart';
 import '../../auth/presentation/problem_text.dart';
 import '../data/models.dart';
 import 'chama_screen.dart';
+import 'vote_screen.dart';
 import 'widgets/sms_code_sheet.dart';
 
 final moneyOutProvider = FutureProvider.autoDispose.family<MoneyOutStatus, String>(
@@ -601,6 +602,16 @@ class _ProposalScreenState extends ConsumerState<ProposalScreen> {
                       ? l.answeredApprovedPhone(a.name, roleLabel(l, a.role))
                       : l.answeredApproved(a.name, roleLabel(l, a.role)))
                   : l.answeredDeclined(a.name, roleLabel(l, a.role), a.reason)),
+            ),
+          if (p.needsVote && p.voteId != null)
+            ListTile(
+              contentPadding: EdgeInsets.zero,
+              leading: const Icon(Icons.how_to_vote_outlined),
+              title: Text(l.membersVote),
+              subtitle: Text(voteStateLabel(l, p.voteState ?? 'open')),
+              trailing: const Icon(Icons.chevron_right),
+              onTap: () => Navigator.of(context).push(MaterialPageRoute(
+                  builder: (_) => VoteScreen(chamaId: widget.chamaId, voteId: p.voteId!))),
             ),
           if (p.bankReference.isNotEmpty)
             Text('${l.bankReferenceLabel}: ${p.bankReference}', style: text.bodySmall),

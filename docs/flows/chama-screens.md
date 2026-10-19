@@ -167,6 +167,22 @@ Officials on phones without a screen lock or fingerprint, older than Android 11,
 iPhone (for now) keep SMS codes. Signing out forgets the phone's key, so the next person
 to sign in on that phone never inherits it.
 
+## Members' votes
+
+A payout above the rules' vote level opens a members' vote alongside the officials'
+approvals.
+- **Overview**: every member who may vote sees "Your vote is needed: {question}" until
+  they have voted.
+- **Vote screen**:
+  - the question, whether it is open, passed, failed or lapsed, and when it closes;
+  - how many have voted out of how many, and the number needed for it to count;
+  - the pass rule, and whether it is secret;
+  - **Vote yes** / **Vote no**. With a phone key, Android asks for the fingerprint and
+    the phone signs the choice; otherwise an SMS code naming the choice confirms it.
+- **After voting**: "You voted yes" (not shown in a secret vote) and who has voted. The
+  yes/no count appears only once the vote has closed, with its receipt.
+- **Proposal screen**: a payout that needs a vote shows the vote's state and opens it.
+
 ## Merry-go-round
 
 For chamas whose rules have a rotation, a **Merry-go-round** button on the overview.
