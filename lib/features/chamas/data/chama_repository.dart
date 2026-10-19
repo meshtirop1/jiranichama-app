@@ -54,6 +54,23 @@ abstract class ChamaRepository {
   Future<void> bankCash(String bankLineId,
       {required List<String> receiptIds, required String idempotencyKey});
 
+  Future<MoneyOutStatus> moneyOut(String id);
+  Future<ChallengeSent> startEnableMoneyOut(String id);
+  Future<MoneyOutStatus> enableMoneyOut(String id,
+      {required String challengeId, required String code});
+  Future<List<Proposal>> proposals(String id);
+  Future<Proposal> propose(String id, Json body, {required String idempotencyKey});
+  Future<ChallengeSent> startApprove(String proposalId);
+  Future<Proposal> approve(String proposalId,
+      {required String challengeId, required String code});
+  Future<Proposal> declineProposal(String proposalId, String reason);
+  Future<Proposal> cancelProposal(String proposalId, String reason);
+  Future<Proposal> markPaid(String proposalId, String bankReference,
+      {required String idempotencyKey});
+  Future<List<UnapprovedDebit>> unapprovedDebits(String id);
+  Future<UnapprovedDebit> linkDebit(String debitId, String proposalId);
+  Future<UnapprovedDebit> explainDebit(String debitId, String explanation);
+
   Future<MemberStatement> memberStatement(String membershipId, {String? from});
   Future<ChamaStatement> chamaStatement(String id, {String? from});
   Future<IssuedDocument> issueMemberStatementPdf(String membershipId,
@@ -278,4 +295,69 @@ class HttpChamaRepository implements ChamaRepository {
   @override
   Future<List<int>> documentFile(String documentId) =>
       _api.getBytes('/documents/$documentId/file/');
+
+  // Money out
+  @override
+  Future<MoneyOutStatus> moneyOut(String id) async =>
+      MoneyOutStatus(await _api.get('/chamas/$id/money-out/') as Json);
+
+  @override
+  Future<ChallengeSent> startEnableMoneyOut(String id) async =>
+      ChallengeSent(await _api.post('/chamas/$id/money-out/', auth: true, body: {}));
+
+  @override
+  Future<MoneyOutStatus> enableMoneyOut(String id,
+          {required String challengeId, required String code}) async =>
+      MoneyOutStatus(await _api.post('/chamas/$id/money-out/', auth: true,
+          body: {'challenge_id': challengeId, 'code': code}));
+
+  @override
+  Future<List<Proposal>> proposals(String id) async => [
+        for (final p in await _api.get('/chamas/$id/proposals/') as List) Proposal(p as Json)
+      ];
+
+  @override
+  Future<Proposal> propose(String id, Json body, {required String idempotencyKey}) async =>
+      Proposal(await _api.post('/chamas/$id/proposals/', body: body, auth: true,
+          idempotencyKey: idempotencyKey));
+
+  @override
+  Future<ChallengeSent> startApprove(String proposalId) async => ChallengeSent(
+      await _api.post('/proposals/$proposalId/approve/', auth: true, body: {}));
+
+  @override
+  Future<Proposal> approve(String proposalId,
+          {required String challengeId, required String code}) async =>
+      Proposal(await _api.post('/proposals/$proposalId/approve/', auth: true,
+          body: {'challenge_id': challengeId, 'code': code}));
+
+  @override
+  Future<Proposal> declineProposal(String proposalId, String reason) async => Proposal(
+      await _api.post('/proposals/$proposalId/decline/', auth: true, body: {'reason': reason}));
+
+  @override
+  Future<Proposal> cancelProposal(String proposalId, String reason) async => Proposal(
+      await _api.post('/proposals/$proposalId/cancel/', auth: true, body: {'reason': reason}));
+
+  @override
+  Future<Proposal> markPaid(String proposalId, String bankReference,
+          {required String idempotencyKey}) async =>
+      Proposal(await _api.post('/proposals/$proposalId/paid/', auth: true,
+          body: {'bank_reference': bankReference}, idempotencyKey: idempotencyKey));
+
+  @override
+  Future<List<UnapprovedDebit>> unapprovedDebits(String id) async => [
+        for (final d in await _api.get('/chamas/$id/unapproved-debits/') as List)
+          UnapprovedDebit(d as Json)
+      ];
+
+  @override
+  Future<UnapprovedDebit> linkDebit(String debitId, String proposalId) async =>
+      UnapprovedDebit(await _api.post('/unapproved-debits/$debitId/link/', auth: true,
+          body: {'proposal_id': proposalId}));
+
+  @override
+  Future<UnapprovedDebit> explainDebit(String debitId, String explanation) async =>
+      UnapprovedDebit(await _api.post('/unapproved-debits/$debitId/explain/', auth: true,
+          body: {'explanation': explanation}));
 }

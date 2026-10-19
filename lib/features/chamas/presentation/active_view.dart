@@ -10,6 +10,7 @@ import '../../auth/presentation/problem_text.dart';
 import '../data/models.dart';
 import 'chama_screen.dart';
 import 'cash_screen.dart';
+import 'money_out_screen.dart';
 import 'records_tab.dart';
 import 'widgets/rule_book_list.dart';
 
@@ -133,11 +134,18 @@ class _Overview extends ConsumerWidget {
             ),
           ),
         _CashToConfirm(chamaId: chama.id, myId: me?.id),
+        _MoneyOutNotices(chamaId: chama.id, moneyOut: chama.mode == 'money_out'),
         if (chama.mode == 'records_only') ...[
           const SizedBox(height: JiraniSpace.s),
           Notice(l.recordsOnlyNote),
         ],
         const SizedBox(height: JiraniSpace.m),
+        OutlinedButton.icon(
+          icon: const Icon(Icons.outbox_outlined),
+          label: Text(l.moneyOut),
+          onPressed: () => context.push('/chamas/${chama.id}/money-out'),
+        ),
+        const SizedBox(height: JiraniSpace.s),
         OutlinedButton.icon(
           icon: const Icon(Icons.summarize_outlined),
           label: Text(l.chamaStatement),
@@ -197,5 +205,43 @@ class _CashToConfirm extends ConsumerWidget {
         child: Notice(l.cashToConfirm(mine), tone: NoticeTone.warning),
       ),
     );
+  }
+}
+
+/// Money that left the bank without approval (every member), and payments waiting for
+/// this official's approval.
+class _MoneyOutNotices extends ConsumerWidget {
+  const _MoneyOutNotices({required this.chamaId, required this.moneyOut});
+
+  final String chamaId;
+  final bool moneyOut;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    if (!moneyOut) return const SizedBox.shrink();
+    final l = AppLocalizations.of(context);
+    final open = (ref.watch(unapprovedProvider(chamaId)).value ?? const [])
+        .where((d) => d.open).toList();
+    final waiting = (ref.watch(proposalsProvider(chamaId)).value ?? const [])
+        .where((p) => p.canAnswer).length;
+    return Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+      for (final d in open)
+        Padding(
+          padding: const EdgeInsets.only(top: JiraniSpace.s),
+          child: InkWell(
+            onTap: () => context.push('/chamas/$chamaId/money-out'),
+            child: Notice(l.unapprovedAlert(d.amount.format(), d.valueDate),
+                tone: NoticeTone.critical),
+          ),
+        ),
+      if (waiting > 0)
+        Padding(
+          padding: const EdgeInsets.only(top: JiraniSpace.s),
+          child: InkWell(
+            onTap: () => context.push('/chamas/$chamaId/money-out'),
+            child: Notice(l.waitingYourApproval('$waiting'), tone: NoticeTone.warning),
+          ),
+        ),
+    ]);
   }
 }

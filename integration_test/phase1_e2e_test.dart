@@ -509,5 +509,69 @@ void main() {
     await confirmSms(founder);
     await waitFor(find.textContaining('typed in by'));
     await screenshot('typed_statement_accepted');
+
+    // 17. Money out: two officials switch it on, the treasurer proposes the member's
+    // payout, the treasurer and chair approve by SMS code, and the chair marks it paid.
+    await tester.pageBack();
+    await tester.pumpAndSettle();
+    await tap(find.text('Money out'));
+    await tap(find.text('Switch on money out'));
+    await confirmSms(founder);
+    await waitFor(find.text('1 of 2 officials have agreed'));
+    await signInAgain(treasurer);
+    await tap(find.text('Money out'));
+    await tap(find.text('Switch on money out'));
+    await confirmSms(treasurer);
+    await tap(find.text('Propose a payment'));
+    await tap(find.byKey(const ValueKey('payee-member')));
+    await tap(find.textContaining('-004)'), last: true);
+    await type(find.byKey(const ValueKey('propose-amount')), '1000');
+    await type(find.byKey(const ValueKey('propose-purpose')), 'Merry-go-round turn');
+    await tap(find.text('Propose'));
+    await tap(find.textContaining('Merry-go-round turn'));
+    await tap(find.text('Approve'));
+    await confirmSms(treasurer);
+    await waitFor(find.text('1 of 2 approvals'));
+    await screenshot('payout_one_approval');
+    await signInAgain(founder);
+    await waitFor(find.text('1 payment(s) waiting for your approval'));
+    await tap(find.text('Money out'));
+    await tap(find.textContaining('Merry-go-round turn'));
+    await tap(find.text('Approve'));
+    await confirmSms(founder);
+    await waitFor(find.text('Approved: pay at the bank'));
+    await tap(find.text('Mark as paid at the bank'));
+    await type(find.byKey(const ValueKey('ask-text')), 'PL$run');
+    await tap(find.widgetWithText(FilledButton, 'Mark as paid at the bank'), last: true);
+    await waitFor(find.text('Paid: waiting for the bank statement'));
+    await screenshot('payout_paid');
+
+    // 18. The next statement carries the debit; once confirmed, it matches the payout.
+    file.bytes = utf8.encode([
+      'Account Number:,0123456789012',
+      'Opening Balance:,5000.00',
+      'Closing Balance:,7000.00',
+      '',
+      'Value Date,Narration,Reference,Debit,Credit,Balance',
+      '${d(today)},MPESA C2B $founder JANE,E2E1$run,,1000.00,6000.00',
+      '${d(today)},MPESA DEPOSIT $member WANJIRU,E2E2$run,,1000.00,7000.00',
+      '${d(today)},CASH DEPOSIT,E2E3$run,,300.00,7300.00',
+      '${d(today)},CASH DEPOSIT MEETING,E2E4$run,,500.00,7800.00',
+      '${d(today)},CASH DEPOSIT LATE,E2E5$run,,200.00,8000.00',
+      '${d(today)},PESALINK PL$run WANJIRU,E2E6$run,1000.00,,7000.00',
+    ].join('\n'));
+    await signInAgain(secretary);
+    await tap(find.text('Bank statements'));
+    await tap(find.text('Upload a statement (CSV)'));
+    await waitFor(find.text('Waiting for a second official'));
+    await signInAgain(founder);
+    await tap(find.text('Bank statements'));
+    await tap(find.text('Confirm this statement'));
+    await confirmSms(founder);
+    await tester.pageBack();
+    await tester.pumpAndSettle();
+    await tap(find.text('Money out'));
+    await waitFor(find.textContaining('Paid and matched to the bank'));
+    await screenshot('payout_matched');
   });
 }

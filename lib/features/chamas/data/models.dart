@@ -342,3 +342,69 @@ class IssuedDocument {
   /// Read out over the phone as two groups of five.
   String get spokenCode => '${verifyCode.substring(0, 5)}-${verifyCode.substring(5)}';
 }
+
+/// Whether money out is on, and what is available to promise (jiranichama-api
+/// docs/flows/money-out.md).
+class MoneyOutStatus {
+  MoneyOutStatus(this.json);
+  final Json json;
+
+  bool get on => json['mode'] == 'money_out';
+  int get consents => json['consents'] as int;
+  int get needed => json['needed'] as int;
+  Kes? get available =>
+      json['available_cents'] == null ? null : Kes(json['available_cents'] as int);
+}
+
+class ProposalAnswer {
+  ProposalAnswer(this.json);
+  final Json json;
+
+  String get name => json['name'] as String;
+  String get role => json['role'] as String;
+  bool get approved => json['decision'] == 'approve';
+  String get reason => json['reason'] as String? ?? '';
+}
+
+/// A payout (to a member) or withdrawal (to anyone else) waiting for, or past, approval.
+class Proposal {
+  Proposal(this.json);
+  final Json json;
+
+  String get id => json['id'] as String;
+  String get kind => json['kind'] as String;
+  String get state => json['state'] as String;
+  String get stateReason => json['state_reason'] as String? ?? '';
+  Kes get amount => Kes(json['amount_cents'] as int);
+  String get payeeName => json['payee_name'] as String;
+  String? get payeeMemberCode => json['payee_member_code'] as String?;
+  String get payeeAccount => json['payee_account'] as String? ?? '';
+  String get purpose => json['purpose'] as String;
+  String get proposedBy => json['proposed_by'] as String;
+  String? get proposedByCode => json['proposed_by_code'] as String?;
+  int get needsOfficials => json['needs_officials'] as int;
+  int get approved => json['approved'] as int;
+  List<ProposalAnswer> get answers =>
+      [for (final a in json['approvals'] as List) ProposalAnswer(a as Json)];
+  String? get refusalRule => (json['refusal'] as Map?)?['rule'] as String?;
+  String? get refusalCode => (json['refusal'] as Map?)?['code'] as String?;
+  String? get deadlineAt => json['deadline_at'] as String?;
+  String get bankReference => json['bank_reference'] as String? ?? '';
+  bool get canAnswer => json['can_answer'] == true;
+  String? get receipt => json['seal_receipt'] as String?;
+}
+
+/// Money that left the bank account with no approval. Every member was told by SMS.
+class UnapprovedDebit {
+  UnapprovedDebit(this.json);
+  final Json json;
+
+  String get id => json['id'] as String;
+  String get state => json['state'] as String;
+  Kes get amount => Kes(json['amount_cents'] as int);
+  String get valueDate => json['value_date'] as String;
+  String get narration => json['narration'] as String? ?? '';
+  String get explanation => json['explanation'] as String? ?? '';
+  String? get resolvedBy => json['resolved_by'] as String?;
+  bool get open => state == 'open';
+}

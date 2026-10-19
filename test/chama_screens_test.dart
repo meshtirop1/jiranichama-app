@@ -207,6 +207,7 @@ void main() {
     final repo = FakeChamaRepository(myRole: 'secretary');
     await _pump(tester, repo);
     await _openChama(tester);
+    await scrollTo(tester, find.text('Bank statements'));
     await tester.tap(find.text('Bank statements'));
     await tester.pumpAndSettle();
     await tester.tap(find.text('Upload a statement (CSV)'));
