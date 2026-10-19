@@ -996,5 +996,80 @@
         "type": "String"
       }
     }
-  }
+  },
+  "errNoRuleChange": "These are the rules already in force. Change at least one setting.",
+  "errProposalOpen": "Another change to the same rules is being decided. Wait until it is.",
+  "errCoolingOff": "The members turned this change down recently. It can be raised again later.",
+  "errCannotWithdraw": "Only the official who proposed it can withdraw it, during the notice period.",
+  "proposeRuleChange": "Propose a rule change",
+  "proposeRuleChangeIntro": "Change any setting, then say why. Members get notice, then vote. If it passes it starts on the 1st of next month.",
+  "sendRuleChange": "Send to members",
+  "ruleChangeReason": "Why should the rules change?",
+  "ruleChangeTitle": "Rule change",
+  "rpNotice": "Members are reading it",
+  "rpVoting": "Members are voting",
+  "rpAdopted": "Adopted, starts soon",
+  "rpInForce": "In force",
+  "rpRejected": "Turned down",
+  "rpLapsed": "Too few voted",
+  "rpWithdrawn": "Withdrawn",
+  "rpNoticeUntil": "Members can read it until {date}. Then the vote opens for {days} days.",
+  "@rpNoticeUntil": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      },
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "rpStartsOn": "Adopted by the members. It starts on {date}.",
+  "@rpStartsOn": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "rpInForceSince": "In force since {date}.",
+  "@rpInForceSince": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "rpProposedBy": "Proposed by {name}",
+  "@rpProposedBy": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "rpThresholds": "Passes if {quorum}% of members vote and more than {pass}% say yes.",
+  "@rpThresholds": {
+    "placeholders": {
+      "quorum": {
+        "type": "int"
+      },
+      "pass": {
+        "type": "int"
+      }
+    }
+  },
+  "rpClause": "Rule {ref}",
+  "@rpClause": {
+    "placeholders": {
+      "ref": {
+        "type": "String"
+      }
+    }
+  },
+  "rpBefore": "Now",
+  "rpAfter": "Proposed",
+  "rpNone": "(none)",
+  "rpOpenVote": "Go to the vote",
+  "rpWithdraw": "Withdraw this change"
 }
