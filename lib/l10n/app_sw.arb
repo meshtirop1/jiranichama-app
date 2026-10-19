@@ -291,7 +291,7 @@
   "reasonLabel": "Kwa nini ni yake",
   "assign": "Mpe",
   "errTreasurerUpload": "Kiongozi mwingine apakie taarifa, ili mweka hazina asikague kazi yake mwenyewe.",
-  "errSecondOfficial": "Kiongozi mwingine athibitishe taarifa uliyopakia.",
+  "errSecondOfficial": "Kiongozi mwingine lazima athibitishe ulichoweka.",
   "errDuplicateStatement": "Faili hili hili lilishapakiwa.",
   "errRoleTaken": "Tayari kuna mtu kwenye nafasi hii.",
   "errAlreadyMember": "Mtu huyo tayari ni mwanachama wa chama hiki.",
@@ -311,5 +311,81 @@
         "type": "String"
       }
     }
-  }
+  },
+  "openingBalances": "Salio la mwanzo",
+  "openingIntro": "Mnahama kutoka daftari? Weka kile kila mwanachama alikuwa nacho tayari. Kiongozi mwingine atathibitisha.",
+  "savingsLabel": "Akiba (KES)",
+  "finesLabel": "Faini zisizolipwa (KES)",
+  "saveDraft": "Hifadhi rasimu",
+  "draftSaved": "Rasimu imehifadhiwa. Kiongozi mwingine lazima aithibitishe.",
+  "confirmOpening": "Thibitisha salio hili la mwanzo",
+  "openingConfirmed": "Imethibitishwa na {name}. Wanachama wanaweza kupinga hadi {date}.",
+  "@openingConfirmed": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "openingDraftBy": "Imewekwa na {name}, inasubiri kiongozi mwingine kuthibitisha.",
+  "@openingDraftBy": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "objectLabel": "Nini si sahihi?",
+  "objectButton": "Pinga salio langu la mwanzo",
+  "objectionSent": "Pingamizi lako limeandikwa. Kila mwanachama anaweza kuliona.",
+  "objectionsCount": "{count, plural, =1{Pingamizi 1} other{Mapingamizi {count}}}",
+  "@objectionsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "cashAtMeetings": "Pesa taslimu za mikutano",
+  "recordCash": "Andika pesa taslimu iliyopokelewa",
+  "amountKesLabel": "Kiasi (KES)",
+  "memberLabel": "Mwanachama",
+  "cashRecorded": "Inasubiri mwanachama athibitishe",
+  "cashConfirmed": "Inasubiri kuwekwa benki",
+  "cashBanked": "Imewekwa benki",
+  "cashDeclined": "Mwanachama anasema hakulipa hii",
+  "cashOverdue": "Haikuwekwa benki kwa wakati",
+  "confirmCash": "Ndiyo, nililipa hii",
+  "declineCash": "Hii si yangu",
+  "cashToConfirm": "{count, plural, =1{Malipo 1 ya taslimu yanasubiri} other{Malipo {count} ya taslimu yanasubiri}} uthibitishe.",
+  "@cashToConfirm": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "pendingCash": "Taslimu inayosubiri benki",
+  "openingSavings": "Iliyoletwa (salio la mwanzo)",
+  "itsCash": "Hii ni taslimu ya mkutano",
+  "pickCashReceipts": "Amana hii ina taslimu ipi?",
+  "cashTotal": "Umechagua {total} kati ya {deposit}",
+  "@cashTotal": {
+    "placeholders": {
+      "total": {
+        "type": "String"
+      },
+      "deposit": {
+        "type": "String"
+      }
+    }
+  },
+  "bankIt": "Unganisha amana",
+  "noConfirmedCash": "Hakuna taslimu iliyothibitishwa inayosubiri benki.",
+  "errAmountsDiffer": "Risiti za taslimu lazima zilingane na amana kikamilifu.",
+  "errObjectionClosed": "Muda wa kupinga umepita.",
+  "recordButton": "Andika"
 }

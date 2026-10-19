@@ -291,7 +291,7 @@
   "reasonLabel": "Why it belongs to them",
   "assign": "Assign",
   "errTreasurerUpload": "Another official must upload the statement, so the treasurer is not checking their own work.",
-  "errSecondOfficial": "A different official must confirm a statement you uploaded.",
+  "errSecondOfficial": "A different official must confirm what you entered.",
   "errDuplicateStatement": "This exact file was uploaded before.",
   "errRoleTaken": "Someone already holds this office.",
   "errAlreadyMember": "That person is already a member of this chama.",
@@ -311,5 +311,81 @@
         "type": "String"
       }
     }
-  }
+  },
+  "openingBalances": "Opening balances",
+  "openingIntro": "Moving from a notebook? Enter what each member already had. A different official then confirms it.",
+  "savingsLabel": "Savings (KES)",
+  "finesLabel": "Unpaid fines (KES)",
+  "saveDraft": "Save draft",
+  "draftSaved": "Draft saved. Another official must confirm it.",
+  "confirmOpening": "Confirm these opening balances",
+  "openingConfirmed": "Confirmed by {name}. Members can object until {date}.",
+  "@openingConfirmed": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "openingDraftBy": "Entered by {name}, waiting for another official to confirm.",
+  "@openingDraftBy": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "objectLabel": "What is wrong?",
+  "objectButton": "Object to my opening balance",
+  "objectionSent": "Your objection is recorded. Every member can see it.",
+  "objectionsCount": "{count, plural, =1{1 objection} other{{count} objections}}",
+  "@objectionsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "cashAtMeetings": "Cash at meetings",
+  "recordCash": "Record cash received",
+  "amountKesLabel": "Amount (KES)",
+  "memberLabel": "Member",
+  "cashRecorded": "Waiting for the member to confirm",
+  "cashConfirmed": "Waiting for the bank deposit",
+  "cashBanked": "Banked",
+  "cashDeclined": "The member says they did not pay this",
+  "cashOverdue": "Not banked in time",
+  "confirmCash": "Yes, I paid this",
+  "declineCash": "This was not me",
+  "cashToConfirm": "{count, plural, =1{1 cash payment is} other{{count} cash payments are}} waiting for you to confirm.",
+  "@cashToConfirm": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "pendingCash": "Cash waiting for the bank",
+  "openingSavings": "Brought in (opening)",
+  "itsCash": "This is cash from a meeting",
+  "pickCashReceipts": "Which cash does this deposit carry?",
+  "cashTotal": "Selected {total} of {deposit}",
+  "@cashTotal": {
+    "placeholders": {
+      "total": {
+        "type": "String"
+      },
+      "deposit": {
+        "type": "String"
+      }
+    }
+  },
+  "bankIt": "Link deposit",
+  "noConfirmedCash": "No confirmed cash is waiting for the bank.",
+  "errAmountsDiffer": "The cash receipts must add up to the deposit exactly.",
+  "errObjectionClosed": "The time to object has passed.",
+  "recordButton": "Record"
 }

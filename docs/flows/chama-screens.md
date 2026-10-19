@@ -50,6 +50,22 @@ closing balance, who uploaded and who confirmed it, and any problems or flags. A
 statement waiting for confirmation has **Confirm this statement** (SMS code). The server
 refuses the treasurer as uploader, and the uploader as confirmer, and the app shows why.
 
+## Opening balances
+
+For a chama moving from a notebook. The treasurer enters each member's savings and unpaid
+fines and saves a draft. A different official sees "waiting for another official" and
+confirms with an SMS code. After that the figures are read-only; each member sees their
+own line, can object to it for 14 days, and every member sees objections.
+
+## Cash at meetings
+
+The treasurer records cash handed over at a meeting (member, amount). The member gets a
+note on their overview ("1 cash payment is waiting for you to confirm") and confirms with
+an SMS code, or says it was not them. Confirmed cash shows as "waiting for the bank
+deposit", and as overdue if not banked in time. When the deposit appears on a statement,
+the treasurer opens it in Unmatched payments, taps the cash icon, and ticks the receipts
+it carries; the button only works when they add up to the deposit exactly.
+
 ## Unmatched payments
 
 Officials see payments the app could not match. Only the treasurer has **Assign**:
@@ -71,6 +87,6 @@ choose the member and write why it belongs to them.
 
 ## Not yet
 
-Opening balances, cash at meetings, PDF member statements, the full rules editor (all
+PDF member statements, the full rules editor (all
 settings, not only the main four), the encrypted offline copy of the ledger, and pull to
 refresh on every list.

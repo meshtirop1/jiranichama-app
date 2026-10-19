@@ -341,5 +341,89 @@ void main() {
     await waitFor(find.text('Sent back to the treasurer.'));
     await waitFor(find.textContaining('Checked on this phone'));
     await screenshot('after_not_me');
+
+    Future<void> signInAgain(String local) async {
+      await signOut();
+      await type(find.byType(TextField), local);
+      await tap(find.text('Send code'));
+      await type(find.byType(TextField), await newCode(e164(local)));
+      await tap(find.text('Continue'));
+      await tap(find.text(chamaName));
+    }
+
+    Finder keyEndingWith(String prefix, String suffix) => find.byWidgetPredicate((w) {
+          final k = w.key;
+          return k is ValueKey<String> && k.value.startsWith(prefix) && k.value.endsWith(suffix);
+        });
+
+    // 8. The treasurer drafts an opening balance and records cash from a meeting.
+    await signInAgain(treasurer);
+    await tap(find.text('Opening balances'));
+    await type(keyEndingWith('savings-', '-004'), '5000');
+    await tap(find.text('Save draft'));
+    await waitFor(find.textContaining('Draft saved'));
+    await tester.pageBack();
+    await tester.pumpAndSettle();
+    await tap(find.text('Cash at meetings'));
+    await tap(find.text('Record cash received'));
+    await tap(find.byType(DropdownButtonFormField<String>));
+    await tap(find.textContaining('-004)'), last: true);
+    await type(find.widgetWithText(TextField, 'Amount (KES)'), '500');
+    await tap(find.widgetWithText(FilledButton, 'Record'));
+    await waitFor(find.text('Waiting for the member to confirm'));
+    await screenshot('cash_recorded');
+
+    // 9. The chair confirms the opening balances.
+    await signInAgain(founder);
+    await tap(find.text('Opening balances'));
+    await tap(find.text('Confirm these opening balances'));
+    await confirmSms(founder);
+    await waitFor(find.textContaining('Confirmed by'));
+    await screenshot('opening_confirmed');
+
+    // 10. The member confirms the cash they handed over.
+    await signInAgain(member);
+    await waitFor(find.textContaining('waiting for you to confirm'));
+    await tap(find.textContaining('waiting for you to confirm'));
+    await tap(find.text('Yes, I paid this'));
+    await confirmSms(member);
+    await waitFor(find.text('Waiting for the bank deposit'));
+
+    // 11. A later statement repeats today's lines and adds the cash deposit.
+    file.bytes = utf8.encode([
+      'Account Number:,0123456789012',
+      'Opening Balance:,5000.00',
+      'Closing Balance:,7800.00',
+      '',
+      'Value Date,Narration,Reference,Debit,Credit,Balance',
+      '${d(today)},MPESA C2B $founder JANE,E2E1$run,,1000.00,6000.00',
+      '${d(today)},MPESA DEPOSIT $member WANJIRU,E2E2$run,,1000.00,7000.00',
+      '${d(today)},CASH DEPOSIT,E2E3$run,,300.00,7300.00',
+      '${d(today)},CASH DEPOSIT MEETING,E2E4$run,,500.00,7800.00',
+    ].join('\n'));
+    await signInAgain(secretary);
+    await tap(find.text('Bank statements'));
+    await tap(find.text('Upload a statement (CSV)'));
+    await waitFor(find.text('Waiting for a second official'));
+    await signInAgain(founder);
+    await tap(find.text('Bank statements'));
+    await tap(find.text('Confirm this statement'));
+    await confirmSms(founder);
+    await waitFor(find.text('Accepted'));
+
+    // 12. The treasurer links the deposit to the confirmed cash.
+    await signInAgain(treasurer);
+    await tap(find.text('Unmatched payments'));
+    await waitFor(find.text('KES 500'));
+    await tap(find.byTooltip('This is cash from a meeting'), last: true);
+    await tap(find.textContaining('-004 ·'));
+    await tap(find.widgetWithText(FilledButton, 'Link deposit'));
+    await waitFor(find.text('KES 300'));
+    await screenshot('cash_banked');
+
+    // 13. The member sees the opening balance in their position.
+    await signInAgain(member);
+    await waitFor(find.text('Brought in (opening)'));
+    await screenshot('member_position_with_opening');
   });
 }

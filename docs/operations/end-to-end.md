@@ -5,7 +5,10 @@ against a real local API: four people sign in and out on one device (founder/cha
 treasurer, secretary, member), set up a chama, join with invite codes, adopt the rules
 by SMS code, upload a bank statement that a second official confirms, see payments
 matched and the records checked on the phone, assign an unmatched payment, and send it
-back with "This was not me". Screenshots land in `build/e2e_screenshots/`; the last
+back with "This was not me". It then brings in an opening balance (drafted by the
+treasurer, confirmed by the chair), records cash at a meeting that the member confirms,
+uploads a later statement that repeats the day's lines and adds the cash deposit, and has
+the treasurer link that deposit to the cash. Screenshots land in `build/e2e_screenshots/`; the last
 passing run is kept in [screenshots/phase1](../screenshots/phase1/).
 
 It is not part of CI, because it needs a running API and a device.
