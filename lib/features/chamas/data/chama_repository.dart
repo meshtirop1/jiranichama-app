@@ -72,6 +72,10 @@ abstract class ChamaRepository {
   Future<List<UnapprovedDebit>> unapprovedDebits(String id);
   Future<Reconciliation> reconciliation(String id);
   Future<List<VoteInfo>> votes(String id);
+  Future<List<RuleProposal>> ruleProposals(String id);
+  Future<RuleProposal> proposeRules(String id, Json rules,
+      {required String reason, required String idempotencyKey});
+  Future<RuleProposal> withdrawRuleProposal(String proposalId);
   Future<ChallengeSent> startBallot(String voteId, String choice);
   Future<VoteInfo> castBallot(String voteId, String choice,
       {required String challengeId, required String code});
@@ -429,6 +433,23 @@ class HttpChamaRepository implements ChamaRepository {
   @override
   Future<List<VoteInfo>> votes(String id) async =>
       [for (final v in await _api.get('/chamas/$id/votes/') as List) VoteInfo(v as Json)];
+
+  @override
+  Future<List<RuleProposal>> ruleProposals(String id) async => [
+        for (final p in await _api.get('/chamas/$id/rule-proposals/') as List)
+          RuleProposal(p as Json),
+      ];
+
+  @override
+  Future<RuleProposal> proposeRules(String id, Json rules,
+          {required String reason, required String idempotencyKey}) async =>
+      RuleProposal(await _api.post('/chamas/$id/rule-proposals/',
+          body: {'rules': rules, 'reason': reason}, auth: true,
+          idempotencyKey: idempotencyKey));
+
+  @override
+  Future<RuleProposal> withdrawRuleProposal(String proposalId) async => RuleProposal(
+      await _api.post('/rule-proposals/$proposalId/withdraw/', body: {}, auth: true));
 
   @override
   Future<ChallengeSent> startBallot(String voteId, String choice) async => ChallengeSent(

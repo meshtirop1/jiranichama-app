@@ -577,6 +577,48 @@ class FakeChamaRepository implements ChamaRepository {
     return VoteInfo(_voteJson(voteId));
   }
 
+  // Rule changes
+  final ruleProposalsList = <Json>[];
+
+  @override
+  Future<List<RuleProposal>> ruleProposals(String id) async =>
+      [for (final p in ruleProposalsList) RuleProposal(p)];
+
+  @override
+  Future<RuleProposal> proposeRules(String id, Json rules,
+      {required String reason, required String idempotencyKey}) async {
+    final before = (_rules['contributions'] as Map)['amount_cents'];
+    final after = (rules['contributions'] as Map)['amount_cents'];
+    if (before == after) {
+      throw ApiProblem(code: 'no_change', detail: '', status: 400);
+    }
+    calls.add('proposeRules:$reason:$after');
+    final p = <String, dynamic>{
+      'id': 'rp-${ruleProposalsList.length + 1}', 'state': 'notice', 'reason': reason,
+      'proposed_by': 'Jane', 'changed': ['contributions/amount_cents'],
+      'clauses': {
+        for (final lang in ['en', 'sw'])
+          lang: [
+            {'ref': '3.1', 'before': 'Each member pays KES ${(before as int) ~/ 100}.',
+             'after': 'Each member pays KES ${(after as int) ~/ 100}.'},
+          ],
+      },
+      'rules': rules, 'notice_until': '2026-11-02T09:00:00Z', 'vote_days': 7,
+      'quorum_pct': 50, 'pass_pct': 66, 'vote_id': null, 'effective_from': null,
+      'created_at': 'x',
+    };
+    ruleProposalsList.insert(0, p);
+    return RuleProposal(p);
+  }
+
+  @override
+  Future<RuleProposal> withdrawRuleProposal(String proposalId) async {
+    final p = ruleProposalsList.firstWhere((p) => p['id'] == proposalId);
+    p['state'] = 'withdrawn';
+    calls.add('withdrawRule:$proposalId');
+    return RuleProposal(p);
+  }
+
   // Daily reconciliation
   Json reconciliationJson = {
     'status': 'no_statement', 'checked_on': null, 'bank_cents': null, 'records_cents': null,

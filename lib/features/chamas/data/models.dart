@@ -508,3 +508,33 @@ class AnchorProof {
   List<Map<String, Object?>> get path =>
       [for (final p in json['path'] as List) Map<String, Object?>.from(p as Map)];
 }
+
+/// A proposed rule change (jiranichama-api docs/flows/rule-changes.md): notice, a
+/// members' vote, then a new rule version from the 1st of next month.
+class RuleProposal {
+  RuleProposal(this.json);
+  final Json json;
+
+  String get id => json['id'] as String;
+  String get state => json['state'] as String;
+  String get reason => json['reason'] as String;
+  String get proposedBy => json['proposed_by'] as String;
+  String get noticeUntil => json['notice_until'] as String;
+  int get voteDays => json['vote_days'] as int;
+  int get quorumPct => json['quorum_pct'] as int;
+  int get passPct => json['pass_pct'] as int;
+  String? get voteId => json['vote_id'] as String?;
+  String? get effectiveFrom => json['effective_from'] as String?;
+  bool get open => state == 'notice' || state == 'voting';
+
+  /// Changed rule-book clauses, before and after, in the member's language.
+  List<({String ref, String? before, String? after})> clauses(String lang) => [
+        for (final c in ((json['clauses'] as Map)[lang] ?? (json['clauses'] as Map)['en'])
+            as List)
+          (
+            ref: (c as Map)['ref'] as String,
+            before: c['before'] as String?,
+            after: c['after'] as String?,
+          ),
+      ];
+}

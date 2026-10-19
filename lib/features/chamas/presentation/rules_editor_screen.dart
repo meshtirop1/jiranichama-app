@@ -11,15 +11,21 @@ import '../../../core/providers.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../auth/presentation/problem_text.dart';
 import '../data/models.dart';
+import '../../../core/api/api_client.dart';
 import 'chama_screen.dart';
+import 'rule_changes_screen.dart';
 
 /// Every rule setting (schema v1), for the founder during setup. The API checks the whole
 /// set (ranges and contradictions); its errors come back with a path and a stable code
 /// and are shown next to the setting, in the member's language.
+///
+/// With [propose], an active chama's official edits a copy of the rules in force and
+/// sends it, with a reason, as a rule change for the members' vote (5.10).
 class RulesEditorScreen extends ConsumerWidget {
-  const RulesEditorScreen({super.key, required this.chamaId});
+  const RulesEditorScreen({super.key, required this.chamaId, this.propose = false});
 
   final String chamaId;
+  final bool propose;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -30,7 +36,7 @@ class RulesEditorScreen extends ConsumerWidget {
       error: (e, _) => Scaffold(appBar: AppBar(),
           body: Padding(padding: const EdgeInsets.all(JiraniSpace.m),
               child: Notice(problemText(l, e), tone: NoticeTone.critical))),
-      data: (b) => _Editor(chamaId: chamaId, rules: b.rules.rules),
+      data: (b) => _Editor(chamaId: chamaId, rules: b.rules.rules, propose: propose),
     );
   }
 }
@@ -48,10 +54,11 @@ class _Tier {
 }
 
 class _Editor extends ConsumerStatefulWidget {
-  const _Editor({required this.chamaId, required this.rules});
+  const _Editor({required this.chamaId, required this.rules, required this.propose});
 
   final String chamaId;
   final Json rules;
+  final bool propose;
 
   @override
   ConsumerState<_Editor> createState() => _EditorState();
@@ -94,6 +101,8 @@ class _EditorState extends ConsumerState<_Editor> {
   late String? _rotOrder = (_r['rotation'] as Json?)?['order'] as String?;
   late String? _rotArrears = (_r['rotation'] as Json?)?['arrears'] as String?;
 
+  final _reason = TextEditingController();
+  final _key = newIdempotencyKey();
   Map<String, String> _errors = {};
   String? _error;
   bool _busy = false;
@@ -101,7 +110,7 @@ class _EditorState extends ConsumerState<_Editor> {
   @override
   void dispose() {
     for (final c in [_amount, _dueDay, _grace, _cashDays, _fineAmount, _fineCap, _deadline,
-      _entryFee, _share, _everyDays, for (final t in _tiers) t.upTo]) {
+      _entryFee, _share, _everyDays, _reason, for (final t in _tiers) t.upTo]) {
       c.dispose();
     }
     super.dispose();
@@ -175,7 +184,18 @@ class _EditorState extends ConsumerState<_Editor> {
       _errors = {};
     });
     try {
-      await ref.read(chamaRepositoryProvider).saveRules(widget.chamaId, _collect());
+      final repo = ref.read(chamaRepositoryProvider);
+      if (widget.propose) {
+        final p = await repo.proposeRules(widget.chamaId, _collect(),
+            reason: _reason.text.trim(), idempotencyKey: _key);
+        ref.invalidate(ruleProposalsProvider(widget.chamaId));
+        if (mounted) {
+          Navigator.of(context).pushReplacement(MaterialPageRoute(
+              builder: (_) => RuleProposalScreen(chamaId: widget.chamaId, proposalId: p.id)));
+        }
+        return;
+      }
+      await repo.saveRules(widget.chamaId, _collect());
       ref.invalidate(chamaBundleProvider(widget.chamaId));
       if (mounted) Navigator.of(context).pop(true);
     } on ApiProblem catch (e) {
@@ -250,13 +270,21 @@ class _EditorState extends ConsumerState<_Editor> {
         ]);
 
     return Scaffold(
-      appBar: AppBar(title: Text(l.rulesEditorTitle)),
-      bottomNavigationBar:
-          ActionBar(child: PrimaryButton(label: l.saveRules, busy: _busy, onPressed: _save)),
+      appBar: AppBar(title: Text(widget.propose ? l.proposeRuleChange : l.rulesEditorTitle)),
+      bottomNavigationBar: ActionBar(child: PrimaryButton(
+          label: widget.propose ? l.sendRuleChange : l.saveRules, busy: _busy,
+          onPressed: _save)),
       body: ListView(
         padding: const EdgeInsets.all(JiraniSpace.m),
         children: [
-          Notice(l.rulesEditorIntro),
+          Notice(widget.propose ? l.proposeRuleChangeIntro : l.rulesEditorIntro),
+          if (widget.propose)
+            Padding(
+              padding: const EdgeInsets.only(top: JiraniSpace.s),
+              child: TextField(key: const ValueKey('rule-change-reason'), controller: _reason,
+                  maxLength: 500, maxLines: 2,
+                  decoration: InputDecoration(labelText: l.ruleChangeReason)),
+            ),
           if (_error != null) ...[
             const SizedBox(height: JiraniSpace.s),
             Notice(_error!, tone: NoticeTone.critical),

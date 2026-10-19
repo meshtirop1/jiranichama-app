@@ -14,6 +14,7 @@ import 'cash_screen.dart';
 import 'money_out_screen.dart';
 import 'vote_screen.dart';
 import 'records_tab.dart';
+import 'rule_changes_screen.dart';
 import 'widgets/rule_book_list.dart';
 
 final reconciliationProvider = FutureProvider.autoDispose.family<Reconciliation, String>(
@@ -67,8 +68,10 @@ class ActiveView extends StatelessWidget {
                   onTap: () => context.push(
                       '/chamas/${bundle.chama.id}/members/${m.id}/statement')),
           ]),
-          ListView(padding: const EdgeInsets.all(JiraniSpace.m),
-              children: [RuleBookList(bundle.rules.clauses(lang))]),
+          ListView(padding: const EdgeInsets.all(JiraniSpace.m), children: [
+            RuleChangesSection(chamaId: bundle.chama.id, official: bundle.chama.iAmOfficial),
+            RuleBookList(bundle.rules.clauses(lang)),
+          ]),
         ]),
       ),
     );

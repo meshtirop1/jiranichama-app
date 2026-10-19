@@ -198,6 +198,25 @@ approvals.
   yes/no count appears only once the vote has closed, with its receipt.
 - **Proposal screen**: a payout that needs a vote shows the vote's state and opens it.
 
+## Changing the rules (5.10)
+
+The rules of an active chama change only by a members' vote (API
+`docs/flows/rule-changes.md`).
+- **Rules tab**: officials see **Propose a rule change**; everyone sees the changes being
+  decided or recently decided, with where each stands (reading, voting, adopted, in force,
+  turned down, too few voted, withdrawn).
+- **Proposing**: the same All rules editor, filled with the rules in force, plus "Why should
+  the rules change?". **Send to members** sends the whole set; setting errors come back next
+  to the setting as in setup. Sending the rules unchanged is refused.
+- **A change's screen**: the reason and who proposed it, where it stands ("Members can read
+  it until {date}. Then the vote opens for {days} days."), the thresholds, and each changed
+  rule-book clause: **Now** (struck through) and **Proposed**, in the member's language.
+  During voting, **Go to the vote** opens the usual vote screen. The official who proposed
+  it can withdraw it during the notice period.
+- **Why the whole rule set is edited**: members compare whole clauses in plain words, and
+  the API checks the complete result, so a change that clashes with another setting is
+  caught before anyone votes.
+
 ## Merry-go-round
 
 For chamas whose rules have a rotation, a **Merry-go-round** button on the overview.
