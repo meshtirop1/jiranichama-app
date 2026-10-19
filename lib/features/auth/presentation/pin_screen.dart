@@ -15,6 +15,7 @@ class PinScreen extends ConsumerStatefulWidget {
 }
 
 class _PinScreenState extends ConsumerState<PinScreen> {
+  final _name = TextEditingController();
   final _pin = TextEditingController();
   final _confirm = TextEditingController();
   String? _error;
@@ -22,6 +23,7 @@ class _PinScreenState extends ConsumerState<PinScreen> {
 
   @override
   void dispose() {
+    _name.dispose();
     _pin.dispose();
     _confirm.dispose();
     super.dispose();
@@ -29,6 +31,10 @@ class _PinScreenState extends ConsumerState<PinScreen> {
 
   Future<void> _save() async {
     final l = AppLocalizations.of(context);
+    if (_name.text.trim().length < 2) {
+      setState(() => _error = l.nameRequired);
+      return;
+    }
     if (_pin.text.length != 6) return;
     if (_pin.text != _confirm.text) {
       setState(() => _error = l.pinMismatch);
@@ -39,7 +45,10 @@ class _PinScreenState extends ConsumerState<PinScreen> {
       _error = null;
     });
     try {
-      await ref.read(authRepositoryProvider).setPin(_pin.text);
+      final repo = ref.read(authRepositoryProvider);
+      await repo.setProfile(name: _name.text.trim(),
+          language: Localizations.localeOf(context).languageCode);
+      await repo.setPin(_pin.text);
       ref.read(sessionProvider.notifier).pinSet();
     } catch (e) {
       if (mounted) setState(() => _error = problemText(l, e));
@@ -61,7 +70,15 @@ class _PinScreenState extends ConsumerState<PinScreen> {
             const SizedBox(height: JiraniSpace.s),
             Text(l.pinBody),
             const SizedBox(height: JiraniSpace.l),
-            DigitsField(controller: _pin, label: l.pinLabel, obscure: true),
+            TextField(
+              controller: _name,
+              autofocus: true,
+              textCapitalization: TextCapitalization.words,
+              autofillHints: const [AutofillHints.name],
+              decoration: InputDecoration(labelText: l.nameLabel, hintText: l.nameHint),
+            ),
+            const SizedBox(height: JiraniSpace.m),
+            DigitsField(controller: _pin, label: l.pinLabel, obscure: true, autofocus: false),
             const SizedBox(height: JiraniSpace.m),
             DigitsField(
               controller: _confirm,

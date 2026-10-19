@@ -6,4 +6,5 @@ library;
 export 'src/canonical_json.dart';
 export 'src/ledger_chain.dart';
 export 'src/money.dart';
+export 'src/platform_signature.dart';
 export 'src/phone.dart';

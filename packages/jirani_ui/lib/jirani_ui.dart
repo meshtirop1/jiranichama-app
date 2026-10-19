@@ -5,6 +5,7 @@
 /// export can replace them in one place.
 library;
 
+export 'src/action_bar.dart';
 export 'src/buttons.dart';
 export 'src/fields.dart';
 export 'src/money_text.dart';

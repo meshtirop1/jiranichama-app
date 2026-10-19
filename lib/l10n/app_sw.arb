@@ -9,26 +9,307 @@
   "sendCode": "Tuma nambari",
   "codeTitle": "Weka nambari ya siri",
   "codeSentTo": "Tumetuma nambari ya tarakimu 6 kwa {phone}.",
-  "@codeSentTo": {"placeholders": {"phone": {"type": "String"}}},
+  "@codeSentTo": {
+    "placeholders": {
+      "phone": {
+        "type": "String"
+      }
+    }
+  },
   "codeLabel": "Nambari ya tarakimu 6",
   "verify": "Endelea",
   "codeWrong": "Nambari hiyo si sahihi. {left, plural, =0{Hakuna jaribio lililobaki: omba nambari mpya.} =1{Jaribio 1 limebaki.} other{Majaribio {left} yamebaki.}}",
-  "@codeWrong": {"placeholders": {"left": {"type": "int"}}},
+  "@codeWrong": {
+    "placeholders": {
+      "left": {
+        "type": "int"
+      }
+    }
+  },
   "codeExpired": "Nambari hii imeisha muda. Omba nambari mpya.",
   "codeLocked": "Umekosea mara nyingi mno. Omba nambari mpya.",
   "tooManyCodes": "Umeomba nambari nyingi mno. Subiri dakika 10 kisha ujaribu tena.",
   "resendCode": "Tuma nambari mpya",
   "pinTitle": "Weka PIN ya programu",
-  "pinBody": "Utatumia PIN hii ya tarakimu 6 kufungua JiraniChama kwenye simu hii.",
+  "pinBody": "Kiambie chama chako wewe ni nani, kisha weka PIN ya tarakimu 6 utakayotumia kufungua JiraniChama kwenye simu hii.",
   "pinLabel": "PIN mpya",
   "pinConfirmLabel": "Andika PIN tena",
   "pinMismatch": "PIN hizo mbili hazifanani.",
   "pinWeak": "Chagua PIN ambayo ni ngumu kukisia.",
   "savePin": "Hifadhi PIN",
   "homeTitle": "Chama zako",
-  "homeEmpty": "Bado hujajiunga na chama. Kuunda na kujiunga na chama kunakuja hivi karibuni.",
+  "homeEmpty": "Bado hujajiunga na chama. Unda chama, au jiunge kwa nambari ya mwaliko.",
   "signOut": "Toka",
   "language": "Lugha / Language",
   "networkError": "Hatukuweza kufikia JiraniChama. Angalia mtandao wako kisha ujaribu tena.",
-  "genericError": "Kuna tatizo. Tafadhali jaribu tena."
+  "genericError": "Kuna tatizo. Tafadhali jaribu tena.",
+  "retry": "Jaribu tena",
+  "cancel": "Ghairi",
+  "confirm": "Thibitisha",
+  "createChama": "Unda chama",
+  "joinChama": "Jiunge kwa nambari",
+  "stateSetup": "Kinaandaliwa",
+  "stateAwaitingOfficials": "Kinasubiri viongozi",
+  "stateAwaitingAdoption": "Kanuni zinathibitishwa",
+  "stateActive": "Kinaendelea",
+  "stateSuspended": "Kimesimamishwa",
+  "stateClosed": "Kimefungwa",
+  "stateExpired": "Muda umeisha",
+  "roleChair": "Mwenyekiti",
+  "roleTreasurer": "Mweka hazina",
+  "roleSecretary": "Katibu",
+  "roleMember": "Mwanachama",
+  "roleAuditor": "Mkaguzi",
+  "roleSignatory": "Mtia sahihi wa benki",
+  "typeMerryGoRound": "Mzunguko (merry-go-round)",
+  "typeTableBanking": "Benki ya mezani",
+  "typeWelfare": "Ustawi",
+  "typeInvestmentClub": "Klabu ya uwekezaji",
+  "chamaNameLabel": "Jina la chama",
+  "chamaTypeLabel": "Aina ya chama",
+  "myRoleLabel": "Nafasi yako",
+  "createButton": "Unda chama",
+  "setupIntro": "Weka akaunti ya benki, angalia kanuni na waalike viongozi. Kisha tuma kanuni kwa wanachama waanzilishi wazithibitishe.",
+  "bankSection": "Akaunti ya benki",
+  "bankLabel": "Benki",
+  "accountNameLabel": "Jina la akaunti",
+  "accountNoLabel": "Nambari ya akaunti",
+  "paybillLabel": "Nambari ya paybill (si lazima)",
+  "statementRouteLabel": "Taarifa za benki zinavyofika",
+  "routeBankEmail": "Benki inazituma kwa barua pepe ya chama",
+  "routeUpload": "Viongozi wanazipakia",
+  "inboxExplain": "Omba benki itume taarifa kwa {address}. Taarifa kutoka benki hazihitaji kiongozi kuzishughulikia.",
+  "@inboxExplain": {
+    "placeholders": {
+      "address": {
+        "type": "String"
+      }
+    }
+  },
+  "saveBank": "Hifadhi akaunti ya benki",
+  "bankSaved": "{bank}, akaunti inayoishia {last4}",
+  "@bankSaved": {
+    "placeholders": {
+      "bank": {
+        "type": "String"
+      },
+      "last4": {
+        "type": "String"
+      }
+    }
+  },
+  "rulesSection": "Kanuni",
+  "amountLabel": "Mchango kila mwezi (KES)",
+  "dueDayLabel": "Ulipwe kabla ya tarehe hii ya mwezi",
+  "graceLabel": "Siku za ziada",
+  "lateFineLabel": "Faini ya kuchelewa (KES, 0 kama hakuna)",
+  "saveRules": "Hifadhi kanuni",
+  "rulesSaved": "Kanuni zimehifadhiwa.",
+  "inviteSection": "Viongozi na wanachama",
+  "inviteRoleLabel": "Nafasi",
+  "invitePhoneLabel": "Nambari yake ya simu",
+  "invitePhoneRequired": "Viongozi wanaalikwa kwa nambari ya simu.",
+  "sendInvite": "Unda mwaliko",
+  "inviteCreated": "Nambari ya mwaliko {code}. Mpe uliyemwalika. Inadumu siku 14.",
+  "@inviteCreated": {
+    "placeholders": {
+      "code": {
+        "type": "String"
+      }
+    }
+  },
+  "submitRules": "Tuma kanuni zithibitishwe",
+  "submitHelp": "Unahitaji akaunti ya benki, na kila nafasi ya uongozi ijazwe.",
+  "waitingFounder": "Mwanzilishi bado anaandaa chama hiki.",
+  "waitingOfficials": "Inasubiri kila nafasi ya uongozi ijazwe. Viongozi wanajiunga kwa nambari ya mwaliko waliyotumiwa.",
+  "adoptionProgress": "Wanachama waanzilishi {confirmed} kati ya {founding} wamethibitisha. Wanahitajika {needed}, pamoja na kila kiongozi.",
+  "@adoptionProgress": {
+    "placeholders": {
+      "confirmed": {
+        "type": "int"
+      },
+      "founding": {
+        "type": "int"
+      },
+      "needed": {
+        "type": "int"
+      }
+    }
+  },
+  "confirmRules": "Thibitisha kanuni hizi",
+  "youConfirmed": "Umethibitisha kanuni.",
+  "smsSheetTitle": "Weka nambari tuliyokutumia kwa SMS",
+  "smsSentTo": "Imetumwa kwa {phone}.",
+  "@smsSentTo": {
+    "placeholders": {
+      "phone": {
+        "type": "String"
+      }
+    }
+  },
+  "joinTitle": "Jiunge na chama",
+  "inviteCodeLabel": "Nambari ya mwaliko",
+  "joinAs": "Umealikwa kujiunga na {chama} kama {role}. Soma kanuni hapa chini.",
+  "@joinAs": {
+    "placeholders": {
+      "chama": {
+        "type": "String"
+      },
+      "role": {
+        "type": "String"
+      }
+    }
+  },
+  "joinAccept": "Jiunge na ukubali kanuni hizi",
+  "inviteInvalid": "Mwaliko huu si halali au muda wake umeisha.",
+  "tabOverview": "Muhtasari",
+  "tabRecords": "Kumbukumbu",
+  "tabMembers": "Wanachama",
+  "tabRules": "Kanuni",
+  "myPosition": "Hali yako",
+  "contributed": "Umechanga",
+  "arrears": "Miezi isiyolipwa",
+  "finesOwed": "Faini unazodaiwa",
+  "creditLabel": "Ziada",
+  "nextDue": "Inayofuata: {amount} ya {period}",
+  "@nextDue": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "period": {
+        "type": "String"
+      }
+    }
+  },
+  "howToPay": "Jinsi ya kulipa",
+  "payWithCode": "Lipa kwenye akaunti ya {bank} inayoishia {last4}. Tumia nambari yako ya mwanachama {code} kama kumbukumbu.",
+  "@payWithCode": {
+    "placeholders": {
+      "bank": {
+        "type": "String"
+      },
+      "last4": {
+        "type": "String"
+      },
+      "code": {
+        "type": "String"
+      }
+    }
+  },
+  "payPaybill": "M-Pesa: paybill {paybill}, akaunti {code}.",
+  "@payPaybill": {
+    "placeholders": {
+      "paybill": {
+        "type": "String"
+      },
+      "code": {
+        "type": "String"
+      }
+    }
+  },
+  "recordsOnlyNote": "Chama hiki kinaandika pesa tu. Malipo na mikopo vitawashwa kila kiongozi akipita ukaguzi wa kitambulisho.",
+  "chainOk": "Imekaguliwa kwenye simu hii: kumbukumbu {count}, hazijabadilishwa na zimetiwa sahihi na JiraniChama.",
+  "@chainOk": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "chainBad": "Tahadhari: kumbukumbu hizi hazilingani na zile simu hii ilikagua. Usizitegemee hadi hili lielezwe.",
+  "chainUnsigned": "{count, plural, =1{Kumbukumbu 1 mpya inasubiri} other{Kumbukumbu {count} mpya zinasubiri}} sahihi ya JiraniChama.",
+  "@chainUnsigned": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "receipt": "Risiti {code}",
+  "@receipt": {
+    "placeholders": {
+      "code": {
+        "type": "String"
+      }
+    }
+  },
+  "entryContribution": "Mchango",
+  "entryFineRaised": "Faini ya kuchelewa",
+  "entryFinePaid": "Faini imelipwa",
+  "entryReversal": "Marekebisho",
+  "entryMembership": "Amejiunga",
+  "entryRulesAdopted": "Kanuni zimekubaliwa",
+  "entryOther": "Kumbukumbu",
+  "notMe": "Hii si yangu",
+  "notMeDone": "Imerudishwa kwa mweka hazina.",
+  "statements": "Taarifa za benki",
+  "uploadStatement": "Pakia taarifa (CSV)",
+  "statementAwaiting": "Inasubiri kiongozi wa pili",
+  "statementAccepted": "Imekubaliwa",
+  "statementRejected": "Imekataliwa",
+  "statementNeedsParser": "Imetumwa kwa wafanyakazi wa JiraniChama kuisoma",
+  "statementHeld": "Imesimamishwa: barua pepe haikuthibitishwa",
+  "confirmStatement": "Thibitisha taarifa hii",
+  "statementSummary": "{from} hadi {to} · mistari {lines} · salio {closing}",
+  "@statementSummary": {
+    "placeholders": {
+      "from": {
+        "type": "String"
+      },
+      "to": {
+        "type": "String"
+      },
+      "lines": {
+        "type": "int"
+      },
+      "closing": {
+        "type": "String"
+      }
+    }
+  },
+  "fromTheBank": "Kutoka benki",
+  "uploadedBy": "Imepakiwa na {name}",
+  "@uploadedBy": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "confirmedBy": "imethibitishwa na {name}",
+  "@confirmedBy": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "unmatched": "Malipo yasiyotambuliwa",
+  "unmatchedEmpty": "Kila malipo yametambuliwa kwa mwanachama.",
+  "assignTo": "Mpe mwanachama",
+  "reasonLabel": "Kwa nini ni yake",
+  "assign": "Mpe",
+  "errTreasurerUpload": "Kiongozi mwingine apakie taarifa, ili mweka hazina asikague kazi yake mwenyewe.",
+  "errSecondOfficial": "Kiongozi mwingine athibitishe taarifa uliyopakia.",
+  "errDuplicateStatement": "Faili hili hili lilishapakiwa.",
+  "errRoleTaken": "Tayari kuna mtu kwenye nafasi hii.",
+  "errAlreadyMember": "Mtu huyo tayari ni mwanachama wa chama hiki.",
+  "errInviteOtherPhone": "Mwaliko huu ulitumwa kwa nambari nyingine ya simu.",
+  "errBankMissing": "Weka akaunti ya benki ya chama kwanza.",
+  "errRulesInvalid": "Baadhi ya mipangilio inapingana au iko nje ya kiwango.",
+  "errNotAllowed": "Huwezi kufanya hivi kwa nafasi yako.",
+  "errFileTooLarge": "Faili ni kubwa mno.",
+  "nameLabel": "Jina lako",
+  "nameHint": "Kama chama chako kinavyokujua",
+  "nameRequired": "Weka jina lako.",
+  "reversedLabel": "Imebatilishwa",
+  "correctsReceipt": "Inarekebisha risiti {code}",
+  "@correctsReceipt": {
+    "placeholders": {
+      "code": {
+        "type": "String"
+      }
+    }
+  }
 }

@@ -1,0 +1,196 @@
+// What the API sends for chamas, rules, members, statements and the ledger.
+// Hand-written readers for now; they follow the OpenAPI schema field names exactly.
+
+import 'package:jirani_domain/jirani_domain.dart';
+
+typedef Json = Map<String, dynamic>;
+
+enum ChamaState { setup, awaitingOfficials, awaitingAdoption, active, suspended, closed, expired }
+
+ChamaState _state(String s) => switch (s) {
+      'setup' => ChamaState.setup,
+      'awaiting_officials' => ChamaState.awaitingOfficials,
+      'awaiting_adoption' => ChamaState.awaitingAdoption,
+      'active' => ChamaState.active,
+      'suspended' => ChamaState.suspended,
+      'closed' => ChamaState.closed,
+      _ => ChamaState.expired,
+    };
+
+const officialRoles = {'chair', 'treasurer', 'secretary'};
+
+class BankAccount {
+  BankAccount(this.json);
+  final Json json;
+
+  String get bank => json['bank'] as String;
+  String get accountName => json['account_name'] as String;
+  String get last4 => json['account_no_last4'] as String? ?? '';
+  String get paybill => json['paybill'] as String? ?? '';
+  String get till => json['till'] as String? ?? '';
+  String get statementRoute => json['statement_route'] as String;
+}
+
+class AdoptionStatus {
+  AdoptionStatus(this.json);
+  final Json json;
+
+  int get founding => json['founding'] as int;
+  int get confirmed => json['confirmed'] as int;
+  int get needed => json['needed'] as int;
+  List<String> get officialsWaiting => (json['officials_waiting'] as List).cast<String>();
+}
+
+class Chama {
+  Chama(this.json);
+  final Json json;
+
+  String get id => json['id'] as String;
+  String get name => json['name'] as String;
+  String get type => json['type'] as String;
+  ChamaState get state => _state(json['state'] as String);
+  String get mode => json['mode'] as String;
+  String? get myRole => json['my_role'] as String?;
+  String? get myMemberCode => json['my_member_code'] as String?;
+  bool get iAmFounder => json['i_am_founder'] == true;
+  String? get statementInbox => json['statement_inbox'] as String?;
+  BankAccount? get bankAccount =>
+      json['bank_account'] == null ? null : BankAccount(json['bank_account'] as Json);
+  AdoptionStatus? get adoption =>
+      json['adoption'] == null ? null : AdoptionStatus(json['adoption'] as Json);
+
+  bool get inSetup => state == ChamaState.setup || state == ChamaState.awaitingOfficials;
+  bool get iAmOfficial => officialRoles.contains(myRole);
+  bool get iAmTreasurer => myRole == 'treasurer';
+}
+
+class Clause {
+  Clause(this.ref, this.text);
+  final String ref;
+  final String text;
+}
+
+class RuleBook {
+  RuleBook(this.json);
+  final Json json;
+
+  bool get inForce => json['status'] == 'in_force';
+  int? get versionNo => json['version_no'] as int?;
+  Json get rules => Map<String, dynamic>.from(json['rules'] as Map);
+
+  List<Clause> clauses(String language) {
+    final book = json['book'] as Map;
+    final list = (book[language] ?? book['en']) as List;
+    return [for (final c in list) Clause(c['ref'] as String, c['text'] as String)];
+  }
+}
+
+class Member {
+  Member(this.json);
+  final Json json;
+
+  String get id => json['id'] as String;
+  String get memberCode => json['member_code'] as String;
+  String get name => (json['name'] as String?)?.trim().isNotEmpty == true
+      ? json['name'] as String
+      : json['member_code'] as String;
+  String get role => json['role'] as String;
+  bool get isFounding => json['is_founding'] == true;
+  bool get adoptedRules => json['rules_adopted_at'] != null;
+}
+
+class Invite {
+  Invite(this.json);
+  final Json json;
+
+  String get code => json['code'] as String;
+  String get role => json['role'] as String;
+  String get phoneHint => json['phone_hint'] as String? ?? '';
+}
+
+class InviteDetail {
+  InviteDetail(this.json);
+  final Json json;
+
+  String get chamaId => (json['chama'] as Map)['id'] as String;
+  String get chamaName => (json['chama'] as Map)['name'] as String;
+  String get role => json['role'] as String;
+  List<Clause> get book =>
+      [for (final c in json['book'] as List) Clause(c['ref'] as String, c['text'] as String)];
+}
+
+class ChallengeSent {
+  ChallengeSent(this.json);
+  final Json json;
+
+  String get challengeId => json['challenge_id'] as String;
+  String get sentTo => json['sent_to'] as String? ?? '';
+}
+
+class Position {
+  Position(this.json);
+  final Json json;
+
+  Kes get contributed => Kes(json['contributed_cents'] as int);
+  Kes get arrears => Kes(json['arrears_cents'] as int);
+  Kes get fines => Kes(json['fines_cents'] as int);
+  Kes get credit => Kes(json['credit_cents'] as int);
+  String? get nextDuePeriod => json['next_due_period'] as String?;
+  Kes get nextDue => Kes(json['next_due_cents'] as int);
+}
+
+class LedgerItem {
+  LedgerItem(this.json);
+  final Json json;
+
+  String get id => json['id'] as String;
+  Map<String, Object?> get document => Map<String, Object?>.from(json['document'] as Map);
+  String get hash => json['hash'] as String;
+  String get receiptCode => json['receipt_code'] as String;
+  String? get signature => json['platform_sig'] as String?;
+
+  int get seq => document['seq'] as int;
+  String get type => document['type'] as String;
+  String? get memberCode => document['member_code'] as String?;
+  Kes get amount => Kes(document['amount_cents'] as int);
+  String? get period => document['period'] as String?;
+  String? get reverses => document['reverses'] as String?;
+  String? get sourceId => document['source_id'] as String?;
+  Map<String, Object?> get decision => Map<String, Object?>.from(document['decision'] as Map);
+}
+
+class LedgerPage {
+  LedgerPage(this.entries, {required this.more, required this.nextAfterSeq});
+  final List<LedgerItem> entries;
+  final bool more;
+  final int nextAfterSeq;
+}
+
+class Statement {
+  Statement(this.json);
+  final Json json;
+
+  String get id => json['id'] as String;
+  String get state => json['state'] as String;
+  String get route => json['route'] as String;
+  String? get periodFrom => json['period_from'] as String?;
+  String? get periodTo => json['period_to'] as String?;
+  Kes? get closing => json['closing_cents'] == null ? null : Kes(json['closing_cents'] as int);
+  int get lines => json['lines'] as int? ?? 0;
+  String? get uploadedBy => json['uploaded_by'] as String?;
+  String? get confirmedBy => json['confirmed_by'] as String?;
+  List<String> get problems =>
+      [for (final p in json['problems'] as List? ?? const []) (p as Map)['message'] as String];
+  List<String> get flags =>
+      [for (final p in json['flags'] as List? ?? const []) (p as Map)['message'] as String];
+}
+
+class BankLine {
+  BankLine(this.json);
+  final Json json;
+
+  String get id => json['id'] as String;
+  Kes get amount => Kes(json['amount_cents'] as int);
+  String get valueDate => json['value_date'] as String;
+  String get narration => json['narration'] as String? ?? '';
+}
