@@ -68,6 +68,11 @@ abstract class ChamaRepository {
   Future<Proposal> markPaid(String proposalId, String bankReference,
       {required String idempotencyKey});
   Future<List<UnapprovedDebit>> unapprovedDebits(String id);
+  Future<String> attestNonce();
+  Future<ChallengeSent> startRegisterDevice(Json body);
+  Future<Json> registerDevice(Json body, {required String challengeId, required String code});
+  Future<Json> signingPayload(String proposalId);
+  Future<Proposal> submitSignature(String proposalId, Json body);
   Future<RotationInfo> rotation(String id);
   Future<RotationInfo> startRotation(String id,
       {List<String>? order, required String idempotencyKey});
@@ -380,4 +385,27 @@ class HttpChamaRepository implements ChamaRepository {
   Future<Proposal> proposeNextTurn(String id, {required String idempotencyKey}) async =>
       Proposal(await _api.post('/chamas/$id/rotation/next/', body: {}, auth: true,
           idempotencyKey: idempotencyKey));
+
+  // Phone signing keys
+  @override
+  Future<String> attestNonce() async =>
+      (await _api.post('/devices/attest-nonce/', auth: true, body: {}))['nonce'] as String;
+
+  @override
+  Future<ChallengeSent> startRegisterDevice(Json body) async =>
+      ChallengeSent(await _api.post('/devices/', auth: true, body: body));
+
+  @override
+  Future<Json> registerDevice(Json body,
+          {required String challengeId, required String code}) =>
+      _api.post('/devices/', auth: true,
+          body: {...body, 'challenge_id': challengeId, 'code': code});
+
+  @override
+  Future<Json> signingPayload(String proposalId) =>
+      _api.post('/proposals/$proposalId/signing-payload/', auth: true, body: {});
+
+  @override
+  Future<Proposal> submitSignature(String proposalId, Json body) async =>
+      Proposal(await _api.post('/proposals/$proposalId/signatures/', auth: true, body: body));
 }

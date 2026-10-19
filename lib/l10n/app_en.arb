@@ -773,5 +773,37 @@
   "arrearsLabel": "When the member is behind on contributions",
   "arrearsSkip": "Move them to the end",
   "arrearsDeduct": "Pay them less what they owe",
-  "arrearsBlock": "Wait until they catch up"
+  "arrearsBlock": "Wait until they catch up",
+  "fingerprintCardTitle": "Approve with your fingerprint",
+  "fingerprintCardBody": "Set up this phone once. Then approvals need your fingerprint, face or phone PIN, and nobody can approve for you with an SMS code.",
+  "setUpThisPhone": "Set up this phone",
+  "phoneReady": "This phone approves payments with your fingerprint.",
+  "approvePromptTitle": "Approve {amount} to {payee}",
+  "@approvePromptTitle": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "payee": {
+        "type": "String"
+      }
+    }
+  },
+  "answeredApprovedPhone": "{name} ({role}) approved with their phone key",
+  "@answeredApprovedPhone": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "role": {
+        "type": "String"
+      }
+    }
+  },
+  "errUseDeviceKey": "Approve on the phone you set up, with your fingerprint.",
+  "errSignatureInvalid": "The phone's signature did not check out. Try again.",
+  "errPayloadChanged": "What you are approving has changed. Look again.",
+  "errOtherPhone": "Your approvals are set up on another phone.",
+  "errKeyNotTrusted": "This phone cannot keep a signing key safely. Approve by SMS code instead.",
+  "errAttestationInvalid": "This phone's key could not be checked."
 }

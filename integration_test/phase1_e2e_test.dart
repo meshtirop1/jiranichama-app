@@ -585,5 +585,29 @@ void main() {
     await tap(find.text('Propose next payout'));
     await waitFor(find.textContaining('Merry-go-round turn 1 of 4'));
     await screenshot('rotation_first_turn_proposed');
+
+    // 20. The chair sets this phone up for approvals and approves with it: the phone's
+    // key signs after the screen lock (the host types the emulator's test PIN; see
+    // docs/operations/end-to-end.md).
+    await tester.pageBack();
+    await tester.pumpAndSettle();
+    await tester.pageBack();
+    await tester.pumpAndSettle();
+    await tap(find.text('Money out'));
+    await tap(find.text('Set up this phone'));
+    await confirmSms(founder);
+    await waitFor(find.text('This phone approves payments with your fingerprint.'),
+        seconds: 60);
+    await screenshot('phone_key_ready');
+    await tap(find.text('Propose a payment'));
+    await tap(find.text('To someone else'));
+    await type(find.byKey(const ValueKey('payee-name')), 'Tent hire');
+    await type(find.byKey(const ValueKey('propose-amount')), '100');
+    await type(find.byKey(const ValueKey('propose-purpose')), 'Meeting tent');
+    await tap(find.text('Propose'));
+    await tap(find.textContaining('Tent hire'));
+    await tap(find.text('Approve'));
+    await waitFor(find.textContaining('approved with their phone key'), seconds: 90);
+    await screenshot('approved_with_phone_key');
   });
 }

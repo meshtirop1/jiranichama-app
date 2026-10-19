@@ -1,9 +1,13 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:jirani_domain/jirani_domain.dart';
+import 'package:jirani_secure_keys/jirani_secure_keys.dart';
 import 'package:jirani_ui/jirani_ui.dart';
 
 import '../../../core/api/api_client.dart';
+import '../../../core/api/problem.dart';
 import '../../../core/labels.dart';
 import '../../../core/providers.dart';
 import '../../../l10n/app_localizations.dart';
@@ -132,6 +136,7 @@ class _MoneyOutScreenState extends ConsumerState<MoneyOutScreen> {
                       ],
                     ],
             ),
+            if (official) const _PhoneKeyCard(),
             _Unapproved(chamaId: widget.chamaId, official: official),
             if (on) ...[
               const SizedBox(height: JiraniSpace.m),
@@ -469,6 +474,8 @@ class _ProposalScreenState extends ConsumerState<ProposalScreen> {
   }
 
   Future<void> _approve(Proposal p) async {
+    final signer = ref.read(phoneSignerProvider);
+    if (await signer.ready()) return _approveWithPhone(p, signer);
     final repo = ref.read(chamaRepositoryProvider);
     ChallengeSent? sent;
     await _run(() async => sent = await repo.startApprove(p.id));
@@ -478,6 +485,37 @@ class _ProposalScreenState extends ConsumerState<ProposalScreen> {
       await repo.approve(p.id, challengeId: challenge.challengeId, code: code);
     });
     if (ok) _refresh();
+  }
+
+  /// 6.7: the server sends the exact payload with a single-use nonce; we check it is the
+  /// proposal on screen, then the phone signs it after the fingerprint, face or PIN.
+  Future<void> _approveWithPhone(Proposal p, PhoneSigner signer) async {
+    final l = AppLocalizations.of(context);
+    final repo = ref.read(chamaRepositoryProvider);
+    await _run(() async {
+      final body = await repo.signingPayload(p.id);
+      if (body['device_id'] != await signer.deviceId()) {
+        throw ApiProblem(code: 'other_phone', detail: '', status: 409);
+      }
+      final payload = Map<String, Object?>.from(body['payload'] as Map);
+      final message = canonicalJson(payload);
+      final shownIsSigned = sha256Hex(message) == body['payload_hash'] &&
+          payload['proposal_id'] == p.id &&
+          payload['amount_cents'] == p.amount.cents &&
+          payload['payee'] == p.payeeName;
+      if (!shownIsSigned) throw ApiProblem(code: 'payload_changed', detail: '', status: 409);
+      final String signature;
+      try {
+        signature = await signer.sign(utf8.encode(message),
+            title: l.approvePromptTitle(p.amount.format(), p.payeeName), subtitle: p.purpose);
+      } on SecureKeysCancelled {
+        return; // they backed out; nothing to say
+      }
+      await repo.submitSignature(p.id, {
+        'device_id': body['device_id'], 'nonce': payload['nonce'],
+        'payload_hash': body['payload_hash'], 'signature': signature,
+      });
+    });
   }
 
   Future<void> _decline(Proposal p) async {
@@ -553,11 +591,15 @@ class _ProposalScreenState extends ConsumerState<ProposalScreen> {
           for (final a in p.answers)
             ListTile(
               contentPadding: EdgeInsets.zero,
-              leading: Icon(a.approved ? Icons.check_circle_outline : Icons.cancel_outlined,
+              leading: Icon(a.approved
+                  ? (a.byPhoneKey ? Icons.fingerprint : Icons.check_circle_outline)
+                  : Icons.cancel_outlined,
                   color: a.approved ? Theme.of(context).colorScheme.primary
                       : Theme.of(context).colorScheme.error),
               title: Text(a.approved
-                  ? l.answeredApproved(a.name, roleLabel(l, a.role))
+                  ? (a.byPhoneKey
+                      ? l.answeredApprovedPhone(a.name, roleLabel(l, a.role))
+                      : l.answeredApproved(a.name, roleLabel(l, a.role)))
                   : l.answeredDeclined(a.name, roleLabel(l, a.role), a.reason)),
             ),
           if (p.bankReference.isNotEmpty)
@@ -570,6 +612,105 @@ class _ProposalScreenState extends ConsumerState<ProposalScreen> {
             TextButton(onPressed: _busy ? null : () => _cancel(p),
                 child: Text(l.cancelProposal)),
         ],
+      ),
+    );
+  }
+}
+
+/// For officials: set this phone up to approve with a fingerprint (6.7), once.
+class _PhoneKeyCard extends ConsumerStatefulWidget {
+  const _PhoneKeyCard();
+
+  @override
+  ConsumerState<_PhoneKeyCard> createState() => _PhoneKeyCardState();
+}
+
+class _PhoneKeyCardState extends ConsumerState<_PhoneKeyCard> {
+  bool? _available;
+  bool _ready = false;
+  bool _busy = false;
+  String? _error;
+
+  @override
+  void initState() {
+    super.initState();
+    _check();
+  }
+
+  Future<void> _check() async {
+    final signer = ref.read(phoneSignerProvider);
+    final available = await signer.available();
+    final ready = available && await signer.ready();
+    if (mounted) {
+      setState(() {
+        _available = available;
+        _ready = ready;
+      });
+    }
+  }
+
+  Future<void> _setUp() async {
+    final l = AppLocalizations.of(context);
+    final repo = ref.read(chamaRepositoryProvider);
+    final signer = ref.read(phoneSignerProvider);
+    setState(() {
+      _busy = true;
+      _error = null;
+    });
+    Json? body;
+    ChallengeSent? sent;
+    try {
+      final nonce = await repo.attestNonce();
+      final key = await signer.create(utf8.encode(nonce));
+      body = {
+        'public_key': key.publicKey, 'platform': 'android', 'label': 'Android phone',
+        'attestation_chain': key.chain, 'attest_nonce': nonce,
+      };
+      sent = await repo.startRegisterDevice(body);
+    } catch (e) {
+      if (mounted) setState(() => _error = problemText(l, e));
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
+    final challenge = sent;
+    final registered = body;
+    if (challenge == null || registered == null || !mounted) return;
+    final ok = await confirmWithSmsCode(context, sent: challenge, onCode: (code) async {
+      final device = await repo.registerDevice(registered,
+          challengeId: challenge.challengeId, code: code);
+      await signer.remember(device['id'] as String);
+    });
+    if (ok) await _check();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
+    if (_available != true) return const SizedBox.shrink();
+    return Padding(
+      padding: const EdgeInsets.only(top: JiraniSpace.s),
+      child: Card(
+        child: Padding(
+          padding: const EdgeInsets.all(JiraniSpace.m),
+          child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+            Row(children: [
+              const Icon(Icons.fingerprint),
+              const SizedBox(width: JiraniSpace.s),
+              Expanded(child: Text(_ready ? l.phoneReady : l.fingerprintCardTitle,
+                  style: Theme.of(context).textTheme.titleSmall)),
+            ]),
+            if (!_ready) ...[
+              const SizedBox(height: JiraniSpace.xs),
+              Text(l.fingerprintCardBody),
+              if (_error != null) ...[
+                const SizedBox(height: JiraniSpace.s),
+                Notice(_error!, tone: NoticeTone.critical),
+              ],
+              const SizedBox(height: JiraniSpace.s),
+              OutlinedButton(onPressed: _busy ? null : _setUp, child: Text(l.setUpThisPhone)),
+            ],
+          ]),
+        ),
       ),
     );
   }

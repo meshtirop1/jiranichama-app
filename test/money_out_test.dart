@@ -31,6 +31,8 @@ Future<void> _open(WidgetTester tester, FakeChamaRepository repo, String button)
   await tester.pumpWidget(ProviderScope(overrides: [
     authRepositoryProvider.overrideWithValue(_SignedIn()),
     chamaRepositoryProvider.overrideWithValue(repo),
+    // No phone key: approvals use SMS codes.
+    phoneSignerProvider.overrideWithValue(FakePhoneSigner(isAvailable: false)),
   ], child: const JiraniApp()));
   await tester.pumpAndSettle();
   await tester.tap(find.text('Umoja Women Group'));
