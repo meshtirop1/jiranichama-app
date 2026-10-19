@@ -580,6 +580,36 @@ class FakeChamaRepository implements ChamaRepository {
     return VoteInfo(_voteJson(voteId));
   }
 
+  // Support access
+  final supportList = <Json>[];
+
+  @override
+  Future<List<SupportGrantInfo>> supportGrants(String id) async =>
+      [for (final g in supportList) SupportGrantInfo(g)];
+
+  @override
+  Future<void> requestSupport(String id,
+      {required List<String> areas, required int hours, required String reason}) async {
+    calls.add('support:${areas.join(',')}:$hours:$reason');
+    supportList.insert(0, {'id': 'sg1', 'areas': areas, 'hours': hours, 'reason': reason,
+        'requested_by': 'JC-4821-002', 'confirmed_by': null, 'state': 'requested',
+        'starts_at': null, 'ends_at': null, 'created_at': 'x'});
+  }
+
+  @override
+  Future<void> confirmSupport(String grantId) async {
+    calls.add('confirmSupport:$grantId');
+    supportList.first
+      ..['state'] = 'active'
+      ..['ends_at'] = '2026-10-22T10:00:00Z';
+  }
+
+  @override
+  Future<void> revokeSupport(String grantId) async {
+    calls.add('revokeSupport:$grantId');
+    supportList.first['state'] = 'revoked';
+  }
+
   // Growth: investments, numbers, referrals
   Json portfolioJson = {'held': 0, 'cost_cents': 0, 'value_cents': 0, 'bank_cents': 1000000,
       'net_worth_cents': 1000000, 'investments': <Json>[]};

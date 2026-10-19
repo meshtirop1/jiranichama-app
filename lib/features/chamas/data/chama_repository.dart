@@ -77,6 +77,11 @@ abstract class ChamaRepository {
   Future<List<Meeting>> meetings(String id);
   Future<List<LoanInfo>> loans(String id);
   Future<List<FineInfo>> fines(String id);
+  Future<List<SupportGrantInfo>> supportGrants(String id);
+  Future<void> requestSupport(String id,
+      {required List<String> areas, required int hours, required String reason});
+  Future<void> confirmSupport(String grantId);
+  Future<void> revokeSupport(String grantId);
   Future<Portfolio> portfolio(String id);
   Future<void> recordInvestment(String id, Json body);
   Future<void> valueInvestment(String investmentId, Json body);
@@ -645,6 +650,29 @@ class HttpChamaRepository implements ChamaRepository {
   @override
   Future<void> withdrawReferral(String referralId) async {
     await _api.post('/referrals/$referralId/withdraw/', body: {}, auth: true);
+  }
+
+  @override
+  Future<List<SupportGrantInfo>> supportGrants(String id) async => [
+        for (final g in await _api.get('/chamas/$id/support/') as List)
+          SupportGrantInfo(g as Json),
+      ];
+
+  @override
+  Future<void> requestSupport(String id,
+      {required List<String> areas, required int hours, required String reason}) async {
+    await _api.post('/chamas/$id/support/', auth: true,
+        body: {'areas': areas, 'hours': hours, 'reason': reason});
+  }
+
+  @override
+  Future<void> confirmSupport(String grantId) async {
+    await _api.post('/support-grants/$grantId/confirm/', body: {}, auth: true);
+  }
+
+  @override
+  Future<void> revokeSupport(String grantId) async {
+    await _api.post('/support-grants/$grantId/revoke/', body: {}, auth: true);
   }
 
   @override

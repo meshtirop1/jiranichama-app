@@ -11,23 +11,33 @@ For each entry the server sends, the phone:
 2. computes its SHA-256 fingerprint and compares it with the hash the server sent;
 3. checks the entry points at the fingerprint of the entry before it, and that the
    sequence has no gaps;
-4. (with the offline store, still to come) remembers the last fingerprint it checked, its
-   **trusted head**.
+4. remembers the last record it checked, its **trusted head** (seq and fingerprint), in
+   the phone's secure storage.
 
-`verifyChain` already accepts a trusted head: given one, it checks only the new entries
-and fails if the server's history no longer leads from that head, for example because an
-old entry was changed or removed. Until the offline store exists, the app checks the whole
-chain from the start on every load.
-
-It then checks **every platform signature** (`PlatformKey.verifyHash`): ECDSA P-256 over
+It then checks the **platform signatures** (`PlatformKey.verifyHash`): ECDSA P-256 over
 the 32-byte entry hash, against the public key from `GET /platform-key/`. A chain with
 matching fingerprints but a forged or swapped signature is caught. Records not signed yet
 (the server signs a few seconds after writing) are counted and shown as waiting.
 
-A failed check shows a red warning on the Records tab. Still to come: keeping the trusted
-head in the encrypted offline store between sessions (today the phone re-checks the whole
-chain each time), reporting a failure to the server, and the nightly public anchor
-(Phase 2).
+## Fast, without trusting less
+
+Checking a signature in Dart costs about 150 ms on a phone, so checking 187 records took
+about 30 seconds, and it ran on the UI thread: the whole app froze. Now:
+
+- **The records show at once**, as the server sent them, with "Checking N records on this
+  phone…" at the top. The notice turns to the result when the check ends.
+- **The check runs on a background isolate** (`Isolate.run`), so scrolling and tapping
+  keep working while it runs.
+- **Signatures are checked once per record per phone.** Every fingerprint and link is
+  still recomputed from the start on every load (fast). Signatures are checked only after
+  the trusted head, and only if the record at the trusted head still has the same
+  fingerprint: then everything up to it is exactly what this phone checked before. If it
+  differs (history changed), every signature is checked again and the change is reported.
+- The trusted head is saved only after a clean check. Signing out does not remove it (it
+  holds no personal data, only a position and a fingerprint).
+
+A failed check shows a red warning on the Records tab. Still to come: reporting a failure
+to the server.
 
 ## Why the phone and the server cannot disagree
 

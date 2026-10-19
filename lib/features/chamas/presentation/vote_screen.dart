@@ -14,7 +14,10 @@ import '../data/models.dart';
 import 'widgets/sms_code_sheet.dart';
 
 final votesProvider = FutureProvider.autoDispose.family<List<VoteInfo>, String>(
-    (ref, chamaId) => ref.watch(chamaRepositoryProvider).votes(chamaId));
+    (ref, chamaId) {
+  ref.cacheFor(const Duration(minutes: 5));
+  return ref.watch(chamaRepositoryProvider).votes(chamaId);
+});
 
 String voteStateLabel(AppLocalizations l, String state) => switch (state) {
       'open' => l.voteOpen,

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Members around a common pot: the JiraniChama mark. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp" android:height="108dp"
+    android:viewportWidth="108" android:viewportHeight="108">
+    <path android:fillColor="#FFFFFF" android:pathData="M44.50,54.00 a9.50,9.50 0 1,0 19.00,0 a9.50,9.50 0 1,0 -19.00,0 z M48.80,33.00 a5.20,5.20 0 1,0 10.40,0 a5.20,5.20 0 1,0 -10.40,0 z M66.99,43.50 a5.20,5.20 0 1,0 10.40,0 a5.20,5.20 0 1,0 -10.40,0 z M66.99,64.50 a5.20,5.20 0 1,0 10.40,0 a5.20,5.20 0 1,0 -10.40,0 z M48.80,75.00 a5.20,5.20 0 1,0 10.40,0 a5.20,5.20 0 1,0 -10.40,0 z M30.61,64.50 a5.20,5.20 0 1,0 10.40,0 a5.20,5.20 0 1,0 -10.40,0 z M30.61,43.50 a5.20,5.20 0 1,0 10.40,0 a5.20,5.20 0 1,0 -10.40,0 z" />
+    <path android:strokeColor="#FFFFFF" android:strokeWidth="2.2" android:fillColor="#00000000"
+        android:pathData="M54.0,38.5 a15.5,15.5 0 1,1 -0.01,0 z" />
+</vector>

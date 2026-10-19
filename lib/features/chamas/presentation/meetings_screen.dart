@@ -14,7 +14,10 @@ import '../../auth/presentation/problem_text.dart';
 import '../data/models.dart';
 
 final meetingsProvider = FutureProvider.autoDispose.family<List<Meeting>, String>(
-    (ref, chamaId) => ref.watch(chamaRepositoryProvider).meetings(chamaId));
+    (ref, chamaId) {
+  ref.cacheFor(const Duration(minutes: 5));
+  return ref.watch(chamaRepositoryProvider).meetings(chamaId);
+});
 
 /// Reads a meeting's QR code with the camera. Behind a provider so tests hand in a code.
 abstract class CodeScanner {

@@ -11,7 +11,10 @@ import 'chama_screen.dart';
 import 'widgets/sms_code_sheet.dart';
 
 final openingProvider = FutureProvider.autoDispose.family<OpeningBalances, String>(
-    (ref, chamaId) => ref.watch(chamaRepositoryProvider).opening(chamaId));
+    (ref, chamaId) {
+  ref.cacheFor(const Duration(minutes: 5));
+  return ref.watch(chamaRepositoryProvider).opening(chamaId);
+});
 
 /// Opening balances (5.1 step 10): the treasurer enters what each member had, a different
 /// official confirms, and each member may object to their own line for 14 days.

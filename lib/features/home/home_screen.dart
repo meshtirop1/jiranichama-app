@@ -11,7 +11,10 @@ import '../auth/presentation/problem_text.dart';
 import '../chamas/data/models.dart';
 
 final chamaListProvider = FutureProvider.autoDispose<List<Chama>>(
-    (ref) => ref.watch(chamaRepositoryProvider).list());
+    (ref) {
+  ref.cacheFor(const Duration(minutes: 5));
+  return ref.watch(chamaRepositoryProvider).list();
+});
 
 /// The member's chamas, and the way into creating or joining one.
 class HomeScreen extends ConsumerWidget {

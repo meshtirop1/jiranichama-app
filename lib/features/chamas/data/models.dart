@@ -861,3 +861,16 @@ class ReferralInfo {
   String get partnerName => (json['partner'] as Map)['name'] as String;
   String get state => json['state'] as String;
 }
+
+/// Support access a chama gave JiraniChama staff (jiranichama-api docs/flows/support-access.md).
+class SupportGrantInfo {
+  SupportGrantInfo(this.json);
+  final Json json;
+
+  String get id => json['id'] as String;
+  List<String> get areas => (json['areas'] as List).cast<String>();
+  String get reason => json['reason'] as String;
+  String get requestedBy => json['requested_by'] as String;
+  String get state => json['state'] as String;
+  String? get endsAt => json['ends_at'] as String?;
+}

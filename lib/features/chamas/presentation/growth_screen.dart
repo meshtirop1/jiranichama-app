@@ -9,13 +9,25 @@ import '../../auth/presentation/problem_text.dart';
 import '../data/models.dart';
 
 final portfolioProvider = FutureProvider.autoDispose.family<Portfolio, String>(
-    (ref, id) => ref.watch(chamaRepositoryProvider).portfolio(id));
+    (ref, id) {
+  ref.cacheFor(const Duration(minutes: 5));
+  return ref.watch(chamaRepositoryProvider).portfolio(id);
+});
 final analyticsProvider = FutureProvider.autoDispose.family<Analytics, String>(
-    (ref, id) => ref.watch(chamaRepositoryProvider).analytics(id));
+    (ref, id) {
+  ref.cacheFor(const Duration(minutes: 5));
+  return ref.watch(chamaRepositoryProvider).analytics(id);
+});
 final referralsProvider = FutureProvider.autoDispose.family<List<ReferralInfo>, String>(
-    (ref, id) => ref.watch(chamaRepositoryProvider).referrals(id));
+    (ref, id) {
+  ref.cacheFor(const Duration(minutes: 5));
+  return ref.watch(chamaRepositoryProvider).referrals(id);
+});
 final partnersProvider = FutureProvider.autoDispose<List<PartnerInfo>>(
-    (ref) => ref.watch(chamaRepositoryProvider).partners());
+    (ref) {
+  ref.cacheFor(const Duration(minutes: 5));
+  return ref.watch(chamaRepositoryProvider).partners();
+});
 
 String _kes(int? cents) => cents == null ? '-' : Kes(cents).format();
 

@@ -11,7 +11,10 @@ import 'chama_screen.dart';
 import 'money_out_screen.dart';
 
 final rotationProvider = FutureProvider.autoDispose.family<RotationInfo, String>(
-    (ref, id) => ref.watch(chamaRepositoryProvider).rotation(id));
+    (ref, id) {
+  ref.cacheFor(const Duration(minutes: 5));
+  return ref.watch(chamaRepositoryProvider).rotation(id);
+});
 
 /// The merry-go-round (rules 8.1, 8.2): the order, whose turn is next, and filling in the
 /// next payout. Every member sees it; officials start a cycle and propose payouts.

@@ -237,6 +237,12 @@ tabs (API: `docs/flows/analytics.md`, `investments.md`, `referrals.md`):
 
 ## Running the chama (5.12, 5.13, 5.14)
 
+- **Get help** (officials, API `docs/flows/support-access.md`): choose what JiraniChama
+  support may read (bank statements, rules, records, members, disputes) and for how long
+  (24 hours, 72 hours or 7 days), and say why. A second official confirms; until then the
+  request waits. While access is open, every member sees "JiraniChama support can read …
+  until …" on the overview, and any official can end it.
+
 The overview ends with the places to go: Fines, **Running the chama**, Meetings and
 (where switched on) Loans. Anything that needs me shows as a warning above the Running
 the chama card: an election is needed, a new phone waits for my vouching, or a dispute

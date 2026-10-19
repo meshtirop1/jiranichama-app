@@ -23,10 +23,16 @@ import 'rule_changes_screen.dart';
 import 'widgets/rule_book_list.dart';
 
 final reconciliationProvider = FutureProvider.autoDispose.family<Reconciliation, String>(
-    (ref, id) => ref.watch(chamaRepositoryProvider).reconciliation(id));
+    (ref, id) {
+  ref.cacheFor(const Duration(minutes: 5));
+  return ref.watch(chamaRepositoryProvider).reconciliation(id);
+});
 
 final positionProvider = FutureProvider.autoDispose.family<Position, String>(
-    (ref, membershipId) => ref.watch(chamaRepositoryProvider).position(membershipId));
+    (ref, membershipId) {
+  ref.cacheFor(const Duration(minutes: 5));
+  return ref.watch(chamaRepositoryProvider).position(membershipId);
+});
 
 /// An active chama: overview, records (checked on the phone), members and rules.
 class ActiveView extends StatelessWidget {
