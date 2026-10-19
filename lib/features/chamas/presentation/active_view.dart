@@ -12,6 +12,7 @@ import '../data/models.dart';
 import 'chama_screen.dart';
 import 'cash_screen.dart';
 import 'fines_screen.dart';
+import 'governance_screen.dart';
 import 'loans_screen.dart';
 import 'meetings_screen.dart';
 import 'money_out_screen.dart';
@@ -157,9 +158,6 @@ class _Overview extends ConsumerWidget {
           ),
         _BankCheck(chamaId: chama.id, myRole: chama.myRole),
         _OpenVotes(chamaId: chama.id),
-        FinesCard(chamaId: chama.id),
-        MeetingsCard(chamaId: chama.id),
-        if (chama.loansOn) LoansCard(chamaId: chama.id),
         _CashToConfirm(chamaId: chama.id, myId: me?.id),
         _MoneyOutNotices(chamaId: chama.id, moneyOut: chama.mode == 'money_out'),
         if (chama.mode == 'records_only') ...[
@@ -212,6 +210,12 @@ class _Overview extends ConsumerWidget {
             onPressed: () => context.push('/chamas/${chama.id}/unmatched'),
           ),
         ],
+        // Where to go for the rest: fines, running the chama, meetings, loans.
+        const SizedBox(height: JiraniSpace.s),
+        FinesCard(chamaId: chama.id),
+        GovernanceCard(chama: chama),
+        MeetingsCard(chamaId: chama.id),
+        if (chama.loansOn) LoansCard(chamaId: chama.id),
       ],
     );
   }

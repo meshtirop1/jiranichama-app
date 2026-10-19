@@ -77,6 +77,31 @@ abstract class ChamaRepository {
   Future<List<Meeting>> meetings(String id);
   Future<List<LoanInfo>> loans(String id);
   Future<List<FineInfo>> fines(String id);
+  Future<List<DisputeInfo>> disputes(String id);
+  Future<DisputeInfo> raiseDispute(String id, Json body);
+  Future<DisputeInfo> respondDispute(String disputeId, String text);
+  Future<DisputeInfo> proposeOutcome(String disputeId, Json body);
+  Future<ChallengeSent> startAgreeDispute(String disputeId);
+  Future<DisputeInfo> agreeDispute(String disputeId,
+      {required String challengeId, required String code});
+  Future<DisputeInfo> disagreeDispute(String disputeId, String text);
+  Future<DisputeInfo> withdrawDispute(String disputeId);
+  Future<DisputeInfo> escalateDispute(String disputeId, String text);
+  Future<ElectionsInfo> elections(String id);
+  Future<void> nominate(String id,
+      {required String role, required String candidateId, bool acting});
+  Future<void> confirmMandate(String electionId);
+  Future<List<WaitingPhone>> newPhones(String id);
+  Future<ChallengeSent> startVouch(String deviceId, String chamaId);
+  Future<void> vouch(String deviceId, String chamaId,
+      {required String challengeId, required String code});
+  Future<List<ExitInfo>> exits(String id);
+  Future<ExitQuote> exitQuote(String id);
+  Future<ChallengeSent> startLeave(String id);
+  Future<void> leave(String id, {required String challengeId, required String code});
+  Future<void> cancelExit(String exitId);
+  Future<void> recordDeath(String membershipId, {required String diedOn,
+      required String nextOfKinName, required String nextOfKinPhone, PickedFile? document});
   Future<FineInfo> requestWaiver(String fineId, String reason);
   Future<ChallengeSent> startWaiverApproval(String waiverId);
   Future<FineInfo> approveWaiver(String waiverId,
@@ -462,6 +487,112 @@ class HttpChamaRepository implements ChamaRepository {
   @override
   Future<List<VoteInfo>> votes(String id) async =>
       [for (final v in await _api.get('/chamas/$id/votes/') as List) VoteInfo(v as Json)];
+
+  @override
+  Future<List<DisputeInfo>> disputes(String id) async => [
+        for (final d in await _api.get('/chamas/$id/disputes/') as List) DisputeInfo(d as Json),
+      ];
+
+  @override
+  Future<DisputeInfo> raiseDispute(String id, Json body) async =>
+      DisputeInfo(await _api.post('/chamas/$id/disputes/', body: body, auth: true));
+
+  @override
+  Future<DisputeInfo> respondDispute(String disputeId, String text) async => DisputeInfo(
+      await _api.post('/disputes/$disputeId/respond/', body: {'text': text}, auth: true));
+
+  @override
+  Future<DisputeInfo> proposeOutcome(String disputeId, Json body) async =>
+      DisputeInfo(await _api.post('/disputes/$disputeId/outcome/', body: body, auth: true));
+
+  @override
+  Future<ChallengeSent> startAgreeDispute(String disputeId) async => ChallengeSent(
+      await _api.post('/disputes/$disputeId/agree/', body: {}, auth: true));
+
+  @override
+  Future<DisputeInfo> agreeDispute(String disputeId,
+          {required String challengeId, required String code}) async =>
+      DisputeInfo(await _api.post('/disputes/$disputeId/agree/', auth: true,
+          body: {'challenge_id': challengeId, 'sms_code': code}));
+
+  @override
+  Future<DisputeInfo> disagreeDispute(String disputeId, String text) async => DisputeInfo(
+      await _api.post('/disputes/$disputeId/disagree/', body: {'text': text}, auth: true));
+
+  @override
+  Future<DisputeInfo> withdrawDispute(String disputeId) async => DisputeInfo(
+      await _api.post('/disputes/$disputeId/withdraw/', body: {}, auth: true));
+
+  @override
+  Future<DisputeInfo> escalateDispute(String disputeId, String text) async => DisputeInfo(
+      await _api.post('/disputes/$disputeId/escalate/', body: {'text': text}, auth: true));
+
+  @override
+  Future<ElectionsInfo> elections(String id) async =>
+      ElectionsInfo(await _api.get('/chamas/$id/elections/') as Json);
+
+  @override
+  Future<void> nominate(String id,
+      {required String role, required String candidateId, bool acting = false}) async {
+    await _api.post('/chamas/$id/elections/', auth: true,
+        body: {'role': role, 'candidate_id': candidateId, 'acting': acting});
+  }
+
+  @override
+  Future<void> confirmMandate(String electionId) async {
+    await _api.post('/elections/$electionId/mandate-updated/', body: {}, auth: true);
+  }
+
+  @override
+  Future<List<WaitingPhone>> newPhones(String id) async => [
+        for (final p in await _api.get('/chamas/$id/new-phones/') as List)
+          WaitingPhone(p as Json),
+      ];
+
+  @override
+  Future<ChallengeSent> startVouch(String deviceId, String chamaId) async => ChallengeSent(
+      await _api.post('/devices/$deviceId/vouch/', body: {'chama_id': chamaId}, auth: true));
+
+  @override
+  Future<void> vouch(String deviceId, String chamaId,
+      {required String challengeId, required String code}) async {
+    await _api.post('/devices/$deviceId/vouch/', auth: true,
+        body: {'chama_id': chamaId, 'challenge_id': challengeId, 'code': code});
+  }
+
+  @override
+  Future<List<ExitInfo>> exits(String id) async =>
+      [for (final e in await _api.get('/chamas/$id/exits/') as List) ExitInfo(e as Json)];
+
+  @override
+  Future<ExitQuote> exitQuote(String id) async =>
+      ExitQuote(await _api.get('/chamas/$id/exit-quote/') as Json);
+
+  @override
+  Future<ChallengeSent> startLeave(String id) async =>
+      ChallengeSent(await _api.post('/chamas/$id/leave/', body: {}, auth: true));
+
+  @override
+  Future<void> leave(String id, {required String challengeId, required String code}) async {
+    await _api.post('/chamas/$id/leave/', auth: true,
+        body: {'challenge_id': challengeId, 'sms_code': code});
+  }
+
+  @override
+  Future<void> cancelExit(String exitId) async {
+    await _api.post('/exits/$exitId/cancel/', body: {}, auth: true);
+  }
+
+  @override
+  Future<void> recordDeath(String membershipId, {required String diedOn,
+      required String nextOfKinName, required String nextOfKinPhone,
+      PickedFile? document}) async {
+    await _api.postForm('/memberships/$membershipId/death/', {
+      'died_on': diedOn, 'next_of_kin_name': nextOfKinName,
+      'next_of_kin_phone': nextOfKinPhone,
+    }, fileField: document == null ? null : 'document', filename: document?.name,
+        bytes: document?.bytes);
+  }
 
   @override
   Future<List<FineInfo>> fines(String id) async =>

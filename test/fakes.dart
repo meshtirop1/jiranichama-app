@@ -580,6 +580,160 @@ class FakeChamaRepository implements ChamaRepository {
     return VoteInfo(_voteJson(voteId));
   }
 
+  // Disputes, elections, phones, exits
+  final disputesList = <Json>[];
+  Json electionsJson = {'elections': <Json>[], 'election_needed': <Json>[]};
+  final newPhonesList = <Json>[];
+  final exitsList = <Json>[];
+
+  Json newDispute({String id = 'd1', bool iCanDecide = false, String state =
+          'awaiting_response'}) => {
+        'id': id, 'raised_by': 'Mary', 'mine': false, 'subject_type': 'other',
+        'subject_id': null, 'reason': 'wrong_amount', 'text': 'March cash missing',
+        'officials_only': false, 'involved_names': ['Jane'], 'i_am_involved': false,
+        'respond_until': 'x', 'state': state, 'round': 0, 'outcome': '', 'outcome_text': '',
+        'outcome_member': null, 'outcome_cents': 0, 'vote_id': null,
+        'decided_by': 'officials', 'agreed': 0, 'officials_needed': 2,
+        'i_can_decide': iCanDecide, 'messages': <Json>[], 'receipt': null, 'created_at': 'x',
+      };
+
+  Json _disputeJson(String id) => disputesList.firstWhere((d) => d['id'] == id);
+
+  @override
+  Future<List<DisputeInfo>> disputes(String id) async =>
+      [for (final d in disputesList) DisputeInfo(d)];
+
+  @override
+  Future<DisputeInfo> raiseDispute(String id, Json body) async {
+    calls.add('raiseDispute:${body['reason']}:${body['text']}');
+    final d = newDispute(id: 'd${disputesList.length + 1}')
+      ..['text'] = body['text']
+      ..['raised_by'] = 'Me'
+      ..['mine'] = true;
+    disputesList.insert(0, d);
+    return DisputeInfo(d);
+  }
+
+  @override
+  Future<DisputeInfo> respondDispute(String disputeId, String text) async {
+    calls.add('respond:$disputeId:$text');
+    (_disputeJson(disputeId)['messages'] as List)
+        .add({'by': 'Me', 'kind': 'note', 'text': text, 'round': 0, 'at': 'x'});
+    return DisputeInfo(_disputeJson(disputeId));
+  }
+
+  @override
+  Future<DisputeInfo> proposeOutcome(String disputeId, Json body) async {
+    calls.add('propose:$disputeId:${body['outcome']}:${body['text']}');
+    return DisputeInfo(_disputeJson(disputeId)
+      ..['state'] = 'deciding'
+      ..['outcome'] = body['outcome']
+      ..['outcome_text'] = body['text']
+      ..['agreed'] = 1
+      ..['i_can_decide'] = false);
+  }
+
+  @override
+  Future<ChallengeSent> startAgreeDispute(String disputeId) async => _sent;
+
+  @override
+  Future<DisputeInfo> agreeDispute(String disputeId,
+      {required String challengeId, required String code}) async {
+    _codeCheck(code);
+    calls.add('agree:$disputeId');
+    return DisputeInfo(_disputeJson(disputeId)
+      ..['state'] = 'resolved'
+      ..['agreed'] = 2
+      ..['receipt'] = 'DSP12345'
+      ..['i_can_decide'] = false);
+  }
+
+  @override
+  Future<DisputeInfo> disagreeDispute(String disputeId, String text) async {
+    calls.add('disagree:$disputeId');
+    return DisputeInfo(_disputeJson(disputeId));
+  }
+
+  @override
+  Future<DisputeInfo> withdrawDispute(String disputeId) async =>
+      DisputeInfo(_disputeJson(disputeId)..['state'] = 'withdrawn');
+
+  @override
+  Future<DisputeInfo> escalateDispute(String disputeId, String text) async =>
+      DisputeInfo(_disputeJson(disputeId)..['state'] = 'escalated_outside');
+
+  @override
+  Future<ElectionsInfo> elections(String id) async => ElectionsInfo(electionsJson);
+
+  @override
+  Future<void> nominate(String id,
+      {required String role, required String candidateId, bool acting = false}) async {
+    calls.add('nominate:$role:$candidateId:$acting');
+    (electionsJson['elections'] as List).add({
+      'id': 'e1', 'role': role, 'candidate': 'Mary', 'candidate_id': candidateId,
+      'outgoing': null, 'acting': acting, 'term_months': 24, 'vote_id': 'v1',
+      'state': 'voting', 'candidate_ready': false, 'mandate_needed': false,
+      'mandate_confirmed_at': null, 'receipt': null, 'created_at': 'x'});
+  }
+
+  @override
+  Future<void> confirmMandate(String electionId) async {
+    calls.add('mandate:$electionId');
+    for (final e in electionsJson['elections'] as List) {
+      if ((e as Map)['id'] == electionId) e['mandate_confirmed_at'] = 'now';
+    }
+  }
+
+  @override
+  Future<List<WaitingPhone>> newPhones(String id) async =>
+      [for (final p in newPhonesList) WaitingPhone(p)];
+
+  @override
+  Future<ChallengeSent> startVouch(String deviceId, String chamaId) async => _sent;
+
+  @override
+  Future<void> vouch(String deviceId, String chamaId,
+      {required String challengeId, required String code}) async {
+    _codeCheck(code);
+    calls.add('vouch:$deviceId');
+    newPhonesList.removeWhere((p) => p['id'] == deviceId);
+  }
+
+  @override
+  Future<List<ExitInfo>> exits(String id) async => [for (final e in exitsList) ExitInfo(e)];
+
+  @override
+  Future<ExitQuote> exitQuote(String id) async => ExitQuote({
+        'savings_cents': 2000000, 'fines_cents': 20000, 'loan_cents': 0,
+        'deduction_pct': 0, 'deduction_cents': 0, 'settlement_cents': 1980000,
+        'shortfall_cents': 0, 'notice_days': 30, 'exit_on': '2026-11-18',
+        'death_benefit_cents': 0});
+
+  @override
+  Future<ChallengeSent> startLeave(String id) async => _sent;
+
+  @override
+  Future<void> leave(String id, {required String challengeId, required String code}) async {
+    _codeCheck(code);
+    calls.add('leave');
+    exitsList.add({'id': 'x1', 'member': 'Me', 'member_id': 'm4', 'mine': true,
+        'kind': 'leave', 'exit_on': '2026-11-18', 'quote': {'settlement_cents': 1980000},
+        'state': 'notice', 'receipt': 'EXT12345', 'created_at': 'x'});
+  }
+
+  @override
+  Future<void> cancelExit(String exitId) async {
+    calls.add('cancelExit:$exitId');
+    exitsList.firstWhere((e) => e['id'] == exitId)['state'] = 'cancelled';
+  }
+
+  @override
+  Future<void> recordDeath(String membershipId, {required String diedOn,
+      required String nextOfKinName, required String nextOfKinPhone,
+      PickedFile? document}) async {
+    calls.add('death:$membershipId:$nextOfKinName:${document?.name}');
+  }
+
   // Fines and waivers
   final finesList = <Json>[];
 
