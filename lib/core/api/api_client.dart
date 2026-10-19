@@ -75,6 +75,18 @@ class ApiClient {
     return data is Map<String, dynamic> ? data : const {};
   }
 
+  Future<Map<String, dynamic>> postForm(String path, Map<String, Object?> fields,
+      {String? fileField, String? filename, List<int>? bytes}) async {
+    final data = await _send('POST', path,
+        formData: () => FormData.fromMap({
+              ...fields,
+              if (fileField != null && bytes != null)
+                fileField: MultipartFile.fromBytes(bytes, filename: filename),
+            }),
+        auth: true);
+    return data is Map<String, dynamic> ? data : const {};
+  }
+
   Future<dynamic> _send(
     String method,
     String path, {

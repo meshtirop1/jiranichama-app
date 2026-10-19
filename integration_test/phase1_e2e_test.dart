@@ -33,6 +33,9 @@ class _StatementFile implements FileSource {
   List<int> bytes = [];
 
   @override
+  Future<PickedFile?> pickPhoto() async => null;
+
+  @override
   Future<PickedFile?> pickStatement() async => PickedFile('statement.csv', bytes);
 }
 

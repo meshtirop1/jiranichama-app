@@ -11,6 +11,7 @@ import '../../auth/presentation/problem_text.dart';
 import '../data/models.dart';
 import 'chama_screen.dart';
 import 'cash_screen.dart';
+import 'meetings_screen.dart';
 import 'money_out_screen.dart';
 import 'vote_screen.dart';
 import 'records_tab.dart';
@@ -154,6 +155,7 @@ class _Overview extends ConsumerWidget {
           ),
         _BankCheck(chamaId: chama.id, myRole: chama.myRole),
         _OpenVotes(chamaId: chama.id),
+        MeetingsCard(chamaId: chama.id),
         _CashToConfirm(chamaId: chama.id, myId: me?.id),
         _MoneyOutNotices(chamaId: chama.id, moneyOut: chama.mode == 'money_out'),
         if (chama.mode == 'records_only') ...[

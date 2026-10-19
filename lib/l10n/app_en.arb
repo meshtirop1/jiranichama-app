@@ -1071,5 +1071,147 @@
   "rpAfter": "Proposed",
   "rpNone": "(none)",
   "rpOpenVote": "Go to the vote",
-  "rpWithdraw": "Withdraw this change"
+  "rpWithdraw": "Withdraw this change",
+  "meetingsTitle": "Meetings",
+  "meetNoneComing": "No meeting scheduled",
+  "meetNext": "Next: {title}, {when}",
+  "@meetNext": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      },
+      "when": {
+        "type": "String"
+      }
+    }
+  },
+  "meetNoneYet": "No meetings yet.",
+  "meetSchedule": "Schedule a meeting",
+  "meetScheduleIntro": "Members get an SMS 2 days and 2 hours before. What you write here cannot be edited later; cancel and schedule again if plans change.",
+  "meetTitleLabel": "What meeting",
+  "meetPlaceLabel": "Where",
+  "meetLinkLabel": "Online link (optional)",
+  "meetAgendaLabel": "Agenda",
+  "meetScheduled": "Scheduled",
+  "meetInProgress": "Under way: check in now",
+  "meetAttendanceClosed": "Attendance closed, minutes to come",
+  "meetMinutesPending": "Minutes out: members may object",
+  "meetSealed": "Minutes sealed",
+  "meetCancelled": "Cancelled",
+  "meetCancelledBecause": "Cancelled: {reason}",
+  "@meetCancelledBecause": {
+    "placeholders": {
+      "reason": {
+        "type": "String"
+      }
+    }
+  },
+  "meetPresent": "Present",
+  "meetLate": "Late",
+  "meetExcused": "Excused (apology)",
+  "meetApology": "Sent an apology",
+  "meetAbsent": "Absent",
+  "meetExpected": "Not checked in",
+  "meetMyStatus": "You: {status}",
+  "@meetMyStatus": {
+    "placeholders": {
+      "status": {
+        "type": "String"
+      }
+    }
+  },
+  "meetApologySend": "Send an apology",
+  "meetApologyReason": "Why can't you come?",
+  "meetCheckIn": "Check in: scan the secretary's code",
+  "meetTypeCode": "Type the code instead",
+  "meetCodeLabel": "Six-digit code",
+  "meetCheckedIn": "You are checked in.",
+  "meetScanTitle": "Scan the meeting code",
+  "meetStart": "Open the meeting for check-in",
+  "meetCancel": "Cancel the meeting",
+  "meetCancelReason": "Why is it cancelled?",
+  "meetShowCode": "Show the check-in code",
+  "meetCodeHelp": "Members scan this or type the number. It changes every 30 seconds.",
+  "meetClose": "Close attendance",
+  "meetCloseConfirm": "Close attendance? Members not checked in are recorded as absent and the rules' fines are raised.",
+  "meetMarkPresent": "Present",
+  "meetMarkLate": "Late",
+  "meetPeople": "Attendance: {present} of {total}",
+  "@meetPeople": {
+    "placeholders": {
+      "present": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "meetAttendanceReceipt": "Attendance on the record, receipt {code}",
+  "@meetAttendanceReceipt": {
+    "placeholders": {
+      "code": {
+        "type": "String"
+      }
+    }
+  },
+  "meetWriteMinutes": "Write the minutes",
+  "meetReviseMinutes": "Revise the minutes",
+  "meetMinutesIntro": "Write the minutes, or add a photo of handwritten ones. Every member gets them and may object within a week.",
+  "meetMinutesLabel": "Minutes",
+  "meetAddPhoto": "Add a photo of the minutes",
+  "meetSendMinutes": "Send to members",
+  "meetMinutesSent": "Minutes sent to every member.",
+  "meetMinutesVersion": "Minutes (version {version})",
+  "@meetMinutesVersion": {
+    "placeholders": {
+      "version": {
+        "type": "int"
+      }
+    }
+  },
+  "meetObjectUntil": "Members may object until {when}.",
+  "@meetObjectUntil": {
+    "placeholders": {
+      "when": {
+        "type": "String"
+      }
+    }
+  },
+  "meetObjection": "{name} objects: {reason}",
+  "@meetObjection": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "reason": {
+        "type": "String"
+      }
+    }
+  },
+  "meetObject": "Object to the minutes",
+  "meetObjectReason": "What is wrong?",
+  "meetSealedReceipt": "Sealed on the record, receipt {code}",
+  "@meetSealedReceipt": {
+    "placeholders": {
+      "code": {
+        "type": "String"
+      }
+    }
+  },
+  "errMeetingState": "That is not possible at this stage of the meeting.",
+  "errPlaceRequired": "Say where the meeting is, or give the online link.",
+  "errTooLate": "Apologies are sent before the meeting starts.",
+  "errTooEarly": "A meeting can be opened from an hour before it starts.",
+  "errMeetCodeWrong": "That is not the code on the secretary's phone now. Scan again.",
+  "errAlreadyCheckedIn": "Already marked present.",
+  "errAlreadySent": "Already sent.",
+  "errMinutesEmpty": "Write the minutes or add a photo of them.",
+  "errMinutesOut": "The minutes are out. A revision answers objections.",
+  "rulesMeetings": "Meetings",
+  "rulesAbsenceFine": "Fine for missing a meeting (KES, 0 for none)",
+  "rulesLateFine": "Fine for arriving late (KES, 0 for none)",
+  "rulesLateAfter": "Late after (minutes)",
+  "rulesApologyExcuses": "An apology before the meeting avoids the fine",
+  "rulesObjectionDays": "Days to object to the minutes"
 }

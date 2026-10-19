@@ -577,6 +577,140 @@ class FakeChamaRepository implements ChamaRepository {
     return VoteInfo(_voteJson(voteId));
   }
 
+  // Meetings
+  final meetingsList = <Json>[];
+
+  Json _meetingJson(String id) => meetingsList.firstWhere((m) => m['id'] == id);
+
+  Json _meeting(String id, {String? state, String? myStatus}) {
+    final m = _meetingJson(id);
+    if (state != null) m['state'] = state;
+    if (myStatus != null) m['my_status'] = myStatus;
+    return m;
+  }
+
+  void _person(String meetingId, String membershipId, String status, {String? reason}) {
+    for (final p in _meetingJson(meetingId)['people'] as List) {
+      if ((p as Map)['membership_id'] == membershipId) {
+        p['status'] = status;
+        if (reason != null) p['reason'] = reason;
+      }
+    }
+  }
+
+  Json newMeeting({String id = 'meet-1', String state = 'scheduled',
+          String myStatus = 'expected', bool iRun = false}) =>
+      {
+        'id': id, 'title': 'March meeting', 'starts_at': '2026-11-05T11:00:00Z',
+        'place': 'Church hall', 'online_link': '', 'agenda': '1. Contributions',
+        'state': state, 'cancel_reason': '', 'i_run': iRun, 'my_status': myStatus,
+        'people': [
+          {'membership_id': 'm1', 'name': 'Jane', 'member_code': 'JC-4821-001',
+           'status': 'expected', 'reason': null},
+          {'membership_id': 'm2', 'name': 'Peter', 'member_code': 'JC-4821-002',
+           'status': 'expected', 'reason': null},
+        ],
+        'minutes': <Json>[], 'attendance_receipt': null, 'sealed_receipt': null,
+        'created_at': 'x',
+      };
+
+  @override
+  Future<List<Meeting>> meetings(String id) async =>
+      [for (final m in meetingsList) Meeting(m)];
+
+  @override
+  Future<Meeting> scheduleMeeting(String id, Json body, {required String idempotencyKey})
+      async {
+    if ((body['place'] as String).isEmpty && (body['online_link'] as String).isEmpty) {
+      throw ApiProblem(code: 'place_required', detail: '', status: 400);
+    }
+    calls.add('scheduleMeeting:${body['title']}:${body['place']}');
+    final m = newMeeting(id: 'meet-${meetingsList.length + 1}', iRun: true)
+      ..['title'] = body['title']
+      ..['starts_at'] = body['starts_at']
+      ..['place'] = body['place'];
+    meetingsList.insert(0, m);
+    return Meeting(m);
+  }
+
+  @override
+  Future<Meeting> cancelMeeting(String meetingId, String reason) async {
+    calls.add('cancelMeeting:$reason');
+    return Meeting(_meeting(meetingId, state: 'cancelled')..['cancel_reason'] = reason);
+  }
+
+  @override
+  Future<Meeting> apologise(String meetingId, String reason) async {
+    calls.add('apologise:$reason');
+    _person(meetingId, 'm1', 'apology', reason: reason);
+    return Meeting(_meeting(meetingId, myStatus: 'apology'));
+  }
+
+  @override
+  Future<Meeting> startMeeting(String meetingId) async {
+    calls.add('startMeeting');
+    return Meeting(_meeting(meetingId, state: 'in_progress'));
+  }
+
+  @override
+  Future<CheckInCode> checkInCode(String meetingId) async => CheckInCode(
+      {'code': '482913', 'qr': 'jcmeet:$meetingId:482913', 'changes_in_seconds': 30});
+
+  @override
+  Future<Meeting> checkIn(String meetingId, String code) async {
+    if (code != '482913') throw ApiProblem(code: 'code_wrong', detail: '', status: 400);
+    calls.add('checkIn:$code');
+    _person(meetingId, 'm1', 'present');
+    return Meeting(_meeting(meetingId, myStatus: 'present'));
+  }
+
+  @override
+  Future<Meeting> markAttendance(String meetingId, String membershipId, {bool? late}) async {
+    calls.add('mark:$membershipId:${late ?? false}');
+    _person(meetingId, membershipId, late == true ? 'late' : 'present');
+    return Meeting(_meetingJson(meetingId));
+  }
+
+  @override
+  Future<Meeting> closeAttendance(String meetingId) async {
+    calls.add('closeAttendance');
+    for (final p in _meetingJson(meetingId)['people'] as List) {
+      if ((p as Map)['status'] == 'expected') p['status'] = 'absent';
+    }
+    return Meeting(_meeting(meetingId, state: 'attendance_closed')
+      ..['attendance_receipt'] = 'ATT12345');
+  }
+
+  @override
+  Future<Meeting> postMinutes(String meetingId, {required String text, PickedFile? photo})
+      async {
+    calls.add('minutes:$text:${photo?.name}');
+    final list = _meetingJson(meetingId)['minutes'] as List;
+    list.insert(0, {
+      'id': 'min-${list.length + 1}', 'version': list.length + 1, 'text': text,
+      'has_photo': false, 'photo_sha256': '', 'hash': 'h', 'written_by': 'Jane',
+      'objection_until': '2026-11-12T11:00:00Z', 'objections': <Json>[], 'created_at': 'x',
+    });
+    return Meeting(_meeting(meetingId, state: 'minutes_pending'));
+  }
+
+  @override
+  Future<Meeting> objectToMinutes(String minutesId, String reason) async {
+    calls.add('object:$minutesId:$reason');
+    for (final m in meetingsList) {
+      for (final mn in m['minutes'] as List) {
+        if ((mn as Map)['id'] == minutesId) {
+          (mn['objections'] as List).add({'by': 'Jane', 'reason': reason, 'at': 'x'});
+          return Meeting(m);
+        }
+      }
+    }
+    throw StateError('no minutes');
+  }
+
+  @override
+  Future<List<int>> minutesPhoto(String minutesId) async => const [];
+
   // Rule changes
   final ruleProposalsList = <Json>[];
 
@@ -841,6 +975,9 @@ extension on FakeChamaRepository {
 }
 
 class FakeFileSource implements FileSource {
+  @override
+  Future<PickedFile?> pickPhoto() async => const PickedFile('minutes.jpg', [0xff, 0xd8]);
+
   @override
   Future<PickedFile?> pickStatement() async =>
       PickedFile('march.csv', utf8.encode('Value Date,Narration,Debit,Credit,Balance\n'));

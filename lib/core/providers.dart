@@ -36,6 +36,7 @@ class PickedFile {
 /// Picks a statement file. Behind a provider so tests can hand in a file directly.
 abstract class FileSource {
   Future<PickedFile?> pickStatement();
+  Future<PickedFile?> pickPhoto();
 }
 
 class DeviceFileSource implements FileSource {
@@ -43,6 +44,13 @@ class DeviceFileSource implements FileSource {
   Future<PickedFile?> pickStatement() async {
     final f = await FilePicker.pickFile(type: FileType.custom,
         allowedExtensions: const ['csv', 'pdf']);
+    if (f == null) return null;
+    return PickedFile(f.name, await f.readAsBytes());
+  }
+
+  @override
+  Future<PickedFile?> pickPhoto() async {
+    final f = await FilePicker.pickFile(type: FileType.image);
     if (f == null) return null;
     return PickedFile(f.name, await f.readAsBytes());
   }

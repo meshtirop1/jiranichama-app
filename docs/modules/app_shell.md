@@ -34,3 +34,11 @@ phone PIN for every signature (Android 11+, `BiometricPrompt` with a `CryptoObje
 `sign` asks for the fingerprint and returns an ECDSA SHA-256 signature. `MainActivity`
 is a `FlutterFragmentActivity` so the prompt can show. On other platforms it reports
 unavailable and the app uses SMS codes.
+
+## Camera and QR (meetings)
+
+`mobile_scanner` reads the meeting QR code (`CodeScanner` in
+`features/chamas/presentation/meetings_screen.dart`, behind `codeScannerProvider` so tests
+hand in a code). `qr_flutter` draws the secretary's code. `FileSource.pickPhoto` picks a
+photo of handwritten minutes. The camera permission comes from the scanner plugin's
+manifest.

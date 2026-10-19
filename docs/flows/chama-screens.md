@@ -217,6 +217,30 @@ The rules of an active chama change only by a members' vote (API
   the API checks the complete result, so a change that clashes with another setting is
   caught before anyone votes.
 
+## Meetings (5.11)
+
+API flow: `docs/flows/meetings.md`.
+- **Overview** shows a Meetings card with the next meeting; it opens every meeting, newest
+  first.
+- **The secretary** (or an official when there is no secretary) schedules one: what, day,
+  time, where or an online link, and agenda. It cannot be edited afterwards; cancelling
+  (with a reason) tells members by SMS.
+- **Before it starts**, a member can **Send an apology** with a reason.
+- **At the meeting** the secretary opens it for check-in and **shows the check-in code**:
+  a QR code and its six digits, refreshed before they change (every 30 seconds). Members
+  tap **Check in** and scan it with the camera, or **type the code**. The secretary marks
+  members on basic phones as present or late from the attendance list.
+- **Close attendance** asks for confirmation, since members not checked in become absent
+  and the rules' fines are raised. The attendance receipt shows afterwards.
+- **Minutes**: the secretary writes them and/or adds a photo of handwritten ones. Members
+  see them, with the date the objection week ends, and can **Object** with a reason. If
+  there are objections the secretary can **Revise the minutes** (a new version). Sealed
+  minutes show their ledger receipt.
+- **Rules editor**: a Meetings section for the absence and lateness fines, minutes after
+  which a member is late, whether an apology avoids the fine, and the days to object.
+- **Why a typed code as well as the QR**: an old phone camera, a cracked screen, or a dim
+  hall can make scanning fail; the code always works and changes just as often.
+
 ## Merry-go-round
 
 For chamas whose rules have a rotation, a **Merry-go-round** button on the overview.

@@ -1,4 +1,5 @@
 import '../../../core/api/api_client.dart';
+import '../../../core/providers.dart' show PickedFile;
 import 'models.dart';
 
 /// Every Phase 1 chama endpoint (jiranichama-api docs/flows: chama-setup, statements,
@@ -73,6 +74,18 @@ abstract class ChamaRepository {
   Future<Reconciliation> reconciliation(String id);
   Future<List<VoteInfo>> votes(String id);
   Future<List<RuleProposal>> ruleProposals(String id);
+  Future<List<Meeting>> meetings(String id);
+  Future<Meeting> scheduleMeeting(String id, Json body, {required String idempotencyKey});
+  Future<Meeting> cancelMeeting(String meetingId, String reason);
+  Future<Meeting> apologise(String meetingId, String reason);
+  Future<Meeting> startMeeting(String meetingId);
+  Future<CheckInCode> checkInCode(String meetingId);
+  Future<Meeting> checkIn(String meetingId, String code);
+  Future<Meeting> markAttendance(String meetingId, String membershipId, {bool? late});
+  Future<Meeting> closeAttendance(String meetingId);
+  Future<Meeting> postMinutes(String meetingId, {required String text, PickedFile? photo});
+  Future<Meeting> objectToMinutes(String minutesId, String reason);
+  Future<List<int>> minutesPhoto(String minutesId);
   Future<RuleProposal> proposeRules(String id, Json rules,
       {required String reason, required String idempotencyKey});
   Future<RuleProposal> withdrawRuleProposal(String proposalId);
@@ -433,6 +446,60 @@ class HttpChamaRepository implements ChamaRepository {
   @override
   Future<List<VoteInfo>> votes(String id) async =>
       [for (final v in await _api.get('/chamas/$id/votes/') as List) VoteInfo(v as Json)];
+
+  @override
+  Future<List<Meeting>> meetings(String id) async =>
+      [for (final m in await _api.get('/chamas/$id/meetings/') as List) Meeting(m as Json)];
+
+  @override
+  Future<Meeting> scheduleMeeting(String id, Json body, {required String idempotencyKey})
+      async => Meeting(await _api.post('/chamas/$id/meetings/', body: body, auth: true,
+          idempotencyKey: idempotencyKey));
+
+  @override
+  Future<Meeting> cancelMeeting(String meetingId, String reason) async => Meeting(
+      await _api.post('/meetings/$meetingId/cancel/', body: {'reason': reason}, auth: true));
+
+  @override
+  Future<Meeting> apologise(String meetingId, String reason) async => Meeting(
+      await _api.post('/meetings/$meetingId/apologies/', body: {'reason': reason},
+          auth: true));
+
+  @override
+  Future<Meeting> startMeeting(String meetingId) async =>
+      Meeting(await _api.post('/meetings/$meetingId/start/', body: {}, auth: true));
+
+  @override
+  Future<CheckInCode> checkInCode(String meetingId) async =>
+      CheckInCode(await _api.get('/meetings/$meetingId/check-in-code/') as Json);
+
+  @override
+  Future<Meeting> checkIn(String meetingId, String code) async => Meeting(
+      await _api.post('/meetings/$meetingId/check-in/', body: {'code': code}, auth: true));
+
+  @override
+  Future<Meeting> markAttendance(String meetingId, String membershipId, {bool? late}) async =>
+      Meeting(await _api.post('/meetings/$meetingId/attendance/',
+          body: {'membership_id': membershipId, 'late': ?late}, auth: true));
+
+  @override
+  Future<Meeting> closeAttendance(String meetingId) async =>
+      Meeting(await _api.post('/meetings/$meetingId/close/', body: {}, auth: true));
+
+  @override
+  Future<Meeting> postMinutes(String meetingId, {required String text, PickedFile? photo})
+      async => Meeting(await _api.postForm('/meetings/$meetingId/minutes/', {'text': text},
+          fileField: photo == null ? null : 'photo', filename: photo?.name,
+          bytes: photo?.bytes));
+
+  @override
+  Future<Meeting> objectToMinutes(String minutesId, String reason) async => Meeting(
+      await _api.post('/minutes/$minutesId/objections/', body: {'reason': reason},
+          auth: true));
+
+  @override
+  Future<List<int>> minutesPhoto(String minutesId) =>
+      _api.getBytes('/minutes/$minutesId/photo/');
 
   @override
   Future<List<RuleProposal>> ruleProposals(String id) async => [

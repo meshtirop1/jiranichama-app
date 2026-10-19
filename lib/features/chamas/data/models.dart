@@ -538,3 +538,61 @@ class RuleProposal {
           ),
       ];
 }
+
+/// A chama meeting (jiranichama-api docs/flows/meetings.md).
+class Meeting {
+  Meeting(this.json);
+  final Json json;
+
+  String get id => json['id'] as String;
+  String get title => json['title'] as String;
+  String get startsAt => json['starts_at'] as String;
+  String get place => json['place'] as String? ?? '';
+  String get onlineLink => json['online_link'] as String? ?? '';
+  String get agenda => json['agenda'] as String? ?? '';
+  String get state => json['state'] as String;
+  String get cancelReason => json['cancel_reason'] as String? ?? '';
+  bool get iRun => json['i_run'] == true;
+  String? get myStatus => json['my_status'] as String?;
+  String? get attendanceReceipt => json['attendance_receipt'] as String?;
+  String? get sealedReceipt => json['sealed_receipt'] as String?;
+  List<MeetingPerson> get people =>
+      [for (final p in json['people'] as List) MeetingPerson(p as Json)];
+  List<MeetingMinutes> get minutes =>
+      [for (final m in json['minutes'] as List) MeetingMinutes(m as Json)];
+}
+
+class MeetingPerson {
+  MeetingPerson(this.json);
+  final Json json;
+
+  String get membershipId => json['membership_id'] as String;
+  String get name => json['name'] as String;
+  String get memberCode => json['member_code'] as String;
+  String get status => json['status'] as String;
+  String? get reason => json['reason'] as String?;
+}
+
+class MeetingMinutes {
+  MeetingMinutes(this.json);
+  final Json json;
+
+  String get id => json['id'] as String;
+  int get version => json['version'] as int;
+  String get text => json['text'] as String? ?? '';
+  bool get hasPhoto => json['has_photo'] == true;
+  String get objectionUntil => json['objection_until'] as String;
+  List<({String by, String reason})> get objections => [
+        for (final o in json['objections'] as List)
+          (by: (o as Map)['by'] as String, reason: o['reason'] as String),
+      ];
+}
+
+class CheckInCode {
+  CheckInCode(this.json);
+  final Json json;
+
+  String get code => json['code'] as String;
+  String get qr => json['qr'] as String;
+  int get changesInSeconds => json['changes_in_seconds'] as int;
+}

@@ -98,6 +98,13 @@ class _EditorState extends ConsumerState<_Editor> {
   late final _everyDays = TextEditingController(
       text: '${(_r['statements'] as Json)['every_days']}');
   late String _kycPayer = (_r['kyc'] as Json)['payer'] as String;
+  Json get _mt => {'absence_fine_cents': 0, 'late_fine_cents': 0, 'late_after_minutes': 15,
+        'apology_excuses': true, 'objection_days': 7, ...?(_r['meetings'] as Json?)};
+  late final _absenceFine = TextEditingController(text: _kes(_mt['absence_fine_cents'] as int));
+  late final _lateFine = TextEditingController(text: _kes(_mt['late_fine_cents'] as int));
+  late final _lateAfter = TextEditingController(text: '${_mt['late_after_minutes']}');
+  late final _objectionDays = TextEditingController(text: '${_mt['objection_days']}');
+  late bool _apologyExcuses = _mt['apology_excuses'] as bool;
   late String? _rotOrder = (_r['rotation'] as Json?)?['order'] as String?;
   late String? _rotArrears = (_r['rotation'] as Json?)?['arrears'] as String?;
 
@@ -110,7 +117,8 @@ class _EditorState extends ConsumerState<_Editor> {
   @override
   void dispose() {
     for (final c in [_amount, _dueDay, _grace, _cashDays, _fineAmount, _fineCap, _deadline,
-      _entryFee, _share, _everyDays, _reason, for (final t in _tiers) t.upTo]) {
+      _entryFee, _share, _everyDays, _reason, _absenceFine, _lateFine, _lateAfter,
+      _objectionDays, for (final t in _tiers) t.upTo]) {
       c.dispose();
     }
     super.dispose();
@@ -163,6 +171,13 @@ class _EditorState extends ConsumerState<_Editor> {
         'statements': {'every_days': _int(_everyDays)},
         'kyc': {'payer': _kycPayer},
         if (_rotOrder != null) 'rotation': {'order': _rotOrder, 'arrears': _rotArrears},
+        'meetings': {
+          'absence_fine_cents': _cents(_absenceFine),
+          'late_fine_cents': _cents(_lateFine),
+          'late_after_minutes': _int(_lateAfter),
+          'apology_excuses': _apologyExcuses,
+          'objection_days': _int(_objectionDays),
+        },
       };
 
   String _ruleMessage(AppLocalizations l, String code) => switch (code) {
@@ -402,6 +417,21 @@ class _EditorState extends ConsumerState<_Editor> {
                 ]),
               ),
             ]),
+          _section(l.rulesMeetings, [
+            _number('absence_fine', _absenceFine, l.rulesAbsenceFine,
+                'meetings/absence_fine_cents'),
+            _number('late_fine', _lateFine, l.rulesLateFine, 'meetings/late_fine_cents'),
+            _number('late_after', _lateAfter, l.rulesLateAfter, 'meetings/late_after_minutes'),
+            SwitchListTile(
+              key: const ValueKey('apology_excuses'),
+              contentPadding: EdgeInsets.zero,
+              title: Text(l.rulesApologyExcuses),
+              value: _apologyExcuses,
+              onChanged: (v) => setState(() => _apologyExcuses = v),
+            ),
+            _number('objection_days', _objectionDays, l.rulesObjectionDays,
+                'meetings/objection_days'),
+          ]),
           _section(l.secKyc, [
             SegmentedButton<String>(
               key: const ValueKey('kyc'),
