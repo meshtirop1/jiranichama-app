@@ -11,6 +11,12 @@ import '../application/chain_check.dart';
 import '../data/models.dart';
 import 'chama_screen.dart';
 
+final anchorCheckProvider = FutureProvider.autoDispose.family<AnchorCheck?, String>(
+    (ref, chamaId) async {
+  final chain = await ref.watch(chainCheckProvider(chamaId).future);
+  return checkAnchor(ref.watch(chamaRepositoryProvider), chamaId, chain);
+});
+
 final chainCheckProvider = FutureProvider.autoDispose.family<ChainCheck, String>(
     (ref, chamaId) => checkChain(ref.watch(chamaRepositoryProvider), chamaId));
 
@@ -43,6 +49,15 @@ class RecordsTab extends ConsumerWidget {
                 c.ok ? l.chainOk(c.entries) : l.chainBad,
                 tone: c.ok ? NoticeTone.info : NoticeTone.critical,
               ),
+              ...switch (ref.watch(anchorCheckProvider(bundle.chama.id)).value) {
+                null => const <Widget>[],
+                final a => [
+                    const SizedBox(height: JiraniSpace.s),
+                    Notice(a.ok ? l.anchorOk(a.at.substring(0, 10), '${a.seq}')
+                        : l.anchorBad(a.at.substring(0, 10)),
+                        tone: a.ok ? NoticeTone.info : NoticeTone.critical),
+                  ],
+              },
               if (c.ok && c.unsigned > 0) ...[
                 const SizedBox(height: JiraniSpace.s),
                 Notice(l.chainUnsigned(c.unsigned), tone: NoticeTone.warning),

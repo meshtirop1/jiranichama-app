@@ -2,10 +2,22 @@
 
 `integration_test/phase1_e2e_test.dart` walks the whole of Phase 1 through the real app
 against a real local API: four people sign in and out on one device (founder/chair,
-treasurer, secretary, member), set up a chama, join with invite codes, adopt the rules
+treasurer, secretary, member), set up a chama (including the full rules editor), join with invite codes, adopt the rules
 by SMS code, upload a bank statement that a second official confirms, see payments
 matched and the records checked on the phone, assign an unmatched payment, and send it
-back with "This was not me". Screenshots land in `build/e2e_screenshots/`; the last
+back with "This was not me". It then brings in an opening balance (drafted by the
+treasurer, confirmed by the chair), records cash at a meeting that the member confirms,
+uploads a later statement that repeats the day's lines and adds the cash deposit, and has
+the treasurer link that deposit to the cash. Finally the member opens their statement,
+gets the sealed PDF, and the test checks its code on the public check endpoint, then
+opens the chama statement. Last, a statement with a damaged row: the secretary types the
+row in and the chair confirms. Then money out: two officials switch it on, the treasurer
+proposes the member's payout, the treasurer and chair approve, the chair marks it paid,
+and the next statement's debit matches it. Last, the chair starts a drawn merry-go-round
+cycle and proposes the first turn, then sets up the phone key and approves a
+payment with it, checks the overview shows the bank-against-records gap, and finally has two members vote on
+the first merry-go-round turn (above the vote level set to KES 1,000 in the rules editor):
+the chair with the phone key, another member by SMS code. Screenshots land in `build/e2e_screenshots/`; the last
 passing run is kept in [screenshots/phase1](../screenshots/phase1/).
 
 It is not part of CI, because it needs a running API and a device.
@@ -51,3 +63,12 @@ sleeping phone. Each run uses fresh phone numbers, so runs never collide.
   and each correction names the receipt it corrects.
 - On a real phone, typing into a field right after closing a dropdown can be lost; the
   test now focuses the field first and checks the text arrived.
+
+## The phone-key step
+
+Signing needs a screen lock. On the emulator (never on a real phone):
+`adb shell locksettings set-pin 1234` and
+`adb shell settings put system screen_off_timeout 2147483647`. The prompt is Android's
+own screen, outside the app, so the test cannot press it. While the test runs, a helper
+on the computer watches for the credential prompt (`dumpsys window windows`) and types
+the PIN (`adb shell input text 1234`, then Enter).

@@ -19,8 +19,14 @@ dependencies:
   intl: ^0.20.3
   jirani_domain:
     path: packages/jirani_domain
+  jirani_secure_keys:
+    path: packages/jirani_secure_keys
   jirani_ui:
     path: packages/jirani_ui
+  mobile_scanner: ^7.4.2
+  path_provider: ^2.1.6
+  qr_flutter: ^4.1.0
+  share_plus: ^13.3.1
 
 dev_dependencies:
   flutter_test:

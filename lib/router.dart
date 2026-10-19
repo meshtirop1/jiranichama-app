@@ -6,9 +6,15 @@ import 'features/auth/application/session.dart';
 import 'features/auth/presentation/code_screen.dart';
 import 'features/auth/presentation/phone_screen.dart';
 import 'features/auth/presentation/pin_screen.dart';
+import 'features/chamas/presentation/cash_screen.dart';
 import 'features/chamas/presentation/chama_screen.dart';
 import 'features/chamas/presentation/create_chama_screen.dart';
 import 'features/chamas/presentation/join_screen.dart';
+import 'features/chamas/presentation/money_out_screen.dart';
+import 'features/chamas/presentation/opening_screen.dart';
+import 'features/chamas/presentation/rotation_screen.dart';
+import 'features/chamas/presentation/rules_editor_screen.dart';
+import 'features/chamas/presentation/statement_screens.dart';
 import 'features/chamas/presentation/statements_screen.dart';
 import 'features/chamas/presentation/unmatched_screen.dart';
 import 'features/home/home_screen.dart';
@@ -49,6 +55,23 @@ final routerProvider = Provider<GoRouter>((ref) {
               builder: (_, state) => StatementsScreen(chamaId: state.pathParameters['id']!)),
           GoRoute(path: 'unmatched',
               builder: (_, state) => UnmatchedScreen(chamaId: state.pathParameters['id']!)),
+          GoRoute(path: 'opening',
+              builder: (_, state) => OpeningScreen(chamaId: state.pathParameters['id']!)),
+          GoRoute(path: 'cash',
+              builder: (_, state) => CashScreen(chamaId: state.pathParameters['id']!)),
+          GoRoute(path: 'rules/edit',
+              builder: (_, state) => RulesEditorScreen(chamaId: state.pathParameters['id']!)),
+          GoRoute(path: 'rotation',
+              builder: (_, state) => RotationScreen(chamaId: state.pathParameters['id']!)),
+          GoRoute(path: 'money-out',
+              builder: (_, state) => MoneyOutScreen(chamaId: state.pathParameters['id']!)),
+          GoRoute(path: 'statement',
+              builder: (_, state) =>
+                  ChamaStatementScreen(chamaId: state.pathParameters['id']!)),
+          GoRoute(path: 'members/:mid/statement',
+              builder: (_, state) => MemberStatementScreen(
+                  chamaId: state.pathParameters['id']!,
+                  membershipId: state.pathParameters['mid']!)),
         ],
       ),
       GoRoute(path: '/sign-in', builder: (_, _) => const PhoneScreen(), routes: [

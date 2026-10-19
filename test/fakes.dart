@@ -1,13 +1,26 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:flutter/widgets.dart';
+import 'package:flutter_test/flutter_test.dart';
 import 'package:jirani_domain/jirani_domain.dart';
+import 'package:jirani_secure_keys/jirani_secure_keys.dart';
 import 'package:jiranichama/core/api/problem.dart';
 import 'package:jiranichama/core/providers.dart';
 import 'package:jiranichama/features/chamas/data/chama_repository.dart';
 import 'package:jiranichama/features/chamas/data/models.dart';
 
 const smsCode = '424242';
+
+/// Scrolls the visible list until [target] is built, then brings it on screen. Lists
+/// build lazily, so a button far down the overview is not in the tree until scrolled to.
+Future<void> scrollTo(WidgetTester tester, Finder target) async {
+  if (target.evaluate().isEmpty) {
+    await tester.dragUntilVisible(target, find.byType(ListView).first, const Offset(0, -300));
+  }
+  await tester.ensureVisible(target);
+  await tester.pumpAndSettle();
+}
 
 Json _vectors(String name) => jsonDecode(
     File('packages/jirani_domain/test/vectors/$name').readAsStringSync()) as Json;
@@ -80,11 +93,15 @@ class FakeChamaRepository implements ChamaRepository {
                      'platform_sig': null, 'key_id': null});
   }
 
+  bool loansOn = false;
+
   Json get _chamaJson => {
         'id': 'c1', 'name': 'Umoja Women Group', 'type': 'merry_go_round', 'state': state,
-        'mode': 'records_only', 'member_code_prefix': 'JC-4821', 'my_role': myRole,
+        'mode': moneyOutOn ? 'money_out' : 'records_only', 'member_code_prefix': 'JC-4821',
+        'my_role': myRole,
         'my_member_code': myRole == 'member' ? 'JC-4821-004' : 'JC-4821-001',
         'i_am_founder': founder, 'statement_inbox': 'jc-4821-ab12@statements.example',
+        'loans_on': loansOn,
         'bank_account': {'bank': 'equity', 'account_name': 'UMOJA', 'account_no_last4': '9012',
                          'paybill': '247247', 'till': '', 'statement_route': 'upload'},
         if (state == 'awaiting_adoption')
@@ -97,6 +114,19 @@ class FakeChamaRepository implements ChamaRepository {
                       'grace_days': 2, 'allocation_order': ['arrears', 'fines', 'current']},
     'fines': {'late_contribution': {'enabled': true, 'amount_cents': 20000,
                                     'monthly_cap_cents': null}},
+    'officials': {'roles': ['chair', 'treasurer', 'secretary']},
+    'approvals': {
+      'tiers': [
+        {'up_to_cents': 5000000, 'officials': 2, 'member_vote': false},
+        {'up_to_cents': null, 'officials': 2, 'member_vote': true},
+      ],
+      'deadline_hours': 72,
+    },
+    'membership': {'entry_fee_cents': 0, 'new_members_need_vote': false},
+    'adoption': {'members_share_pct': 51},
+    'statements': {'every_days': 14},
+    'kyc': {'payer': 'chama'},
+    'rotation': {'order': 'draw', 'arrears': 'skip'},
   };
   Json? savedRules;
 
@@ -142,13 +172,24 @@ class FakeChamaRepository implements ChamaRepository {
 
   @override
   Future<RuleBook> saveRules(String id, Json rules) async {
+    // A little of the API's validation, enough to show errors coming back per setting.
+    final dueDay = (rules['contributions'] as Map)['due_day'] as int;
+    if (dueDay < 1 || dueDay > 28) {
+      throw ApiProblem(code: 'rules_invalid', detail: '', status: 400, extra: {
+        'errors': [
+          {'path': 'contributions/due_day', 'code': 'out_of_range', 'message': 'x'},
+        ],
+      });
+    }
     savedRules = rules;
     calls.add('rules');
     return RuleBook({'status': 'draft', 'rules': rules, 'book': _book});
   }
 
   @override
-  Future<Invite> invite(String id, {required String role, String? phone}) async {
+  Future<Invite> invite(String id, {required String role, String? phone, bool bySms = false,
+      String language = 'en'}) async {
+    if (bySms) calls.add('smsInvite:$phone:$language');
     calls.add('invite:$role:${phone ?? ''}');
     return Invite({'code': 'KQWERT', 'role': role, 'phone_hint': '', 'state': 'pending'});
   }
@@ -262,10 +303,890 @@ class FakeChamaRepository implements ChamaRepository {
       {String reason = '', required String idempotencyKey}) async {
     calls.add('notMe:$bankLineId');
   }
+
+  // Opening balances
+  String openingState = 'none';
+  List<Json> openingLines = [];
+
+  @override
+  Future<OpeningBalances> opening(String id) async => OpeningBalances(_openingJson);
+
+  @override
+  Future<OpeningBalances> saveOpening(String id, List<Json> lines) async {
+    calls.add('saveOpening:${lines.length}');
+    openingState = 'draft';
+    openingLines = [
+      for (final l in lines)
+        {...l, 'id': 'line-${l['membership_id']}', 'member_code': 'JC-4821-00?',
+         'objections': <String>[]},
+    ];
+    return OpeningBalances(_openingJson);
+  }
+
+  @override
+  Future<ChallengeSent> startConfirmOpening(String id) async {
+    if (myRole == 'treasurer') {
+      throw ApiProblem(code: 'second_official_required', detail: '', status: 403);
+    }
+    return _sent;
+  }
+
+  @override
+  Future<OpeningBalances> confirmOpening(String id,
+      {required String challengeId, required String code}) async {
+    _codeCheck(code);
+    openingState = 'confirmed';
+    calls.add('confirmOpening');
+    return OpeningBalances(_openingJson);
+  }
+
+  @override
+  Future<void> objectToOpening(String lineId, String reason) async {
+    calls.add('object:$lineId:$reason');
+    for (final l in openingLines) {
+      if (l['id'] == lineId) (l['objections'] as List).add(reason);
+    }
+  }
+
+  // Cash
+  final cash = <Json>[];
+
+  @override
+  Future<List<CashReceipt>> cashReceipts(String id) async => [for (final c in cash) CashReceipt(c)];
+
+  @override
+  Future<CashReceipt> recordCash(String id, {required String membershipId,
+      required int amountCents, required String idempotencyKey}) async {
+    calls.add('recordCash:$membershipId:$amountCents');
+    final r = {'id': 'cash-${cash.length + 1}', 'membership_id': membershipId,
+               'member_code': 'JC-4821-004', 'amount_cents': amountCents,
+               'received_on': '2026-03-04', 'state': 'recorded', 'overdue': false};
+    cash.add(r);
+    return CashReceipt(r);
+  }
+
+  @override
+  Future<ChallengeSent> startConfirmCash(String receiptId) async => _sent;
+
+  @override
+  Future<CashReceipt> confirmCash(String receiptId,
+      {required String challengeId, required String code}) async {
+    _codeCheck(code);
+    final r = cash.firstWhere((c) => c['id'] == receiptId)..['state'] = 'member_confirmed';
+    calls.add('confirmCash:$receiptId');
+    return CashReceipt(r);
+  }
+
+  @override
+  Future<CashReceipt> declineCash(String receiptId, {String reason = ''}) async {
+    final r = cash.firstWhere((c) => c['id'] == receiptId)..['state'] = 'declined';
+    calls.add('declineCash:$receiptId');
+    return CashReceipt(r);
+  }
+
+  @override
+  Future<void> bankCash(String bankLineId,
+      {required List<String> receiptIds, required String idempotencyKey}) async {
+    calls.add('bankCash:$bankLineId:${receiptIds.join(",")}');
+    for (final c in cash) {
+      if (receiptIds.contains(c['id'])) c['state'] = 'banked';
+    }
+    unmatchedList.removeWhere((t) => t['id'] == bankLineId);
+  }
+
+  // Money out
+  bool moneyOutOn = false;
+  int consents = 0;
+  final proposalsList = <Json>[];
+  final unapprovedList = <Json>[];
+
+  @override
+  Future<MoneyOutStatus> moneyOut(String id) async => MoneyOutStatus({
+        'mode': moneyOutOn ? 'money_out' : 'records_only', 'consents': consents,
+        'needed': 2, 'available_cents': 10000000});
+
+  @override
+  Future<ChallengeSent> startEnableMoneyOut(String id) async => _sent;
+
+  @override
+  Future<MoneyOutStatus> enableMoneyOut(String id,
+      {required String challengeId, required String code}) async {
+    _codeCheck(code);
+    consents++;
+    moneyOutOn = consents >= 2;
+    calls.add('enableMoneyOut');
+    return moneyOut(id);
+  }
+
+  @override
+  Future<List<Proposal>> proposals(String id) async =>
+      [for (final p in proposalsList) Proposal(p)];
+
+  Json _proposalJson(Json body) {
+    final toMember = body['kind'] == 'payout';
+    final refused = body['amount_cents'] as int > 5000000;
+    return {
+      'id': 'prop-${proposalsList.length + 1}', 'kind': body['kind'],
+      'state': refused ? 'refused' : 'collecting_approvals',
+      'state_reason': '', 'amount_cents': body['amount_cents'],
+      'payee_name': toMember ? 'Wanjiru' : body['payee_name'],
+      'payee_member_code': toMember ? 'JC-4821-004' : null,
+      'payee_account': body['payee_account'] ?? '', 'purpose': body['purpose'],
+      'proposed_by': 'Jane', 'proposed_by_code': 'JC-4821-001',
+      'needs_officials': 2, 'approved': 0, 'approvals': <Json>[],
+      'refusal': refused ? {'code': 'member_vote_needed', 'rule': '4.2'} : <String, dynamic>{},
+      'deadline_at': '2026-03-13T10:00:00Z', 'bank_reference': '', 'paid_at': null,
+      'can_answer': !refused && myRole != 'member', 'seal_receipt': null,
+    };
+  }
+
+  @override
+  Future<Proposal> propose(String id, Json body, {required String idempotencyKey}) async {
+    calls.add('propose:${body['kind']}:${body['amount_cents']}');
+    final p = _proposalJson(body);
+    proposalsList.insert(0, p);
+    return Proposal(p);
+  }
+
+  @override
+  Future<ChallengeSent> startApprove(String proposalId) async => _sent;
+
+  Json _prop(String id) => proposalsList.firstWhere((p) => p['id'] == id);
+
+  @override
+  Future<Proposal> approve(String proposalId,
+      {required String challengeId, required String code}) async {
+    _codeCheck(code);
+    final p = _prop(proposalId);
+    (p['approvals'] as List).add(
+        {'name': 'Jane', 'role': 'chair', 'decision': 'approve', 'reason': '', 'at': 'x'});
+    p['approved'] = (p['approved'] as int) + 1;
+    p['can_answer'] = false;
+    if (p['approved'] as int >= 2) p['state'] = 'approved';
+    calls.add('approve:$proposalId');
+    return Proposal(p);
+  }
+
+  @override
+  Future<Proposal> declineProposal(String proposalId, String reason) async {
+    final p = _prop(proposalId);
+    (p['approvals'] as List).add(
+        {'name': 'Jane', 'role': 'chair', 'decision': 'decline', 'reason': reason, 'at': 'x'});
+    p['can_answer'] = false;
+    calls.add('decline:$proposalId:$reason');
+    return Proposal(p);
+  }
+
+  @override
+  Future<Proposal> cancelProposal(String proposalId, String reason) async {
+    final p = _prop(proposalId)..['state'] = 'cancelled';
+    return Proposal(p);
+  }
+
+  @override
+  Future<Proposal> markPaid(String proposalId, String bankReference,
+      {required String idempotencyKey}) async {
+    final p = _prop(proposalId)
+      ..['state'] = 'paid_pending_match'
+      ..['bank_reference'] = bankReference;
+    calls.add('paid:$proposalId:$bankReference');
+    return Proposal(p);
+  }
+
+  @override
+  Future<List<UnapprovedDebit>> unapprovedDebits(String id) async =>
+      [for (final d in unapprovedList) UnapprovedDebit(d)];
+
+  @override
+  Future<UnapprovedDebit> linkDebit(String debitId, String proposalId) async {
+    final d = unapprovedList.firstWhere((d) => d['id'] == debitId)
+      ..['state'] = 'linked'
+      ..['resolved_by'] = 'Peter';
+    return UnapprovedDebit(d);
+  }
+
+  @override
+  Future<UnapprovedDebit> explainDebit(String debitId, String explanation) async {
+    final d = unapprovedList.firstWhere((d) => d['id'] == debitId)
+      ..['state'] = 'explained'
+      ..['explanation'] = explanation
+      ..['resolved_by'] = 'Jane';
+    calls.add('explain:$debitId:$explanation');
+    return UnapprovedDebit(d);
+  }
+
+  // Public anchors
+  List<Json> anchorsList = [];
+
+  @override
+  Future<List<AnchorProof>> anchors(String id) async =>
+      [for (final a in anchorsList) AnchorProof(a)];
+
+  /// An anchor of exactly this chain's last entry: a one-leaf tree, root = leaf.
+  void anchorLastEntry({String chamaId = 'c1', bool tamper = false}) {
+    final last = ledgerItems.last;
+    final seq = (last['document'] as Map)['seq'] as int;
+    final hash = last['hash'] as String;
+    final leaf = anchorLeaf(chamaId, seq, tamper ? '00' * 32 : hash);
+    anchorsList = [
+      {'anchor_id': 'a1', 'at': '2026-03-10T00:30:00Z', 'merkle_root': leaf, 'seq': seq,
+       'hash': hash, 'leaf': leaf, 'path': <Json>[], 'ots_status': 'submitted',
+       'ots_calendar': 'x'},
+    ];
+  }
+
+  // Members' votes
+  final votesList = <Json>[];
+
+  Json _voteJson(String id) => votesList.firstWhere((v) => v['id'] == id);
+
+  void _castFake(String voteId, String choice) {
+    final v = _voteJson(voteId);
+    v['cast'] = (v['cast'] as int) + 1;
+    (v['voted'] as List).add('Jane');
+    v['i_can_vote'] = false;
+    v['i_voted'] = true;
+    v['my_choice'] = v['secret'] == true ? null : choice;
+    calls.add('ballot:$voteId:$choice');
+  }
+
+  @override
+  Future<List<VoteInfo>> votes(String id) async => [for (final v in votesList) VoteInfo(v)];
+
+  @override
+  Future<ChallengeSent> startBallot(String voteId, String choice) async => _sent;
+
+  @override
+  Future<VoteInfo> castBallot(String voteId, String choice,
+      {required String challengeId, required String code}) async {
+    _codeCheck(code);
+    _castFake(voteId, choice);
+    return VoteInfo(_voteJson(voteId));
+  }
+
+  @override
+  Future<Json> ballotPayload(String voteId, String choice) async {
+    final v = _voteJson(voteId);
+    final payload = <String, Object?>{'v': 1, 'purpose': 'cast_ballot', 'chama_id': 'c1',
+        'vote_id': voteId, 'question': v['question'], 'choice': choice, 'nonce': 'n-vote'};
+    return {'device_id': 'dev-1', 'payload': payload,
+            'payload_hash': sha256Hex(canonicalJson(payload))};
+  }
+
+  @override
+  Future<VoteInfo> submitSignedBallot(String voteId, Json body) async {
+    calls.add('signedBallot:$voteId:${body['signature']}');
+    _castFake(voteId, body['choice'] as String);
+    return VoteInfo(_voteJson(voteId));
+  }
+
+  // Fines and waivers
+  final finesList = <Json>[];
+
+  Json newFine({String id = 'f1', bool mine = true, Json? waiver}) => {
+        'id': id, 'member': mine ? 'Me' : 'Mary', 'member_id': mine ? 'm4' : 'm3',
+        'mine': mine, 'rule_ref': '3.2', 'period': '2026-09', 'amount_cents': 20000,
+        'paid_cents': 0, 'outstanding_cents': 20000, 'state': 'raised',
+        'cause': 'late_contribution', 'receipt': 'FINE1234', 'waiver': waiver,
+        'created_at': 'x',
+      };
+
+  Json _fineJson(String id) => finesList.firstWhere((f) => f['id'] == id);
+
+  Json _fineOfWaiver(String waiverId) =>
+      finesList.firstWhere((f) => (f['waiver'] as Map?)?['id'] == waiverId);
+
+  @override
+  Future<List<FineInfo>> fines(String id) async => [for (final f in finesList) FineInfo(f)];
+
+  @override
+  Future<FineInfo> requestWaiver(String fineId, String reason) async {
+    calls.add('requestWaiver:$fineId:$reason');
+    return FineInfo(_fineJson(fineId)..['waiver'] = {
+      'id': 'w-$fineId', 'reason': reason, 'state': 'requested', 'state_reason': '',
+      'needs_officials': 2, 'needs_vote': false, 'deadline_at': 'x', 'approvals': 0,
+      'i_can_decide': false, 'created_at': 'x'});
+  }
+
+  @override
+  Future<ChallengeSent> startWaiverApproval(String waiverId) async => _sent;
+
+  @override
+  Future<FineInfo> approveWaiver(String waiverId,
+      {required String challengeId, required String code}) async {
+    _codeCheck(code);
+    calls.add('approveWaiver:$waiverId');
+    final f = _fineOfWaiver(waiverId);
+    (f['waiver'] as Map)
+      ..['approvals'] = 1
+      ..['i_can_decide'] = false;
+    return FineInfo(f);
+  }
+
+  @override
+  Future<FineInfo> declineWaiver(String waiverId, String reason) async {
+    calls.add('declineWaiver:$waiverId:$reason');
+    final f = _fineOfWaiver(waiverId);
+    (f['waiver'] as Map)['i_can_decide'] = false;
+    return FineInfo(f);
+  }
+
+  // Loans
+  final loansList = <Json>[];
+
+  Json _loanJson(String id) => loansList.firstWhere((x) => x['id'] == id);
+
+  List<Json> _schedule(int amount, int months) => [
+        for (var i = 1; i <= months; i++)
+          {'no': i, 'due': '2026-${(10 + i).toString().padLeft(2, '0')}-05',
+           'principal_cents': amount ~/ months, 'interest_cents': amount ~/ 100,
+           'total_cents': amount ~/ months + amount ~/ 100},
+      ];
+
+  Json newLoan({String id = 'loan-1', String state = 'awaiting_guarantors', bool mine = false,
+          bool iGuarantee = false}) =>
+      {
+        'id': id, 'borrower': mine ? 'Me' : 'Mary', 'borrower_id': mine ? 'm4' : 'm3',
+        'mine': mine, 'amount_cents': 3000000, 'term_months': 3, 'purpose': 'Stock',
+        'terms': {'guarantors': 2, 'interest': 'flat', 'monthly_rate_bp': 100},
+        'schedule': _schedule(3000000, 3), 'state': state, 'state_reason': '',
+        'proposal_id': null, 'disbursed_on': null, 'expires_at': 'x',
+        'guarantees': [
+          {'id': 'g1', 'guarantor': 'Jane', 'guarantor_id': 'm1', 'share_cents': 1500000,
+           'state': 'requested', 'answered_at': null, 'expires_at': 'x', 'mine': iGuarantee},
+          {'id': 'g2', 'guarantor': 'Peter', 'guarantor_id': 'm2', 'share_cents': 1500000,
+           'state': 'requested', 'answered_at': null, 'expires_at': 'x', 'mine': false},
+        ],
+        'balance': {'principal_cents': 0, 'interest_charged_cents': 0, 'repaid_cents': 0,
+                    'outstanding_cents': 0, 'due_now_cents': 0, 'next': null},
+        'created_at': 'x',
+      };
+
+  @override
+  Future<List<LoanInfo>> loans(String id) async => [for (final x in loansList) LoanInfo(x)];
+
+  @override
+  Future<LoanQuote> loanQuote(String id, {required int amountCents, required int termMonths})
+      async {
+    calls.add('quote:$amountCents:$termMonths');
+    final over = amountCents > 6000000;
+    return LoanQuote({
+      'eligible': !over,
+      'reasons': [if (over) {'code': 'over_limit', 'rule': '12.1', 'message': 'x'}],
+      'savings_cents': 2000000, 'limit_cents': 6000000,
+      'terms': {'interest': 'flat', 'monthly_rate_bp': 100, 'guarantors': 2},
+      'guarantors_needed': 2, 'share_cents': amountCents ~/ 2,
+      'schedule': _schedule(amountCents, termMonths),
+      'total_interest_cents': termMonths * (amountCents ~/ 100),
+      'total_cents': amountCents + termMonths * (amountCents ~/ 100),
+    });
+  }
+
+  @override
+  Future<LoanInfo> requestLoan(String id, Json body, {required String idempotencyKey})
+      async {
+    calls.add('requestLoan:${body['amount_cents']}:${body['purpose']}:'
+        '${(body['guarantor_ids'] as List).join(',')}');
+    final x = newLoan(id: 'loan-${loansList.length + 1}', mine: true)
+      ..['amount_cents'] = body['amount_cents'];
+    loansList.insert(0, x);
+    return LoanInfo(x);
+  }
+
+  @override
+  Future<LoanInfo> cancelLoan(String loanId) async {
+    calls.add('cancelLoan:$loanId');
+    return LoanInfo(_loanJson(loanId)..['state'] = 'cancelled');
+  }
+
+  @override
+  Future<LoanInfo> replaceGuarantor(String loanId,
+      {required String guaranteeId, required String membershipId}) async {
+    calls.add('replace:$guaranteeId:$membershipId');
+    return LoanInfo(_loanJson(loanId));
+  }
+
+  @override
+  Future<ChallengeSent> startGuarantee(String guaranteeId) async => _sent;
+
+  @override
+  Future<LoanInfo> acceptGuarantee(String guaranteeId,
+      {required String challengeId, required String code}) async {
+    _codeCheck(code);
+    calls.add('acceptGuarantee:$guaranteeId');
+    for (final x in loansList) {
+      for (final g in x['guarantees'] as List) {
+        if ((g as Map)['id'] == guaranteeId) {
+          g['state'] = 'accepted';
+          return LoanInfo(x);
+        }
+      }
+    }
+    throw StateError('no guarantee');
+  }
+
+  @override
+  Future<LoanInfo> declineGuarantee(String guaranteeId) async {
+    calls.add('declineGuarantee:$guaranteeId');
+    for (final x in loansList) {
+      for (final g in x['guarantees'] as List) {
+        if ((g as Map)['id'] == guaranteeId) {
+          g['state'] = 'declined';
+          return LoanInfo(x);
+        }
+      }
+    }
+    throw StateError('no guarantee');
+  }
+
+  // Meetings
+  final meetingsList = <Json>[];
+
+  Json _meetingJson(String id) => meetingsList.firstWhere((m) => m['id'] == id);
+
+  Json _meeting(String id, {String? state, String? myStatus}) {
+    final m = _meetingJson(id);
+    if (state != null) m['state'] = state;
+    if (myStatus != null) m['my_status'] = myStatus;
+    return m;
+  }
+
+  void _person(String meetingId, String membershipId, String status, {String? reason}) {
+    for (final p in _meetingJson(meetingId)['people'] as List) {
+      if ((p as Map)['membership_id'] == membershipId) {
+        p['status'] = status;
+        if (reason != null) p['reason'] = reason;
+      }
+    }
+  }
+
+  Json newMeeting({String id = 'meet-1', String state = 'scheduled',
+          String myStatus = 'expected', bool iRun = false}) =>
+      {
+        'id': id, 'title': 'March meeting', 'starts_at': '2026-11-05T11:00:00Z',
+        'place': 'Church hall', 'online_link': '', 'agenda': '1. Contributions',
+        'state': state, 'cancel_reason': '', 'i_run': iRun, 'my_status': myStatus,
+        'people': [
+          {'membership_id': 'm1', 'name': 'Jane', 'member_code': 'JC-4821-001',
+           'status': 'expected', 'reason': null},
+          {'membership_id': 'm2', 'name': 'Peter', 'member_code': 'JC-4821-002',
+           'status': 'expected', 'reason': null},
+        ],
+        'minutes': <Json>[], 'attendance_receipt': null, 'sealed_receipt': null,
+        'created_at': 'x',
+      };
+
+  @override
+  Future<List<Meeting>> meetings(String id) async =>
+      [for (final m in meetingsList) Meeting(m)];
+
+  @override
+  Future<Meeting> scheduleMeeting(String id, Json body, {required String idempotencyKey})
+      async {
+    if ((body['place'] as String).isEmpty && (body['online_link'] as String).isEmpty) {
+      throw ApiProblem(code: 'place_required', detail: '', status: 400);
+    }
+    calls.add('scheduleMeeting:${body['title']}:${body['place']}');
+    final m = newMeeting(id: 'meet-${meetingsList.length + 1}', iRun: true)
+      ..['title'] = body['title']
+      ..['starts_at'] = body['starts_at']
+      ..['place'] = body['place'];
+    meetingsList.insert(0, m);
+    return Meeting(m);
+  }
+
+  @override
+  Future<Meeting> cancelMeeting(String meetingId, String reason) async {
+    calls.add('cancelMeeting:$reason');
+    return Meeting(_meeting(meetingId, state: 'cancelled')..['cancel_reason'] = reason);
+  }
+
+  @override
+  Future<Meeting> apologise(String meetingId, String reason) async {
+    calls.add('apologise:$reason');
+    _person(meetingId, 'm1', 'apology', reason: reason);
+    return Meeting(_meeting(meetingId, myStatus: 'apology'));
+  }
+
+  @override
+  Future<Meeting> startMeeting(String meetingId) async {
+    calls.add('startMeeting');
+    return Meeting(_meeting(meetingId, state: 'in_progress'));
+  }
+
+  @override
+  Future<CheckInCode> checkInCode(String meetingId) async => CheckInCode(
+      {'code': '482913', 'qr': 'jcmeet:$meetingId:482913', 'changes_in_seconds': 30});
+
+  @override
+  Future<Meeting> checkIn(String meetingId, String code) async {
+    if (code != '482913') throw ApiProblem(code: 'code_wrong', detail: '', status: 400);
+    calls.add('checkIn:$code');
+    _person(meetingId, 'm1', 'present');
+    return Meeting(_meeting(meetingId, myStatus: 'present'));
+  }
+
+  @override
+  Future<Meeting> markAttendance(String meetingId, String membershipId, {bool? late}) async {
+    calls.add('mark:$membershipId:${late ?? false}');
+    _person(meetingId, membershipId, late == true ? 'late' : 'present');
+    return Meeting(_meetingJson(meetingId));
+  }
+
+  @override
+  Future<Meeting> closeAttendance(String meetingId) async {
+    calls.add('closeAttendance');
+    for (final p in _meetingJson(meetingId)['people'] as List) {
+      if ((p as Map)['status'] == 'expected') p['status'] = 'absent';
+    }
+    return Meeting(_meeting(meetingId, state: 'attendance_closed')
+      ..['attendance_receipt'] = 'ATT12345');
+  }
+
+  @override
+  Future<Meeting> postMinutes(String meetingId, {required String text, PickedFile? photo})
+      async {
+    calls.add('minutes:$text:${photo?.name}');
+    final list = _meetingJson(meetingId)['minutes'] as List;
+    list.insert(0, {
+      'id': 'min-${list.length + 1}', 'version': list.length + 1, 'text': text,
+      'has_photo': false, 'photo_sha256': '', 'hash': 'h', 'written_by': 'Jane',
+      'objection_until': '2026-11-12T11:00:00Z', 'objections': <Json>[], 'created_at': 'x',
+    });
+    return Meeting(_meeting(meetingId, state: 'minutes_pending'));
+  }
+
+  @override
+  Future<Meeting> objectToMinutes(String minutesId, String reason) async {
+    calls.add('object:$minutesId:$reason');
+    for (final m in meetingsList) {
+      for (final mn in m['minutes'] as List) {
+        if ((mn as Map)['id'] == minutesId) {
+          (mn['objections'] as List).add({'by': 'Jane', 'reason': reason, 'at': 'x'});
+          return Meeting(m);
+        }
+      }
+    }
+    throw StateError('no minutes');
+  }
+
+  @override
+  Future<List<int>> minutesPhoto(String minutesId) async => const [];
+
+  // Rule changes
+  final ruleProposalsList = <Json>[];
+
+  @override
+  Future<List<RuleProposal>> ruleProposals(String id) async =>
+      [for (final p in ruleProposalsList) RuleProposal(p)];
+
+  @override
+  Future<RuleProposal> proposeRules(String id, Json rules,
+      {required String reason, required String idempotencyKey}) async {
+    final before = (_rules['contributions'] as Map)['amount_cents'];
+    final after = (rules['contributions'] as Map)['amount_cents'];
+    if (before == after) {
+      throw ApiProblem(code: 'no_change', detail: '', status: 400);
+    }
+    calls.add('proposeRules:$reason:$after');
+    final p = <String, dynamic>{
+      'id': 'rp-${ruleProposalsList.length + 1}', 'state': 'notice', 'reason': reason,
+      'proposed_by': 'Jane', 'changed': ['contributions/amount_cents'],
+      'clauses': {
+        for (final lang in ['en', 'sw'])
+          lang: [
+            {'ref': '3.1', 'before': 'Each member pays KES ${(before as int) ~/ 100}.',
+             'after': 'Each member pays KES ${(after as int) ~/ 100}.'},
+          ],
+      },
+      'rules': rules, 'notice_until': '2026-11-02T09:00:00Z', 'vote_days': 7,
+      'quorum_pct': 50, 'pass_pct': 66, 'vote_id': null, 'effective_from': null,
+      'created_at': 'x',
+    };
+    ruleProposalsList.insert(0, p);
+    return RuleProposal(p);
+  }
+
+  @override
+  Future<RuleProposal> withdrawRuleProposal(String proposalId) async {
+    final p = ruleProposalsList.firstWhere((p) => p['id'] == proposalId);
+    p['state'] = 'withdrawn';
+    calls.add('withdrawRule:$proposalId');
+    return RuleProposal(p);
+  }
+
+  // Daily reconciliation
+  Json reconciliationJson = {
+    'status': 'no_statement', 'checked_on': null, 'bank_cents': null, 'records_cents': null,
+    'gap_cents': 0, 'unmatched_cents': 0, 'unexplained_cents': 0, 'gap_opened_on': null,
+    'days_open': 0, 'breach_after_days': 7, 'history': <Json>[],
+  };
+
+  @override
+  Future<Reconciliation> reconciliation(String id) async => Reconciliation(reconciliationJson);
+
+  // Phone signing keys
+  String? tamperAmount;
+
+  @override
+  Future<String> attestNonce() async => 'nonce-attest';
+
+  @override
+  Future<ChallengeSent> startRegisterDevice(Json body) async {
+    calls.add('startRegisterDevice:${body['public_key']}');
+    return _sent;
+  }
+
+  @override
+  Future<Json> registerDevice(Json body,
+      {required String challengeId, required String code}) async {
+    _codeCheck(code);
+    calls.add('registerDevice');
+    return {'id': 'dev-1', 'security_level': 'tee'};
+  }
+
+  @override
+  Future<Json> signingPayload(String proposalId) async {
+    final p = _prop(proposalId);
+    final payload = <String, Object?>{
+      'v': 1, 'purpose': 'approve_proposal', 'chama_id': 'c1', 'proposal_id': proposalId,
+      'kind': p['kind'], 'amount_cents': tamperAmount != null ? 1 : p['amount_cents'],
+      'deduct_cents': 0, 'payee': p['payee_name'], 'payee_account': p['payee_account'],
+      'purpose_text': p['purpose'], 'rule_version_id': null, 'nonce': 'nonce-sign',
+    };
+    return {'device_id': 'dev-1', 'payload': payload,
+            'payload_hash': sha256Hex(canonicalJson(payload))};
+  }
+
+  @override
+  Future<Proposal> submitSignature(String proposalId, Json body) async {
+    calls.add('signature:$proposalId:${body['signature']}');
+    final p = _prop(proposalId);
+    (p['approvals'] as List).add({'name': 'Jane', 'role': 'chair', 'decision': 'approve',
+        'reason': '', 'method': 'device', 'at': 'x'});
+    p['approved'] = (p['approved'] as int) + 1;
+    p['can_answer'] = false;
+    return Proposal(p);
+  }
+
+  // Merry-go-round
+  Json? rotationJson;
+
+  @override
+  Future<RotationInfo> rotation(String id) async => RotationInfo(rotationJson ?? {
+        'settings': {'order': 'draw', 'arrears': 'skip'}, 'cycle_no': null, 'method': null,
+        'seed': null, 'receipt': null, 'running': false, 'pot_cents': null,
+        'next_position': null, 'turns': <Json>[],
+      });
+
+  @override
+  Future<RotationInfo> startRotation(String id,
+      {List<String>? order, required String idempotencyKey}) async {
+    calls.add('startRotation:${order?.join(",") ?? "draw"}');
+    final ids = order ?? ['m4', 'm1', 'm2'];
+    final names = {'m1': ('Jane', 'JC-4821-001'), 'm2': ('Peter', 'JC-4821-002'),
+                   'm4': ('Wanjiru', 'JC-4821-004')};
+    rotationJson = {
+      'settings': {'order': order == null ? 'draw' : 'fixed', 'arrears': 'skip'},
+      'cycle_no': 1, 'method': order == null ? 'draw' : 'fixed',
+      'seed': order == null ? 'ab12cd34ef56ab12cd34ef56' : '', 'receipt': 'ROT12345',
+      'running': true, 'pot_cents': 300000, 'next_position': 1,
+      'turns': [
+        for (var i = 0; i < ids.length; i++)
+          {'position': i + 1, 'membership_id': ids[i], 'member_code': names[ids[i]]!.$2,
+           'name': names[ids[i]]!.$1, 'state': 'pending', 'note': '', 'proposal_id': null,
+           'proposal_state': null},
+      ],
+    };
+    return RotationInfo(rotationJson!);
+  }
+
+  @override
+  Future<Proposal> proposeNextTurn(String id, {required String idempotencyKey}) async {
+    calls.add('proposeNextTurn');
+    final first = ((rotationJson!['turns'] as List).first as Map);
+    final p = _proposalJson({'kind': 'payout', 'amount_cents': 300000,
+        'purpose': 'Merry-go-round turn 1 of 3, cycle 1'})
+      ..['payee_name'] = first['name']
+      ..['payee_member_code'] = first['member_code'];
+    proposalsList.insert(0, p);
+    first['proposal_id'] = p['id'];
+    first['proposal_state'] = 'collecting_approvals';
+    return Proposal(p);
+  }
+
+  // Typed-in statement lines
+  List<Json>? typedSubmitted;
+
+  @override
+  Future<Statement> submitTypedLines(String statementId, List<Json> lines,
+      {required String idempotencyKey}) async {
+    if (lines.any((l) => l['credit_cents'] != 30000)) {
+      throw ApiProblem(code: 'typed_lines_do_not_add_up', detail: '', status: 400);
+    }
+    typedSubmitted = lines;
+    final st = statementsList.firstWhere((x) => x['id'] == statementId)
+      ..['state'] = 'awaiting_confirmation'
+      ..['typed_lines'] = [
+        for (final l in lines) {...l, 'typed_by': 'Akinyi'},
+      ];
+    return Statement(st);
+  }
+
+  // Member and chama statements
+  final statementFroms = <String?>[];
+  int documentsIssued = 0;
+
+  @override
+  Future<MemberStatement> memberStatement(String membershipId, {String? from}) async {
+    statementFroms.add(from);
+    return MemberStatement({
+      'from': from ?? '2026-01-01', 'to': '2026-03-10',
+      'member': {'code': 'JC-4821-004', 'name': 'Wanjiru', 'role': 'member'},
+      'lines': from != null ? <Json>[] : [
+        {'date': '2026-01-08', 'seq': 3, 'receipt': 'K7Q2M9AB', 'type': 'fine_raised',
+         'period': '2026-01', 'amount_cents': 20000, 'reversed': false,
+         'reverses_receipt': null},
+        {'date': '2026-02-03', 'seq': 5, 'receipt': 'P3XW8RT2', 'type': 'contribution',
+         'period': '2026-01', 'amount_cents': 100000, 'reversed': true,
+         'reverses_receipt': null},
+        {'date': '2026-02-04', 'seq': 6, 'receipt': 'ZZ4Q8M1C', 'type': 'reversal',
+         'period': '2026-01', 'amount_cents': -100000, 'reversed': false,
+         'reverses_receipt': 'P3XW8RT2'},
+      ],
+      'totals': {'opening_cents': 0, 'contributed_cents': 0, 'fines_raised_cents': 20000,
+                 'fines_paid_cents': 0, 'fines_waived_cents': 0},
+      'position': {'on': '2026-03-10', 'contributed_cents': 200000, 'opening_cents': 0,
+                   'pending_cash_cents': 0, 'arrears_cents': 100000, 'fines_cents': 20000,
+                   'credit_cents': 0, 'next_due_period': '2026-04', 'next_due_cents': 100000},
+      'records_to_seq': 6,
+    });
+  }
+
+  @override
+  Future<ChamaStatement> chamaStatement(String id, {String? from}) async => ChamaStatement({
+        'from': from ?? '2026-01-01', 'to': '2026-03-10',
+        'members': [
+          {'code': 'JC-4821-001', 'name': 'Jane', 'role': 'chair', 'contributed_cents': 300000,
+           'savings_cents': 300000, 'arrears_cents': 0, 'fines_cents': 0},
+          {'code': 'JC-4821-004', 'name': 'Wanjiru', 'role': 'member',
+           'contributed_cents': 200000, 'savings_cents': 200000, 'arrears_cents': 100000,
+           'fines_cents': 20000},
+        ],
+        'totals': {'contributed_cents': 500000, 'savings_cents': 500000,
+                   'arrears_cents': 100000, 'fines_cents': 20000},
+        'bank': {'reconciled_to': '2026-03-05', 'closing_cents': 530000,
+                 'unmatched_count': 1, 'unmatched_cents': 30000, 'cash_waiting_cents': 0},
+      });
+
+  IssuedDocument _doc(String kind, String language) {
+    documentsIssued++;
+    return IssuedDocument({
+      'id': 'doc-$documentsIssued', 'kind': kind, 'language': language,
+      'verify_code': '7KQ2M9XB4D', 'verify_url': 'https://api.jiranichama.co.ke/verify/7KQ2M9XB4D/',
+      'fingerprint': 'ab' * 32, 'sha256': 'cd' * 32, 'seal_receipt': 'SEAL1234',
+    });
+  }
+
+  @override
+  Future<IssuedDocument> issueMemberStatementPdf(String membershipId,
+      {String? from, required String language, required String idempotencyKey}) async {
+    calls.add('memberPdf:$membershipId:$language');
+    return _doc('member_statement', language);
+  }
+
+  @override
+  Future<IssuedDocument> issueChamaStatementPdf(String id,
+      {String? from, required String language, required String idempotencyKey}) async {
+    calls.add('chamaPdf:$id:$language');
+    return _doc('chama_statement', language);
+  }
+
+  @override
+  Future<List<int>> documentFile(String documentId) async {
+    calls.add('download:$documentId');
+    return utf8.encode('%PDF-1.4 fake');
+  }
+}
+
+/// Keeps "saved" PDFs in memory and records what was shared.
+class FakeDocumentSaver implements DocumentSaver {
+  final saved = <String, List<int>>{};
+  final shared = <String>[];
+
+  @override
+  Future<String> save(String filename, List<int> bytes) async {
+    saved[filename] = bytes;
+    return '/fake/$filename';
+  }
+
+  @override
+  Future<void> share(String path, {required String text}) async => shared.add('$path|$text');
+}
+
+extension on FakeChamaRepository {
+  Json get _openingJson => {
+        'state': openingState,
+        'proposed_by': openingState == 'none' ? null : 'Peter',
+        'confirmed_by': openingState == 'confirmed' ? 'Jane' : null,
+        'objection_until': openingState == 'confirmed'
+            ? DateTime.now().add(const Duration(days: 14)).toIso8601String()
+            : null,
+        'lines': openingLines,
+      };
 }
 
 class FakeFileSource implements FileSource {
   @override
+  Future<PickedFile?> pickPhoto() async => const PickedFile('minutes.jpg', [0xff, 0xd8]);
+
+  @override
   Future<PickedFile?> pickStatement() async =>
       PickedFile('march.csv', utf8.encode('Value Date,Narration,Debit,Credit,Balance\n'));
+}
+
+/// A phone key without the keystore: records what it was asked to sign.
+class FakePhoneSigner implements PhoneSigner {
+  FakePhoneSigner({this.isAvailable = true, this.hasKeyAndId = false});
+
+  bool isAvailable;
+  bool hasKeyAndId;
+  bool cancel = false;
+  final signed = <String>[];
+  String? remembered;
+
+  @override
+  Future<bool> available() async => isAvailable;
+
+  @override
+  Future<String?> deviceId() async => hasKeyAndId ? (remembered ?? 'dev-1') : null;
+
+  @override
+  Future<bool> ready() async => isAvailable && hasKeyAndId;
+
+  @override
+  Future<CreatedKey> create(List<int> challenge) async => const CreatedKey(
+      publicKey: 'PUBKEY', chain: ['LEAF', 'ROOT'], strongBox: false);
+
+  @override
+  Future<void> remember(String deviceId) async {
+    remembered = deviceId;
+    hasKeyAndId = true;
+  }
+
+  bool forgotten = false;
+
+  @override
+  Future<void> forget() async {
+    forgotten = true;
+    hasKeyAndId = false;
+    remembered = null;
+  }
+
+  @override
+  Future<String> sign(List<int> data, {required String title, required String subtitle}) async {
+    if (cancel) throw const SecureKeysCancelled('back');
+    signed.add('$title|${utf8.decode(data)}');
+    return 'SIG';
+  }
 }

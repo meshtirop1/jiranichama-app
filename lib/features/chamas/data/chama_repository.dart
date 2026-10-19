@@ -1,4 +1,5 @@
 import '../../../core/api/api_client.dart';
+import '../../../core/providers.dart' show PickedFile;
 import 'models.dart';
 
 /// Every Phase 1 chama endpoint (jiranichama-api docs/flows: chama-setup, statements,
@@ -13,7 +14,8 @@ abstract class ChamaRepository {
       required String accountNo, String paybill, required String statementRoute});
   Future<RuleBook> rules(String id);
   Future<RuleBook> saveRules(String id, Json rules);
-  Future<Invite> invite(String id, {required String role, String? phone});
+  Future<Invite> invite(String id, {required String role, String? phone, bool bySms,
+      String language});
   Future<Chama> submit(String id);
   Future<ChallengeSent> startAdoption(String id);
   Future<Chama> confirmAdoption(String id, {required String challengeId, required String code});
@@ -23,6 +25,7 @@ abstract class ChamaRepository {
   Future<List<Member>> members(String id);
   Future<Position> position(String membershipId);
   Future<LedgerPage> ledger(String id, {int afterSeq = 0});
+  Future<List<AnchorProof>> anchors(String id);
   Future<String> platformKeyPem();
   Future<List<Statement>> statements(String id);
   Future<Statement> uploadStatement(String id, {required String filename,
@@ -30,10 +33,102 @@ abstract class ChamaRepository {
   Future<ChallengeSent> startStatementConfirm(String statementId);
   Future<Statement> confirmStatement(String statementId,
       {required String challengeId, required String code});
+  Future<Statement> submitTypedLines(String statementId, List<Json> lines,
+      {required String idempotencyKey});
   Future<List<BankLine>> unmatched(String id);
   Future<void> assign(String bankLineId, {required String membershipId, required String reason,
       required String idempotencyKey});
   Future<void> notMe(String bankLineId, {String reason, required String idempotencyKey});
+
+  Future<OpeningBalances> opening(String id);
+  Future<OpeningBalances> saveOpening(String id, List<Json> lines);
+  Future<ChallengeSent> startConfirmOpening(String id);
+  Future<OpeningBalances> confirmOpening(String id,
+      {required String challengeId, required String code});
+  Future<void> objectToOpening(String lineId, String reason);
+
+  Future<List<CashReceipt>> cashReceipts(String id);
+  Future<CashReceipt> recordCash(String id, {required String membershipId,
+      required int amountCents, required String idempotencyKey});
+  Future<ChallengeSent> startConfirmCash(String receiptId);
+  Future<CashReceipt> confirmCash(String receiptId,
+      {required String challengeId, required String code});
+  Future<CashReceipt> declineCash(String receiptId, {String reason});
+  Future<void> bankCash(String bankLineId,
+      {required List<String> receiptIds, required String idempotencyKey});
+
+  Future<MoneyOutStatus> moneyOut(String id);
+  Future<ChallengeSent> startEnableMoneyOut(String id);
+  Future<MoneyOutStatus> enableMoneyOut(String id,
+      {required String challengeId, required String code});
+  Future<List<Proposal>> proposals(String id);
+  Future<Proposal> propose(String id, Json body, {required String idempotencyKey});
+  Future<ChallengeSent> startApprove(String proposalId);
+  Future<Proposal> approve(String proposalId,
+      {required String challengeId, required String code});
+  Future<Proposal> declineProposal(String proposalId, String reason);
+  Future<Proposal> cancelProposal(String proposalId, String reason);
+  Future<Proposal> markPaid(String proposalId, String bankReference,
+      {required String idempotencyKey});
+  Future<List<UnapprovedDebit>> unapprovedDebits(String id);
+  Future<Reconciliation> reconciliation(String id);
+  Future<List<VoteInfo>> votes(String id);
+  Future<List<RuleProposal>> ruleProposals(String id);
+  Future<List<Meeting>> meetings(String id);
+  Future<List<LoanInfo>> loans(String id);
+  Future<List<FineInfo>> fines(String id);
+  Future<FineInfo> requestWaiver(String fineId, String reason);
+  Future<ChallengeSent> startWaiverApproval(String waiverId);
+  Future<FineInfo> approveWaiver(String waiverId,
+      {required String challengeId, required String code});
+  Future<FineInfo> declineWaiver(String waiverId, String reason);
+  Future<LoanQuote> loanQuote(String id, {required int amountCents, required int termMonths});
+  Future<LoanInfo> requestLoan(String id, Json body, {required String idempotencyKey});
+  Future<LoanInfo> cancelLoan(String loanId);
+  Future<LoanInfo> replaceGuarantor(String loanId,
+      {required String guaranteeId, required String membershipId});
+  Future<ChallengeSent> startGuarantee(String guaranteeId);
+  Future<LoanInfo> acceptGuarantee(String guaranteeId,
+      {required String challengeId, required String code});
+  Future<LoanInfo> declineGuarantee(String guaranteeId);
+  Future<Meeting> scheduleMeeting(String id, Json body, {required String idempotencyKey});
+  Future<Meeting> cancelMeeting(String meetingId, String reason);
+  Future<Meeting> apologise(String meetingId, String reason);
+  Future<Meeting> startMeeting(String meetingId);
+  Future<CheckInCode> checkInCode(String meetingId);
+  Future<Meeting> checkIn(String meetingId, String code);
+  Future<Meeting> markAttendance(String meetingId, String membershipId, {bool? late});
+  Future<Meeting> closeAttendance(String meetingId);
+  Future<Meeting> postMinutes(String meetingId, {required String text, PickedFile? photo});
+  Future<Meeting> objectToMinutes(String minutesId, String reason);
+  Future<List<int>> minutesPhoto(String minutesId);
+  Future<RuleProposal> proposeRules(String id, Json rules,
+      {required String reason, required String idempotencyKey});
+  Future<RuleProposal> withdrawRuleProposal(String proposalId);
+  Future<ChallengeSent> startBallot(String voteId, String choice);
+  Future<VoteInfo> castBallot(String voteId, String choice,
+      {required String challengeId, required String code});
+  Future<Json> ballotPayload(String voteId, String choice);
+  Future<VoteInfo> submitSignedBallot(String voteId, Json body);
+  Future<String> attestNonce();
+  Future<ChallengeSent> startRegisterDevice(Json body);
+  Future<Json> registerDevice(Json body, {required String challengeId, required String code});
+  Future<Json> signingPayload(String proposalId);
+  Future<Proposal> submitSignature(String proposalId, Json body);
+  Future<RotationInfo> rotation(String id);
+  Future<RotationInfo> startRotation(String id,
+      {List<String>? order, required String idempotencyKey});
+  Future<Proposal> proposeNextTurn(String id, {required String idempotencyKey});
+  Future<UnapprovedDebit> linkDebit(String debitId, String proposalId);
+  Future<UnapprovedDebit> explainDebit(String debitId, String explanation);
+
+  Future<MemberStatement> memberStatement(String membershipId, {String? from});
+  Future<ChamaStatement> chamaStatement(String id, {String? from});
+  Future<IssuedDocument> issueMemberStatementPdf(String membershipId,
+      {String? from, required String language, required String idempotencyKey});
+  Future<IssuedDocument> issueChamaStatementPdf(String id,
+      {String? from, required String language, required String idempotencyKey});
+  Future<List<int>> documentFile(String documentId);
 }
 
 class HttpChamaRepository implements ChamaRepository {
@@ -70,9 +165,12 @@ class HttpChamaRepository implements ChamaRepository {
       RuleBook({...await _api.put('/chamas/$id/rules/', rules), 'status': 'draft'});
 
   @override
-  Future<Invite> invite(String id, {required String role, String? phone}) async =>
-      Invite(await _api.post('/chamas/$id/invites/', auth: true,
-          body: {'role': role, if (phone != null && phone.isNotEmpty) 'phone': phone}));
+  Future<Invite> invite(String id, {required String role, String? phone, bool bySms = false,
+          String language = 'en'}) async =>
+      Invite(await _api.post('/chamas/$id/invites/', auth: true, body: {
+        'role': role, if (phone != null && phone.isNotEmpty) 'phone': phone,
+        if (bySms) 'by_sms': true, if (bySms) 'language': language,
+      }));
 
   @override
   Future<Chama> submit(String id) async =>
@@ -132,6 +230,12 @@ class HttpChamaRepository implements ChamaRepository {
           filename: filename, bytes: bytes, idempotencyKey: idempotencyKey));
 
   @override
+  Future<Statement> submitTypedLines(String statementId, List<Json> lines,
+          {required String idempotencyKey}) async =>
+      Statement(await _api.post('/statements/$statementId/typed-lines/',
+          body: {'lines': lines}, auth: true, idempotencyKey: idempotencyKey));
+
+  @override
   Future<ChallengeSent> startStatementConfirm(String statementId) async =>
       ChallengeSent(await _api.post('/statements/$statementId/confirm/', auth: true, body: {}));
 
@@ -159,4 +263,357 @@ class HttpChamaRepository implements ChamaRepository {
     await _api.post('/bank-transactions/$bankLineId/not-me/', auth: true,
         idempotencyKey: idempotencyKey, body: {'reason': reason});
   }
+
+  @override
+  Future<OpeningBalances> opening(String id) async =>
+      OpeningBalances(await _api.get('/chamas/$id/opening-balances/') as Json);
+
+  @override
+  Future<OpeningBalances> saveOpening(String id, List<Json> lines) async =>
+      OpeningBalances(await _api.put('/chamas/$id/opening-balances/', {'lines': lines}));
+
+  @override
+  Future<ChallengeSent> startConfirmOpening(String id) async => ChallengeSent(
+      await _api.post('/chamas/$id/opening-balances/confirm/', auth: true, body: {}));
+
+  @override
+  Future<OpeningBalances> confirmOpening(String id,
+          {required String challengeId, required String code}) async =>
+      OpeningBalances(await _api.post('/chamas/$id/opening-balances/confirm/', auth: true,
+          body: {'challenge_id': challengeId, 'code': code}));
+
+  @override
+  Future<void> objectToOpening(String lineId, String reason) async {
+    await _api.post('/opening-balance-lines/$lineId/object/', auth: true,
+        body: {'reason': reason});
+  }
+
+  @override
+  Future<List<CashReceipt>> cashReceipts(String id) async => [
+        for (final r in await _api.get('/chamas/$id/cash-receipts/') as List)
+          CashReceipt(r as Json),
+      ];
+
+  @override
+  Future<CashReceipt> recordCash(String id, {required String membershipId,
+          required int amountCents, required String idempotencyKey}) async =>
+      CashReceipt(await _api.post('/chamas/$id/cash-receipts/', auth: true,
+          idempotencyKey: idempotencyKey,
+          body: {'membership_id': membershipId, 'amount_cents': amountCents}));
+
+  @override
+  Future<ChallengeSent> startConfirmCash(String receiptId) async => ChallengeSent(
+      await _api.post('/cash-receipts/$receiptId/confirm/', auth: true, body: {}));
+
+  @override
+  Future<CashReceipt> confirmCash(String receiptId,
+          {required String challengeId, required String code}) async =>
+      CashReceipt(await _api.post('/cash-receipts/$receiptId/confirm/', auth: true,
+          body: {'challenge_id': challengeId, 'code': code}));
+
+  @override
+  Future<CashReceipt> declineCash(String receiptId, {String reason = ''}) async =>
+      CashReceipt(await _api.post('/cash-receipts/$receiptId/decline/', auth: true,
+          body: {'reason': reason}));
+
+  @override
+  Future<void> bankCash(String bankLineId,
+      {required List<String> receiptIds, required String idempotencyKey}) async {
+    await _api.post('/bank-transactions/$bankLineId/bank-cash/', auth: true,
+        idempotencyKey: idempotencyKey, body: {'receipt_ids': receiptIds});
+  }
+
+  @override
+  Future<MemberStatement> memberStatement(String membershipId, {String? from}) async =>
+      MemberStatement(await _api.get('/memberships/$membershipId/statement/',
+          query: {'from': ?from}) as Json);
+
+  @override
+  Future<ChamaStatement> chamaStatement(String id, {String? from}) async =>
+      ChamaStatement(await _api.get('/chamas/$id/statement/', query: {'from': ?from}) as Json);
+
+  @override
+  Future<IssuedDocument> issueMemberStatementPdf(String membershipId,
+          {String? from, required String language, required String idempotencyKey}) async =>
+      IssuedDocument(await _api.post('/memberships/$membershipId/statement/pdf/',
+          body: {'language': language, 'period_from': ?from},
+          auth: true, idempotencyKey: idempotencyKey));
+
+  @override
+  Future<IssuedDocument> issueChamaStatementPdf(String id,
+          {String? from, required String language, required String idempotencyKey}) async =>
+      IssuedDocument(await _api.post('/chamas/$id/statement/pdf/',
+          body: {'language': language, 'period_from': ?from},
+          auth: true, idempotencyKey: idempotencyKey));
+
+  @override
+  Future<List<int>> documentFile(String documentId) =>
+      _api.getBytes('/documents/$documentId/file/');
+
+  // Money out
+  @override
+  Future<MoneyOutStatus> moneyOut(String id) async =>
+      MoneyOutStatus(await _api.get('/chamas/$id/money-out/') as Json);
+
+  @override
+  Future<ChallengeSent> startEnableMoneyOut(String id) async =>
+      ChallengeSent(await _api.post('/chamas/$id/money-out/', auth: true, body: {}));
+
+  @override
+  Future<MoneyOutStatus> enableMoneyOut(String id,
+          {required String challengeId, required String code}) async =>
+      MoneyOutStatus(await _api.post('/chamas/$id/money-out/', auth: true,
+          body: {'challenge_id': challengeId, 'code': code}));
+
+  @override
+  Future<List<Proposal>> proposals(String id) async => [
+        for (final p in await _api.get('/chamas/$id/proposals/') as List) Proposal(p as Json)
+      ];
+
+  @override
+  Future<Proposal> propose(String id, Json body, {required String idempotencyKey}) async =>
+      Proposal(await _api.post('/chamas/$id/proposals/', body: body, auth: true,
+          idempotencyKey: idempotencyKey));
+
+  @override
+  Future<ChallengeSent> startApprove(String proposalId) async => ChallengeSent(
+      await _api.post('/proposals/$proposalId/approve/', auth: true, body: {}));
+
+  @override
+  Future<Proposal> approve(String proposalId,
+          {required String challengeId, required String code}) async =>
+      Proposal(await _api.post('/proposals/$proposalId/approve/', auth: true,
+          body: {'challenge_id': challengeId, 'code': code}));
+
+  @override
+  Future<Proposal> declineProposal(String proposalId, String reason) async => Proposal(
+      await _api.post('/proposals/$proposalId/decline/', auth: true, body: {'reason': reason}));
+
+  @override
+  Future<Proposal> cancelProposal(String proposalId, String reason) async => Proposal(
+      await _api.post('/proposals/$proposalId/cancel/', auth: true, body: {'reason': reason}));
+
+  @override
+  Future<Proposal> markPaid(String proposalId, String bankReference,
+          {required String idempotencyKey}) async =>
+      Proposal(await _api.post('/proposals/$proposalId/paid/', auth: true,
+          body: {'bank_reference': bankReference}, idempotencyKey: idempotencyKey));
+
+  @override
+  Future<List<UnapprovedDebit>> unapprovedDebits(String id) async => [
+        for (final d in await _api.get('/chamas/$id/unapproved-debits/') as List)
+          UnapprovedDebit(d as Json)
+      ];
+
+  @override
+  Future<UnapprovedDebit> linkDebit(String debitId, String proposalId) async =>
+      UnapprovedDebit(await _api.post('/unapproved-debits/$debitId/link/', auth: true,
+          body: {'proposal_id': proposalId}));
+
+  @override
+  Future<UnapprovedDebit> explainDebit(String debitId, String explanation) async =>
+      UnapprovedDebit(await _api.post('/unapproved-debits/$debitId/explain/', auth: true,
+          body: {'explanation': explanation}));
+
+  // Merry-go-round
+  @override
+  Future<RotationInfo> rotation(String id) async =>
+      RotationInfo(await _api.get('/chamas/$id/rotation/') as Json);
+
+  @override
+  Future<RotationInfo> startRotation(String id,
+          {List<String>? order, required String idempotencyKey}) async =>
+      RotationInfo(await _api.post('/chamas/$id/rotation/',
+          body: {'order': ?order}, auth: true, idempotencyKey: idempotencyKey));
+
+  @override
+  Future<Proposal> proposeNextTurn(String id, {required String idempotencyKey}) async =>
+      Proposal(await _api.post('/chamas/$id/rotation/next/', body: {}, auth: true,
+          idempotencyKey: idempotencyKey));
+
+  // Phone signing keys
+  @override
+  Future<String> attestNonce() async =>
+      (await _api.post('/devices/attest-nonce/', auth: true, body: {}))['nonce'] as String;
+
+  @override
+  Future<ChallengeSent> startRegisterDevice(Json body) async =>
+      ChallengeSent(await _api.post('/devices/', auth: true, body: body));
+
+  @override
+  Future<Json> registerDevice(Json body,
+          {required String challengeId, required String code}) =>
+      _api.post('/devices/', auth: true,
+          body: {...body, 'challenge_id': challengeId, 'code': code});
+
+  @override
+  Future<Json> signingPayload(String proposalId) =>
+      _api.post('/proposals/$proposalId/signing-payload/', auth: true, body: {});
+
+  @override
+  Future<Proposal> submitSignature(String proposalId, Json body) async =>
+      Proposal(await _api.post('/proposals/$proposalId/signatures/', auth: true, body: body));
+
+  @override
+  Future<Reconciliation> reconciliation(String id) async =>
+      Reconciliation(await _api.get('/chamas/$id/reconciliation/') as Json);
+
+  // Members' votes
+  @override
+  Future<List<VoteInfo>> votes(String id) async =>
+      [for (final v in await _api.get('/chamas/$id/votes/') as List) VoteInfo(v as Json)];
+
+  @override
+  Future<List<FineInfo>> fines(String id) async =>
+      [for (final f in await _api.get('/chamas/$id/fines/') as List) FineInfo(f as Json)];
+
+  @override
+  Future<FineInfo> requestWaiver(String fineId, String reason) async => FineInfo(
+      await _api.post('/fines/$fineId/waiver/', body: {'reason': reason}, auth: true));
+
+  @override
+  Future<ChallengeSent> startWaiverApproval(String waiverId) async => ChallengeSent(
+      await _api.post('/waivers/$waiverId/approve/', body: {}, auth: true));
+
+  @override
+  Future<FineInfo> approveWaiver(String waiverId,
+          {required String challengeId, required String code}) async =>
+      FineInfo(await _api.post('/waivers/$waiverId/approve/', auth: true,
+          body: {'challenge_id': challengeId, 'sms_code': code}));
+
+  @override
+  Future<FineInfo> declineWaiver(String waiverId, String reason) async => FineInfo(
+      await _api.post('/waivers/$waiverId/decline/', body: {'reason': reason}, auth: true));
+
+  @override
+  Future<List<LoanInfo>> loans(String id) async =>
+      [for (final x in await _api.get('/chamas/$id/loans/') as List) LoanInfo(x as Json)];
+
+  @override
+  Future<LoanQuote> loanQuote(String id, {required int amountCents, required int termMonths})
+      async => LoanQuote(await _api.get('/chamas/$id/loans/quote/',
+          query: {'amount_cents': amountCents, 'term_months': termMonths}) as Json);
+
+  @override
+  Future<LoanInfo> requestLoan(String id, Json body, {required String idempotencyKey})
+      async => LoanInfo(await _api.post('/chamas/$id/loans/', body: body, auth: true,
+          idempotencyKey: idempotencyKey));
+
+  @override
+  Future<LoanInfo> cancelLoan(String loanId) async =>
+      LoanInfo(await _api.post('/loans/$loanId/cancel/', body: {}, auth: true));
+
+  @override
+  Future<LoanInfo> replaceGuarantor(String loanId,
+          {required String guaranteeId, required String membershipId}) async =>
+      LoanInfo(await _api.post('/loans/$loanId/guarantors/', auth: true,
+          body: {'guarantee_id': guaranteeId, 'membership_id': membershipId}));
+
+  @override
+  Future<ChallengeSent> startGuarantee(String guaranteeId) async => ChallengeSent(
+      await _api.post('/guarantees/$guaranteeId/accept/', body: {}, auth: true));
+
+  @override
+  Future<LoanInfo> acceptGuarantee(String guaranteeId,
+          {required String challengeId, required String code}) async =>
+      LoanInfo(await _api.post('/guarantees/$guaranteeId/accept/', auth: true,
+          body: {'challenge_id': challengeId, 'sms_code': code}));
+
+  @override
+  Future<LoanInfo> declineGuarantee(String guaranteeId) async =>
+      LoanInfo(await _api.post('/guarantees/$guaranteeId/decline/', body: {}, auth: true));
+
+  @override
+  Future<List<Meeting>> meetings(String id) async =>
+      [for (final m in await _api.get('/chamas/$id/meetings/') as List) Meeting(m as Json)];
+
+  @override
+  Future<Meeting> scheduleMeeting(String id, Json body, {required String idempotencyKey})
+      async => Meeting(await _api.post('/chamas/$id/meetings/', body: body, auth: true,
+          idempotencyKey: idempotencyKey));
+
+  @override
+  Future<Meeting> cancelMeeting(String meetingId, String reason) async => Meeting(
+      await _api.post('/meetings/$meetingId/cancel/', body: {'reason': reason}, auth: true));
+
+  @override
+  Future<Meeting> apologise(String meetingId, String reason) async => Meeting(
+      await _api.post('/meetings/$meetingId/apologies/', body: {'reason': reason},
+          auth: true));
+
+  @override
+  Future<Meeting> startMeeting(String meetingId) async =>
+      Meeting(await _api.post('/meetings/$meetingId/start/', body: {}, auth: true));
+
+  @override
+  Future<CheckInCode> checkInCode(String meetingId) async =>
+      CheckInCode(await _api.get('/meetings/$meetingId/check-in-code/') as Json);
+
+  @override
+  Future<Meeting> checkIn(String meetingId, String code) async => Meeting(
+      await _api.post('/meetings/$meetingId/check-in/', body: {'code': code}, auth: true));
+
+  @override
+  Future<Meeting> markAttendance(String meetingId, String membershipId, {bool? late}) async =>
+      Meeting(await _api.post('/meetings/$meetingId/attendance/',
+          body: {'membership_id': membershipId, 'late': ?late}, auth: true));
+
+  @override
+  Future<Meeting> closeAttendance(String meetingId) async =>
+      Meeting(await _api.post('/meetings/$meetingId/close/', body: {}, auth: true));
+
+  @override
+  Future<Meeting> postMinutes(String meetingId, {required String text, PickedFile? photo})
+      async => Meeting(await _api.postForm('/meetings/$meetingId/minutes/', {'text': text},
+          fileField: photo == null ? null : 'photo', filename: photo?.name,
+          bytes: photo?.bytes));
+
+  @override
+  Future<Meeting> objectToMinutes(String minutesId, String reason) async => Meeting(
+      await _api.post('/minutes/$minutesId/objections/', body: {'reason': reason},
+          auth: true));
+
+  @override
+  Future<List<int>> minutesPhoto(String minutesId) =>
+      _api.getBytes('/minutes/$minutesId/photo/');
+
+  @override
+  Future<List<RuleProposal>> ruleProposals(String id) async => [
+        for (final p in await _api.get('/chamas/$id/rule-proposals/') as List)
+          RuleProposal(p as Json),
+      ];
+
+  @override
+  Future<RuleProposal> proposeRules(String id, Json rules,
+          {required String reason, required String idempotencyKey}) async =>
+      RuleProposal(await _api.post('/chamas/$id/rule-proposals/',
+          body: {'rules': rules, 'reason': reason}, auth: true,
+          idempotencyKey: idempotencyKey));
+
+  @override
+  Future<RuleProposal> withdrawRuleProposal(String proposalId) async => RuleProposal(
+      await _api.post('/rule-proposals/$proposalId/withdraw/', body: {}, auth: true));
+
+  @override
+  Future<ChallengeSent> startBallot(String voteId, String choice) async => ChallengeSent(
+      await _api.post('/votes/$voteId/ballots/', auth: true, body: {'choice': choice}));
+
+  @override
+  Future<VoteInfo> castBallot(String voteId, String choice,
+          {required String challengeId, required String code}) async =>
+      VoteInfo(await _api.post('/votes/$voteId/ballots/', auth: true,
+          body: {'choice': choice, 'challenge_id': challengeId, 'code': code}));
+
+  @override
+  Future<Json> ballotPayload(String voteId, String choice) =>
+      _api.post('/votes/$voteId/signing-payload/', auth: true, body: {'choice': choice});
+
+  @override
+  Future<VoteInfo> submitSignedBallot(String voteId, Json body) async =>
+      VoteInfo(await _api.post('/votes/$voteId/signed-ballots/', auth: true, body: body));
+
+  @override
+  Future<List<AnchorProof>> anchors(String id) async => [
+        for (final a in await _api.get('/chamas/$id/anchors/') as List) AnchorProof(a as Json)
+      ];
 }

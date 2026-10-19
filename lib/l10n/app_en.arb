@@ -291,7 +291,7 @@
   "reasonLabel": "Why it belongs to them",
   "assign": "Assign",
   "errTreasurerUpload": "Another official must upload the statement, so the treasurer is not checking their own work.",
-  "errSecondOfficial": "A different official must confirm a statement you uploaded.",
+  "errSecondOfficial": "A different official must confirm what you entered.",
   "errDuplicateStatement": "This exact file was uploaded before.",
   "errRoleTaken": "Someone already holds this office.",
   "errAlreadyMember": "That person is already a member of this chama.",
@@ -311,5 +311,1132 @@
         "type": "String"
       }
     }
-  }
+  },
+  "openingBalances": "Opening balances",
+  "openingIntro": "Moving from a notebook? Enter what each member already had. A different official then confirms it.",
+  "savingsLabel": "Savings (KES)",
+  "finesLabel": "Unpaid fines (KES)",
+  "saveDraft": "Save draft",
+  "draftSaved": "Draft saved. Another official must confirm it.",
+  "confirmOpening": "Confirm these opening balances",
+  "openingConfirmed": "Confirmed by {name}. Members can object until {date}.",
+  "@openingConfirmed": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "openingDraftBy": "Entered by {name}, waiting for another official to confirm.",
+  "@openingDraftBy": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "objectLabel": "What is wrong?",
+  "objectButton": "Object to my opening balance",
+  "objectionSent": "Your objection is recorded. Every member can see it.",
+  "objectionsCount": "{count, plural, =1{1 objection} other{{count} objections}}",
+  "@objectionsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "cashAtMeetings": "Cash at meetings",
+  "recordCash": "Record cash received",
+  "amountKesLabel": "Amount (KES)",
+  "memberLabel": "Member",
+  "cashRecorded": "Waiting for the member to confirm",
+  "cashConfirmed": "Waiting for the bank deposit",
+  "cashBanked": "Banked",
+  "cashDeclined": "The member says they did not pay this",
+  "cashOverdue": "Not banked in time",
+  "confirmCash": "Yes, I paid this",
+  "declineCash": "This was not me",
+  "cashToConfirm": "{count, plural, =1{1 cash payment is} other{{count} cash payments are}} waiting for you to confirm.",
+  "@cashToConfirm": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "pendingCash": "Cash waiting for the bank",
+  "openingSavings": "Brought in (opening)",
+  "itsCash": "This is cash from a meeting",
+  "pickCashReceipts": "Which cash does this deposit carry?",
+  "cashTotal": "Selected {total} of {deposit}",
+  "@cashTotal": {
+    "placeholders": {
+      "total": {
+        "type": "String"
+      },
+      "deposit": {
+        "type": "String"
+      }
+    }
+  },
+  "bankIt": "Link deposit",
+  "noConfirmedCash": "No confirmed cash is waiting for the bank.",
+  "errAmountsDiffer": "The cash receipts must add up to the deposit exactly.",
+  "errObjectionClosed": "The time to object has passed.",
+  "recordButton": "Record",
+  "myStatement": "My statement",
+  "seeMyStatement": "See my statement",
+  "memberStatement": "Member statement",
+  "chamaStatement": "Chama statement",
+  "periodAll": "Since joining",
+  "periodYear": "This year",
+  "periodQuarter": "Last 3 months",
+  "periodRange": "{from} to {to}",
+  "@periodRange": {
+    "placeholders": {
+      "from": {
+        "type": "String"
+      },
+      "to": {
+        "type": "String"
+      }
+    }
+  },
+  "inThisPeriod": "In this period",
+  "positionOn": "Position on {date}",
+  "@positionOn": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "finesRaised": "Fines raised",
+  "finesPaid": "Fines paid",
+  "finesWaived": "Fines waived",
+  "totalSavings": "Total savings",
+  "noLinesInPeriod": "Nothing was recorded in this period.",
+  "reversalOf": "Reversal of {receipt}",
+  "@reversalOf": {
+    "placeholders": {
+      "receipt": {
+        "type": "String"
+      }
+    }
+  },
+  "entryOpening": "Opening balance",
+  "entryPendingCash": "Cash at a meeting (waiting for the bank)",
+  "entryFineWaived": "Fine waived",
+  "getPdf": "Get PDF statement",
+  "pdfReady": "The PDF statement is ready.",
+  "checkCode": "Check code: {code}",
+  "@checkCode": {
+    "placeholders": {
+      "code": {
+        "type": "String"
+      }
+    }
+  },
+  "anyoneCanCheck": "Whoever you give it to can check it is genuine at {url}",
+  "@anyoneCanCheck": {
+    "placeholders": {
+      "url": {
+        "type": "String"
+      }
+    }
+  },
+  "sharePdf": "Share PDF",
+  "pdfOnlyForMember": "Only the member or an official can get this member's PDF statement.",
+  "bankHeading": "Bank",
+  "reconciledTo": "Bank statement reconciled to {date}",
+  "@reconciledTo": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "closingOnStatement": "Closing balance on that statement",
+  "noBankStatementYet": "No bank statement has been accepted yet.",
+  "unmatchedSummary": "{count} payment(s) not yet matched: {amount}",
+  "@unmatchedSummary": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      },
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "cashNotBanked": "Cash confirmed, not yet banked",
+  "totalLabel": "Total",
+  "errBadDates": "Choose a period that ends today or earlier.",
+  "statementNeedsTyping": "Lines to type in",
+  "typeLinesNotice": "{count} line(s) could not be read. Type them in from the bank's own statement.",
+  "@typeLinesNotice": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "typeLinesButton": "Type in lines",
+  "typeLinesTitle": "Type in unreadable lines",
+  "typeLinesIntro": "Copy each line exactly from the bank's statement. The whole statement must then add up, and a different official confirms it. Every member will see these lines were typed in.",
+  "lineInFile": "Line {n} in the file",
+  "@lineInFile": {
+    "placeholders": {
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "dateLabel": "Date (YYYY-MM-DD)",
+  "moneyIn": "Money in",
+  "moneyOut": "Money out",
+  "descriptionLabel": "Description",
+  "referenceOptional": "Reference (if shown)",
+  "balanceOptional": "Balance after this line, KES (if shown)",
+  "saveTypedLines": "Save typed lines",
+  "errTypedDoNotAddUp": "With these lines the statement does not add up. Check the amounts and dates against the bank's statement.",
+  "errTypedIncomplete": "Type in every line.",
+  "errTypedInvalid": "Check each line: a date, and an amount of money in or money out.",
+  "typedLinesBy": "{count} line(s) typed in by {name}",
+  "@typedLinesBy": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      },
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "typedIn": "Typed in",
+  "typedLinesSaved": "Saved. Another official now confirms the statement.",
+  "editAllRules": "Edit all rules",
+  "rulesEditorTitle": "All rules",
+  "rulesEditorIntro": "These become the chama's constitution once members adopt them. Every setting shows in the rule book members confirm.",
+  "secContributions": "Contributions",
+  "frequencyMonthly": "Paid every month.",
+  "cashBankingDaysLabel": "Days to bank cash from a meeting",
+  "allocationTitle": "When a payment comes in, it pays in this order",
+  "allocArrears": "Months behind",
+  "allocFines": "Fines",
+  "allocCurrent": "This month",
+  "moveUp": "Move up",
+  "moveDown": "Move down",
+  "secLateFine": "Late fine",
+  "lateFineOn": "Charge a late fine",
+  "fineAmountLabel": "Fine (KES)",
+  "fineCapLabel": "Most fines in a month (KES, empty for no limit)",
+  "secOfficials": "Officials",
+  "officialsHelp": "At least two. Nobody approves a payout to themselves.",
+  "secApprovals": "Approving money out",
+  "approvalsPhase2": "Used once the chama pays out through the app.",
+  "tierUpTo": "Up to (KES)",
+  "tierAnyAmount": "Any larger amount",
+  "tierOfficials": "Officials who must approve: {n}",
+  "@tierOfficials": {
+    "placeholders": {
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "tierMemberVote": "Members also vote",
+  "addTier": "Add a level",
+  "removeTier": "Remove this level",
+  "deadlineHoursLabel": "Hours to approve before it lapses",
+  "secMembership": "Membership",
+  "entryFeeLabel": "Entry fee (KES)",
+  "newMembersVote": "New members need a members' vote",
+  "secAdoption": "Adopting these rules",
+  "membersSharePct": "Share of members who must confirm (%)",
+  "statementEveryDays": "A new bank statement at least every (days)",
+  "secKyc": "ID checks",
+  "kycPayerChama": "The chama pays",
+  "kycPayerMember": "Each member pays",
+  "ruleOutOfRange": "This value is out of range.",
+  "ruleTiersLastUnlimited": "The last level must cover any amount.",
+  "ruleTiersOnlyLast": "Only the last level can be without a limit.",
+  "ruleTiersOrder": "Each level's limit must be higher than the one before.",
+  "ruleTiersOfficialsOrder": "A larger amount cannot need fewer officials.",
+  "ruleTiersTooMany": "Too many officials: the person being paid never approves.",
+  "ruleFineNeedsAmount": "A late fine that is on needs an amount.",
+  "ruleFineCapBelow": "The monthly limit cannot be lower than one fine.",
+  "moneyOutOffIntro": "Money out is off. Members' payments are recorded, but payouts are not approved here yet. When two officials switch it on, every payment out needs approval in the app, and any money leaving the bank without it alerts every member.",
+  "switchOnMoneyOut": "Switch on money out",
+  "consentsSoFar": "{count} of {needed} officials have agreed",
+  "@consentsSoFar": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      },
+      "needed": {
+        "type": "String"
+      }
+    }
+  },
+  "availableToPromise": "Available after money already promised: {amount}",
+  "@availableToPromise": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "balanceUnknown": "No bank statement accepted yet, so the balance is not known.",
+  "proposePayment": "Propose a payment",
+  "toAMember": "To a member",
+  "toSomeoneElse": "To someone else",
+  "payeeLabel": "Who is paid",
+  "payeeAccountLabel": "Their account (optional), e.g. Equity ending 4417",
+  "purposeLabel": "What it is for",
+  "proposeButton": "Propose",
+  "proposalsHeading": "Payments out",
+  "noProposals": "No payments proposed yet.",
+  "stCollecting": "Waiting for approvals",
+  "stApproved": "Approved: pay at the bank",
+  "stPaidPending": "Paid: waiting for the bank statement",
+  "stPaid": "Paid and matched to the bank",
+  "stRefused": "Refused by the rules",
+  "stRejected": "Rejected by officials",
+  "stExpired": "Expired",
+  "stCancelled": "Cancelled",
+  "approvalsCount": "{approved} of {needed} approvals",
+  "@approvalsCount": {
+    "placeholders": {
+      "approved": {
+        "type": "String"
+      },
+      "needed": {
+        "type": "String"
+      }
+    }
+  },
+  "refusedByRule": "Rule {rule}: {reason}",
+  "@refusedByRule": {
+    "placeholders": {
+      "rule": {
+        "type": "String"
+      },
+      "reason": {
+        "type": "String"
+      }
+    }
+  },
+  "refusalArrears": "the payee has unpaid contributions.",
+  "refusalMoney": "there is not enough money after what is already promised.",
+  "refusalNoBalance": "no bank statement has been accepted yet.",
+  "refusalVote": "this amount needs a members' vote, which is not in the app yet.",
+  "approveButton": "Approve",
+  "declineButton": "Decline",
+  "cancelProposal": "Cancel this proposal",
+  "markPaid": "Mark as paid at the bank",
+  "bankReferenceLabel": "Bank reference (from the receipt)",
+  "proposedByLine": "Proposed by {name}",
+  "@proposedByLine": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "answeredApproved": "{name} ({role}) approved",
+  "@answeredApproved": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "role": {
+        "type": "String"
+      }
+    }
+  },
+  "answeredDeclined": "{name} ({role}) declined: {reason}",
+  "@answeredDeclined": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "role": {
+        "type": "String"
+      },
+      "reason": {
+        "type": "String"
+      }
+    }
+  },
+  "payeeNeverApproves": "You are being paid, so you do not approve this.",
+  "unapprovedHeading": "Money out with no approval",
+  "unapprovedAlert": "{amount} left the bank on {date} with no approval. Every member was told.",
+  "@unapprovedAlert": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "unapprovedExplained": "Explained by {name}: {text}",
+  "@unapprovedExplained": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "text": {
+        "type": "String"
+      }
+    }
+  },
+  "unapprovedLinked": "Linked to an approved payment by {name}",
+  "@unapprovedLinked": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "explainButton": "Explain",
+  "linkButton": "Link to an approved payment",
+  "waitingYourApproval": "{count} payment(s) waiting for your approval",
+  "@waitingYourApproval": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "errMoneyOutOff": "Money out is not switched on for this chama.",
+  "errPayeeCannotApprove": "Nobody approves a payment to themselves.",
+  "errAlreadyAnswered": "You have already answered this.",
+  "errNotCollecting": "This is no longer waiting for approvals.",
+  "errNotApproved": "Only an approved payment can be marked paid.",
+  "errFillIn": "Fill in the missing details.",
+  "errNotLinkable": "That cannot be linked or has already been dealt with.",
+  "whyLabel": "Why",
+  "receiptLabel": "Receipt",
+  "merryGoRound": "Merry-go-round",
+  "rotationOrderDraw": "Order: drawn by the app from the records (anyone can re-check)",
+  "rotationOrderFixed": "Order: set by the officials",
+  "rotationArrearsSkip": "Behind on contributions: moved to the end",
+  "rotationArrearsDeduct": "Behind on contributions: paid less what they owe",
+  "rotationArrearsBlock": "Behind on contributions: the rotation waits",
+  "rotationNotStarted": "No cycle is running.",
+  "startRotation": "Start the rotation",
+  "startRotationDrawConfirm": "The app will draw the order from the chama's records. Everyone will see the order and can re-check the draw.",
+  "setOrderTitle": "Set the order",
+  "cycleLine": "Cycle {cycle} · each turn receives {pot}",
+  "@cycleLine": {
+    "placeholders": {
+      "cycle": {
+        "type": "String"
+      },
+      "pot": {
+        "type": "String"
+      }
+    }
+  },
+  "drawSeedLine": "Drawn from the records (seed {seed}…, receipt {receipt}). Anyone can re-run the draw.",
+  "@drawSeedLine": {
+    "placeholders": {
+      "seed": {
+        "type": "String"
+      },
+      "receipt": {
+        "type": "String"
+      }
+    }
+  },
+  "turnNext": "Next",
+  "turnPending": "Waiting",
+  "turnPaid": "Paid",
+  "turnSkipped": "Skipped",
+  "proposeNextTurn": "Propose next payout",
+  "errTurnInProgress": "The current turn already has a payout proposal.",
+  "errTurnBlocked": "The member whose turn it is must catch up first (rule 8.2).",
+  "errRotationRunning": "A rotation is already running.",
+  "errRotationComplete": "Everyone has had their turn. Start a new cycle.",
+  "errNoRotationRunning": "Start the rotation first.",
+  "errOrderIncomplete": "Put every member in the order, once each.",
+  "rotationOrderLabel": "Order of turns",
+  "orderDraw": "Drawn by the app",
+  "orderFixed": "Set by the officials",
+  "arrearsLabel": "When the member is behind on contributions",
+  "arrearsSkip": "Move them to the end",
+  "arrearsDeduct": "Pay them less what they owe",
+  "arrearsBlock": "Wait until they catch up",
+  "fingerprintCardTitle": "Approve with your fingerprint",
+  "fingerprintCardBody": "Set up this phone once. Then approvals need your fingerprint, face or phone PIN, and nobody can approve for you with an SMS code.",
+  "setUpThisPhone": "Set up this phone",
+  "phoneReady": "This phone approves payments with your fingerprint.",
+  "approvePromptTitle": "Approve {amount} to {payee}",
+  "@approvePromptTitle": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "payee": {
+        "type": "String"
+      }
+    }
+  },
+  "answeredApprovedPhone": "{name} ({role}) approved with their phone key",
+  "@answeredApprovedPhone": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "role": {
+        "type": "String"
+      }
+    }
+  },
+  "errUseDeviceKey": "Approve on the phone you set up, with your fingerprint.",
+  "errSignatureInvalid": "The phone's signature did not check out. Try again.",
+  "errPayloadChanged": "What you are approving has changed. Look again.",
+  "errOtherPhone": "Your approvals are set up on another phone.",
+  "errKeyNotTrusted": "This phone cannot keep a signing key safely. Approve by SMS code instead.",
+  "errAttestationInvalid": "This phone's key could not be checked.",
+  "recMatch": "Records match the bank · checked {date}",
+  "@recMatch": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "recGap": "The records and the bank differ by {amount} since {date}.",
+  "@recGap": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "recBreach": "BREACH: the records and the bank have differed by {amount} for {days} days. Officials must explain it.",
+  "@recBreach": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "days": {
+        "type": "String"
+      }
+    }
+  },
+  "recUnmatched": "{amount} is payments not yet matched to a member.",
+  "@recUnmatched": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "recUnexplained": "{amount} is not explained by any record.",
+  "@recUnexplained": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "recNoStatement": "Not yet checked against the bank: no bank statement has been accepted.",
+  "recBreachSoon": "It becomes a breach, and every member is told, after {days} days.",
+  "@recBreachSoon": {
+    "placeholders": {
+      "days": {
+        "type": "String"
+      }
+    }
+  },
+  "recBankRecords": "Bank {bank} · records {records}",
+  "@recBankRecords": {
+    "placeholders": {
+      "bank": {
+        "type": "String"
+      },
+      "records": {
+        "type": "String"
+      }
+    }
+  },
+  "membersVote": "Members' vote",
+  "voteOpen": "Open: members are voting",
+  "votePassed": "Passed",
+  "voteFailed": "Failed: the members said no",
+  "voteLapsed": "Lapsed: not enough members voted",
+  "voteYes": "Vote yes",
+  "voteNo": "Vote no",
+  "voteYesPrompt": "Vote YES",
+  "voteNoPrompt": "Vote NO",
+  "voteCloses": "Closes {when}",
+  "@voteCloses": {
+    "placeholders": {
+      "when": {
+        "type": "String"
+      }
+    }
+  },
+  "voteTurnout": "{cast} of {eligible} have voted · {quorum} needed for it to count",
+  "@voteTurnout": {
+    "placeholders": {
+      "cast": {
+        "type": "String"
+      },
+      "eligible": {
+        "type": "String"
+      },
+      "quorum": {
+        "type": "String"
+      }
+    }
+  },
+  "voteRule": "It passes with more than {pct}% yes.",
+  "@voteRule": {
+    "placeholders": {
+      "pct": {
+        "type": "String"
+      }
+    }
+  },
+  "voteSecret": "Secret vote: who voted is shown, not how.",
+  "youVoted": "You have voted.",
+  "youVotedYes": "You voted yes.",
+  "youVotedNo": "You voted no.",
+  "voteTally": "Yes {yes} · No {no}",
+  "@voteTally": {
+    "placeholders": {
+      "yes": {
+        "type": "String"
+      },
+      "no": {
+        "type": "String"
+      }
+    }
+  },
+  "whoVoted": "Who has voted",
+  "voteWaiting": "Your vote is needed: {question}",
+  "@voteWaiting": {
+    "placeholders": {
+      "question": {
+        "type": "String"
+      }
+    }
+  },
+  "errAlreadyVoted": "You have already voted. The first vote counts.",
+  "errVoteClosed": "This vote has closed.",
+  "errNotEligible": "You do not vote on this one.",
+  "statementOverdue": "The bank statement is {days} day(s) overdue. Upload it from Bank statements.",
+  "@statementOverdue": {
+    "placeholders": {
+      "days": {
+        "type": "String"
+      }
+    }
+  },
+  "statementNotCheckedSince": "Records not checked against the bank since {date}.",
+  "@statementNotCheckedSince": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "sinceGoingLive": "the chama went live",
+  "fromMpesa": "From M-Pesa just now",
+  "inviteMember": "Invite a member",
+  "inviteBySms": "They have no smartphone",
+  "inviteBySmsHelp": "They get the main rules by SMS and reply YES with a code to join.",
+  "sendSmsInvite": "Send the SMS invite",
+  "createInviteCode": "Create an invite code",
+  "inviteSmsSent": "Sent to {phone}. They reply YES with the code to join.",
+  "@inviteSmsSent": {
+    "placeholders": {
+      "phone": {
+        "type": "String"
+      }
+    }
+  },
+  "inviteCodeToShare": "Invite code {code}: they enter it in the app to join.",
+  "@inviteCodeToShare": {
+    "placeholders": {
+      "code": {
+        "type": "String"
+      }
+    }
+  },
+  "errSmsInviteNotAllowed": "SMS invites are for members of an active chama, with a phone number.",
+  "anchorOk": "Matches the public anchor of {date}: this phone checked the chain up to entry #{seq} against it.",
+  "@anchorOk": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      },
+      "seq": {
+        "type": "String"
+      }
+    }
+  },
+  "anchorBad": "Does NOT match the public anchor of {date}. Tell the officials and JiraniChama.",
+  "@anchorBad": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "errNoRuleChange": "These are the rules already in force. Change at least one setting.",
+  "errProposalOpen": "Another change to the same rules is being decided. Wait until it is.",
+  "errCoolingOff": "The members turned this change down recently. It can be raised again later.",
+  "errCannotWithdraw": "Only the official who proposed it can withdraw it, during the notice period.",
+  "proposeRuleChange": "Propose a rule change",
+  "proposeRuleChangeIntro": "Change any setting, then say why. Members get notice, then vote. If it passes it starts on the 1st of next month.",
+  "sendRuleChange": "Send to members",
+  "ruleChangeReason": "Why should the rules change?",
+  "ruleChangeTitle": "Rule change",
+  "rpNotice": "Members are reading it",
+  "rpVoting": "Members are voting",
+  "rpAdopted": "Adopted, starts soon",
+  "rpInForce": "In force",
+  "rpRejected": "Turned down",
+  "rpLapsed": "Too few voted",
+  "rpWithdrawn": "Withdrawn",
+  "rpNoticeUntil": "Members can read it until {date}. Then the vote opens for {days} days.",
+  "@rpNoticeUntil": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      },
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "rpStartsOn": "Adopted by the members. It starts on {date}.",
+  "@rpStartsOn": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "rpInForceSince": "In force since {date}.",
+  "@rpInForceSince": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "rpProposedBy": "Proposed by {name}",
+  "@rpProposedBy": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "rpThresholds": "Passes if {quorum}% of members vote and more than {pass}% say yes.",
+  "@rpThresholds": {
+    "placeholders": {
+      "quorum": {
+        "type": "int"
+      },
+      "pass": {
+        "type": "int"
+      }
+    }
+  },
+  "rpClause": "Rule {ref}",
+  "@rpClause": {
+    "placeholders": {
+      "ref": {
+        "type": "String"
+      }
+    }
+  },
+  "rpBefore": "Now",
+  "rpAfter": "Proposed",
+  "rpNone": "(none)",
+  "rpOpenVote": "Go to the vote",
+  "rpWithdraw": "Withdraw this change",
+  "meetingsTitle": "Meetings",
+  "meetNoneComing": "No meeting scheduled",
+  "meetNext": "Next: {title}, {when}",
+  "@meetNext": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      },
+      "when": {
+        "type": "String"
+      }
+    }
+  },
+  "meetNoneYet": "No meetings yet.",
+  "meetSchedule": "Schedule a meeting",
+  "meetScheduleIntro": "Members get an SMS 2 days and 2 hours before. What you write here cannot be edited later; cancel and schedule again if plans change.",
+  "meetTitleLabel": "What meeting",
+  "meetPlaceLabel": "Where",
+  "meetLinkLabel": "Online link (optional)",
+  "meetAgendaLabel": "Agenda",
+  "meetScheduled": "Scheduled",
+  "meetInProgress": "Under way: check in now",
+  "meetAttendanceClosed": "Attendance closed, minutes to come",
+  "meetMinutesPending": "Minutes out: members may object",
+  "meetSealed": "Minutes sealed",
+  "meetCancelled": "Cancelled",
+  "meetCancelledBecause": "Cancelled: {reason}",
+  "@meetCancelledBecause": {
+    "placeholders": {
+      "reason": {
+        "type": "String"
+      }
+    }
+  },
+  "meetPresent": "Present",
+  "meetLate": "Late",
+  "meetExcused": "Excused (apology)",
+  "meetApology": "Sent an apology",
+  "meetAbsent": "Absent",
+  "meetExpected": "Not checked in",
+  "meetMyStatus": "You: {status}",
+  "@meetMyStatus": {
+    "placeholders": {
+      "status": {
+        "type": "String"
+      }
+    }
+  },
+  "meetApologySend": "Send an apology",
+  "meetApologyReason": "Why can't you come?",
+  "meetCheckIn": "Check in: scan the secretary's code",
+  "meetTypeCode": "Type the code instead",
+  "meetCodeLabel": "Six-digit code",
+  "meetCheckedIn": "You are checked in.",
+  "meetScanTitle": "Scan the meeting code",
+  "meetStart": "Open the meeting for check-in",
+  "meetCancel": "Cancel the meeting",
+  "meetCancelReason": "Why is it cancelled?",
+  "meetShowCode": "Show the check-in code",
+  "meetCodeHelp": "Members scan this or type the number. It changes every 30 seconds.",
+  "meetClose": "Close attendance",
+  "meetCloseConfirm": "Close attendance? Members not checked in are recorded as absent and the rules' fines are raised.",
+  "meetMarkPresent": "Present",
+  "meetMarkLate": "Late",
+  "meetPeople": "Attendance: {present} of {total}",
+  "@meetPeople": {
+    "placeholders": {
+      "present": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "meetAttendanceReceipt": "Attendance on the record, receipt {code}",
+  "@meetAttendanceReceipt": {
+    "placeholders": {
+      "code": {
+        "type": "String"
+      }
+    }
+  },
+  "meetWriteMinutes": "Write the minutes",
+  "meetReviseMinutes": "Revise the minutes",
+  "meetMinutesIntro": "Write the minutes, or add a photo of handwritten ones. Every member gets them and may object within a week.",
+  "meetMinutesLabel": "Minutes",
+  "meetAddPhoto": "Add a photo of the minutes",
+  "meetSendMinutes": "Send to members",
+  "meetMinutesSent": "Minutes sent to every member.",
+  "meetMinutesVersion": "Minutes (version {version})",
+  "@meetMinutesVersion": {
+    "placeholders": {
+      "version": {
+        "type": "int"
+      }
+    }
+  },
+  "meetObjectUntil": "Members may object until {when}.",
+  "@meetObjectUntil": {
+    "placeholders": {
+      "when": {
+        "type": "String"
+      }
+    }
+  },
+  "meetObjection": "{name} objects: {reason}",
+  "@meetObjection": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "reason": {
+        "type": "String"
+      }
+    }
+  },
+  "meetObject": "Object to the minutes",
+  "meetObjectReason": "What is wrong?",
+  "meetSealedReceipt": "Sealed on the record, receipt {code}",
+  "@meetSealedReceipt": {
+    "placeholders": {
+      "code": {
+        "type": "String"
+      }
+    }
+  },
+  "errMeetingState": "That is not possible at this stage of the meeting.",
+  "errPlaceRequired": "Say where the meeting is, or give the online link.",
+  "errTooLate": "Apologies are sent before the meeting starts.",
+  "errTooEarly": "A meeting can be opened from an hour before it starts.",
+  "errMeetCodeWrong": "That is not the code on the secretary's phone now. Scan again.",
+  "errAlreadyCheckedIn": "Already marked present.",
+  "errAlreadySent": "Already sent.",
+  "errMinutesEmpty": "Write the minutes or add a photo of them.",
+  "errMinutesOut": "The minutes are out. A revision answers objections.",
+  "rulesMeetings": "Meetings",
+  "rulesAbsenceFine": "Fine for missing a meeting (KES, 0 for none)",
+  "rulesLateFine": "Fine for arriving late (KES, 0 for none)",
+  "rulesLateAfter": "Late after (minutes)",
+  "rulesApologyExcuses": "An apology before the meeting avoids the fine",
+  "rulesObjectionDays": "Days to object to the minutes",
+  "loansTitle": "Loans",
+  "loansNone": "No loans yet.",
+  "loanOwed": "{amount} owed",
+  "@loanOwed": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "loanRequest": "Request a loan",
+  "loanIntro": "Enter the amount and months, then see the terms: your limit, the interest and every instalment, before you send anything.",
+  "loanAmountLabel": "Amount (KES)",
+  "loanTermLabel": "Months to repay",
+  "loanPurposeLabel": "What is the loan for?",
+  "loanSeeTerms": "See the terms",
+  "loanSend": "Ask the guarantors",
+  "loanLimit": "You can borrow up to {limit} (your savings: {savings}).",
+  "@loanLimit": {
+    "placeholders": {
+      "limit": {
+        "type": "String"
+      },
+      "savings": {
+        "type": "String"
+      }
+    }
+  },
+  "loanTerms": "Interest {rate}% a month, {how}.",
+  "@loanTerms": {
+    "placeholders": {
+      "rate": {
+        "type": "String"
+      },
+      "how": {
+        "type": "String"
+      }
+    }
+  },
+  "loanFlat": "on the amount borrowed",
+  "loanReducing": "on what is still owed",
+  "loanReason": "Rule {rule}: {message}",
+  "@loanReason": {
+    "placeholders": {
+      "rule": {
+        "type": "String"
+      },
+      "message": {
+        "type": "String"
+      }
+    }
+  },
+  "loanTotals": "Interest {interest} · total to repay {total}",
+  "@loanTotals": {
+    "placeholders": {
+      "interest": {
+        "type": "String"
+      },
+      "total": {
+        "type": "String"
+      }
+    }
+  },
+  "loanPickGuarantors": "Choose {count} guarantors. Each guarantees {share}.",
+  "@loanPickGuarantors": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "share": {
+        "type": "String"
+      }
+    }
+  },
+  "loanColDue": "Due",
+  "loanColPrincipal": "Principal",
+  "loanColInterest": "Interest",
+  "loanColTotal": "Total",
+  "loanAwaitingGuarantors": "Waiting for guarantors",
+  "loanAwaitingApproval": "With the officials for approval",
+  "loanApproved": "Approved, to be paid at the bank",
+  "loanRepaying": "Repaying",
+  "loanInArrears": "Behind on repayments",
+  "loanDefaulted": "In default",
+  "loanRepaid": "Repaid",
+  "loanDeclined": "Declined",
+  "loanExpired": "Expired",
+  "loanCancelled": "Cancelled",
+  "guaranteeRequested": "Asked, no answer yet",
+  "guaranteeAccepted": "Accepted",
+  "guaranteeDeclined": "Declined",
+  "guaranteeExpired": "No answer in time",
+  "guaranteeCalled": "Called: the loan is in default",
+  "guaranteeReleased": "Released",
+  "guaranteeAsked": "{name} asks you to guarantee a loan of {amount}",
+  "@guaranteeAsked": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "guaranteeExplain": "{name} asks you to guarantee {amount}. Your share is {share}: if the loan is not repaid, the rules can recover it from your savings.",
+  "@guaranteeExplain": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "amount": {
+        "type": "String"
+      },
+      "share": {
+        "type": "String"
+      }
+    }
+  },
+  "guaranteeAccept": "Guarantee (SMS code)",
+  "guaranteeDecline": "Decline",
+  "loanBalance": "Owed {owed} · repaid {repaid} · interest so far {interest}",
+  "@loanBalance": {
+    "placeholders": {
+      "owed": {
+        "type": "String"
+      },
+      "repaid": {
+        "type": "String"
+      },
+      "interest": {
+        "type": "String"
+      }
+    }
+  },
+  "loanDueNow": "Due now: {amount}",
+  "@loanDueNow": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "loanGuarantors": "Guarantors",
+  "loanReplace": "Choose someone else",
+  "loanPickReplacement": "Who should guarantee instead?",
+  "loanCancel": "Cancel the request",
+  "loanSchedule": "Schedule",
+  "errLoansOff": "Loans are not switched on for this chama.",
+  "errGuarantorsNeeded": "Choose the number of guarantors the rules need.",
+  "errInvalidGuarantor": "Choose guarantors who are members of this chama.",
+  "errGuarantorCannotCover": "That guarantor's savings cannot cover their share.",
+  "errLoanState": "Not possible at this stage of the loan.",
+  "loanWhyTooNew": "You have not been a member long enough to borrow yet.",
+  "loanWhyArrears": "Your contributions are behind. Catch up first.",
+  "loanWhyOpen": "You already have a loan. One loan at a time.",
+  "loanWhyOverLimit": "That is more than you can borrow now.",
+  "loanWhyTerm": "That is longer than the rules allow.",
+  "finesTitle": "Fines",
+  "finesNone": "No fines.",
+  "finesNoneOwed": "You owe no fines",
+  "finesMineOwed": "You owe {amount}",
+  "@finesMineOwed": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "waiversToDecide": "{count, plural, =1{1 waiver to decide} other{{count} waivers to decide}}",
+  "@waiversToDecide": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "fineOwed": "owed",
+  "finePaid": "paid",
+  "fineWaived": "waived",
+  "fineReversed": "reversed",
+  "fineLine": "Rule {rule} · {period} · {state} · receipt {receipt}",
+  "@fineLine": {
+    "placeholders": {
+      "rule": {
+        "type": "String"
+      },
+      "period": {
+        "type": "String"
+      },
+      "state": {
+        "type": "String"
+      },
+      "receipt": {
+        "type": "String"
+      }
+    }
+  },
+  "waiverRequested": "Waiver asked",
+  "waiverWaived": "Waived",
+  "waiverRefused": "Waiver refused",
+  "waiverExpired": "Waiver not decided in time",
+  "waiverLine": "{state}: {reason} ({approvals} of {needed} officials)",
+  "@waiverLine": {
+    "placeholders": {
+      "state": {
+        "type": "String"
+      },
+      "reason": {
+        "type": "String"
+      },
+      "approvals": {
+        "type": "int"
+      },
+      "needed": {
+        "type": "int"
+      }
+    }
+  },
+  "waiverAsk": "Ask for a waiver",
+  "waiverApprove": "Approve the waiver (SMS code)",
+  "waiverDecline": "Decline",
+  "errOwnFine": "Nobody decides a waiver of their own fine.",
+  "errFineNotOpen": "Only an unpaid fine can be waived.",
+  "waiverReasonLabel": "Reason"
 }

@@ -1,5 +1,6 @@
 package ke.co.jiranichama.jiranichama
 
-import io.flutter.embedding.android.FlutterActivity
+import io.flutter.embedding.android.FlutterFragmentActivity
 
-class MainActivity : FlutterActivity()
+// A FragmentActivity, so the fingerprint prompt (BiometricPrompt) can show.
+class MainActivity : FlutterFragmentActivity()

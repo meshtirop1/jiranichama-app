@@ -3,6 +3,7 @@
 /// to the vectors in `test/vectors/`.
 library;
 
+export 'src/anchor.dart';
 export 'src/canonical_json.dart';
 export 'src/ledger_chain.dart';
 export 'src/money.dart';

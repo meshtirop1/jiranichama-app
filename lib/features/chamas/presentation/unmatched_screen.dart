@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:jirani_domain/jirani_domain.dart';
 import 'package:jirani_ui/jirani_ui.dart';
 
 import '../../../core/api/api_client.dart';
@@ -7,6 +8,7 @@ import '../../../core/providers.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../auth/presentation/problem_text.dart';
 import '../data/models.dart';
+import 'cash_screen.dart';
 import 'chama_screen.dart';
 
 final unmatchedProvider = FutureProvider.autoDispose.family<List<BankLine>, String>(
@@ -38,18 +40,36 @@ class UnmatchedScreen extends ConsumerWidget {
               Card(
                 child: ListTile(
                   title: MoneyText(line.amount),
-                  subtitle: Text('${line.valueDate} · ${line.narration}'),
+                  subtitle: Text([line.valueDate, line.narration,
+                    if (line.fromMpesa) l.fromMpesa,
+                    if (line.typedIn) l.typedIn].join(' · ')),
                   trailing: bundle != null && bundle.chama.iAmTreasurer
-                      ? TextButton(
-                          onPressed: () async {
-                            final done = await showDialog<bool>(
-                              context: context,
-                              builder: (_) => _AssignDialog(line: line, bundle: bundle),
-                            );
-                            if (done == true) ref.invalidate(unmatchedProvider(chamaId));
-                          },
-                          child: Text(l.assign),
-                        )
+                      ? Wrap(spacing: JiraniSpace.xs, children: [
+                          TextButton(
+                            onPressed: () async {
+                              final done = await showDialog<bool>(
+                                context: context,
+                                builder: (_) => _AssignDialog(line: line, bundle: bundle),
+                              );
+                              if (done == true) ref.invalidate(unmatchedProvider(chamaId));
+                            },
+                            child: Text(l.assign),
+                          ),
+                          IconButton(
+                            tooltip: l.itsCash,
+                            icon: const Icon(Icons.payments_outlined),
+                            onPressed: () async {
+                              final done = await showDialog<bool>(
+                                context: context,
+                                builder: (_) => _BankCashDialog(line: line, chamaId: chamaId),
+                              );
+                              if (done == true) {
+                                ref.invalidate(unmatchedProvider(chamaId));
+                                ref.invalidate(cashProvider(chamaId));
+                              }
+                            },
+                          ),
+                        ])
                       : null,
                 ),
               ),
@@ -125,6 +145,78 @@ class _AssignDialogState extends ConsumerState<_AssignDialog> {
       actions: [
         TextButton(onPressed: () => Navigator.of(context).pop(false), child: Text(l.cancel)),
         FilledButton(onPressed: _busy ? null : _assign, child: Text(l.assign)),
+      ],
+    );
+  }
+}
+
+/// Links a deposit to the confirmed cash receipts it carries (5.4 step 4). The selected
+/// receipts must add up to the deposit exactly.
+class _BankCashDialog extends ConsumerStatefulWidget {
+  const _BankCashDialog({required this.line, required this.chamaId});
+
+  final BankLine line;
+  final String chamaId;
+
+  @override
+  ConsumerState<_BankCashDialog> createState() => _BankCashDialogState();
+}
+
+class _BankCashDialogState extends ConsumerState<_BankCashDialog> {
+  final _picked = <String>{};
+  final _key = newIdempotencyKey();
+  String? _error;
+  bool _busy = false;
+
+  Future<void> _bank() async {
+    setState(() {
+      _busy = true;
+      _error = null;
+    });
+    try {
+      await ref.read(chamaRepositoryProvider).bankCash(widget.line.id,
+          receiptIds: _picked.toList(), idempotencyKey: _key);
+      if (mounted) Navigator.of(context).pop(true);
+    } catch (e) {
+      if (mounted) setState(() => _error = problemText(AppLocalizations.of(context), e));
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
+    final waiting = (ref.watch(cashProvider(widget.chamaId)).value ?? const [])
+        .where((r) => r.state == 'member_confirmed')
+        .toList();
+    final total = Kes(waiting.where((r) => _picked.contains(r.id))
+        .fold<int>(0, (sum, r) => sum + r.amount.cents));
+    final matches = total == widget.line.amount;
+    return AlertDialog(
+      title: Text(l.pickCashReceipts),
+      content: SingleChildScrollView(
+        child: Column(mainAxisSize: MainAxisSize.min, children: [
+          if (waiting.isEmpty) Notice(l.noConfirmedCash),
+          for (final r in waiting)
+            CheckboxListTile(
+              value: _picked.contains(r.id),
+              title: Text('${r.memberCode} · ${r.receivedOn}'),
+              secondary: MoneyText(r.amount),
+              onChanged: (v) => setState(() => v == true ? _picked.add(r.id) : _picked.remove(r.id)),
+            ),
+          const SizedBox(height: JiraniSpace.s),
+          Text(l.cashTotal(total.format(), widget.line.amount.format()),
+              style: TextStyle(color: matches ? null : Theme.of(context).colorScheme.error)),
+          if (_error != null) ...[
+            const SizedBox(height: JiraniSpace.s),
+            Notice(_error!, tone: NoticeTone.critical),
+          ],
+        ]),
+      ),
+      actions: [
+        TextButton(onPressed: () => Navigator.of(context).pop(false), child: Text(l.cancel)),
+        FilledButton(onPressed: _busy || !matches ? null : _bank, child: Text(l.bankIt)),
       ],
     );
   }

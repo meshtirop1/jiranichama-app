@@ -207,6 +207,7 @@ void main() {
     final repo = FakeChamaRepository(myRole: 'secretary');
     await _pump(tester, repo);
     await _openChama(tester);
+    await scrollTo(tester, find.text('Bank statements'));
     await tester.tap(find.text('Bank statements'));
     await tester.pumpAndSettle();
     await tester.tap(find.text('Upload a statement (CSV)'));
@@ -226,6 +227,7 @@ void main() {
     final repo = FakeChamaRepository(myRole: 'treasurer');
     await _pump(tester, repo);
     await _openChama(tester);
+    await scrollTo(tester, find.text('Unmatched payments'));
     await tester.tap(find.text('Unmatched payments'));
     await tester.pumpAndSettle();
     expect(find.text('KES 300'), findsOneWidget);
@@ -246,9 +248,64 @@ void main() {
   testWidgets('a chair sees the unmatched queue but cannot assign', (tester) async {
     await _pump(tester, FakeChamaRepository(myRole: 'chair'));
     await _openChama(tester);
+    await scrollTo(tester, find.text('Unmatched payments'));
     await tester.tap(find.text('Unmatched payments'));
     await tester.pumpAndSettle();
     expect(find.text('KES 300'), findsOneWidget);
     expect(find.text('Assign'), findsNothing);
+  });
+
+  testWidgets('a payment straight from M-Pesa is tagged in the unmatched queue',
+      (tester) async {
+    final repo = FakeChamaRepository(myRole: 'treasurer');
+    repo.unmatchedList
+      ..clear()
+      ..add({'id': 'txn-9', 'amount_cents': 50000, 'value_date': '2026-03-05',
+             'narration': 'M-PESA RKTQDM7W6U JANE', 'state': 'unmatched',
+             'source': 'daraja'});
+    await _pump(tester, repo);
+    await _openChama(tester);
+    await scrollTo(tester, find.text('Unmatched payments'));
+    await tester.tap(find.text('Unmatched payments'));
+    await tester.pumpAndSettle();
+    expect(find.textContaining('From M-Pesa just now'), findsOneWidget);
+  });
+
+  testWidgets('an official invites a member without a smartphone by SMS', (tester) async {
+    final repo = FakeChamaRepository(myRole: 'chair');
+    await _pump(tester, repo);
+    await _openChama(tester);
+    await tester.tap(find.text('Members'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Invite a member'));
+    await tester.pumpAndSettle();
+    await tester.enterText(find.byKey(const ValueKey('invite-member-phone')), '0799111222');
+    await tester.tap(find.byKey(const ValueKey('invite-by-sms')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Kiswahili'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Send the SMS invite'));
+    await tester.pumpAndSettle();
+    expect(repo.calls, contains('smsInvite:0799111222:sw'));
+    expect(find.textContaining('They reply YES with the code'), findsOneWidget);
+  });
+
+  testWidgets('the records tab checks the chain against the public anchor', (tester) async {
+    final repo = FakeChamaRepository(myRole: 'member', founder: false)..anchorLastEntry();
+    await _pump(tester, repo);
+    await _openChama(tester);
+    await tester.tap(find.text('Records'));
+    await tester.pumpAndSettle();
+    expect(find.textContaining('Matches the public anchor of 2026-03-10'), findsOneWidget);
+  });
+
+  testWidgets('a chain that does not fit the anchor is flagged', (tester) async {
+    final repo = FakeChamaRepository(myRole: 'member', founder: false)
+      ..anchorLastEntry(tamper: true);
+    await _pump(tester, repo);
+    await _openChama(tester);
+    await tester.tap(find.text('Records'));
+    await tester.pumpAndSettle();
+    expect(find.textContaining('Does NOT match the public anchor'), findsOneWidget);
   });
 }

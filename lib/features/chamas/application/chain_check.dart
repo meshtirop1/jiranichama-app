@@ -15,6 +15,25 @@ class ChainCheck {
   bool get ok => problems.isEmpty;
 }
 
+/// Whether the chain this phone checked is the one in the latest public anchor.
+class AnchorCheck {
+  const AnchorCheck({required this.at, required this.seq, required this.ok});
+
+  final String at;
+  final int seq;
+  final bool ok;
+}
+
+Future<AnchorCheck?> checkAnchor(ChamaRepository repo, String chamaId, ChainCheck chain) async {
+  final proofs = await repo.anchors(chamaId);
+  if (proofs.isEmpty) return null;
+  final p = proofs.first;
+  final mine = chain.items.where((i) => i.seq == p.seq).firstOrNull;
+  final ok = chain.ok && mine != null && mine.hash == p.hash &&
+      verifyAnchorPath(anchorLeaf(chamaId, p.seq, p.hash), p.path, p.merkleRoot);
+  return AnchorCheck(at: p.at, seq: p.seq, ok: ok);
+}
+
 /// Downloads a chama's whole chain and checks it on the phone (6.10): every hash
 /// recomputed, every link followed, every platform signature verified. The phone never
 /// trusts a stored hash or the server's word that the chain is fine.

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:jirani_domain/jirani_domain.dart';
 import 'package:jirani_ui/jirani_ui.dart';
 
@@ -33,7 +34,7 @@ class _SetupViewState extends ConsumerState<SetupView> {
   late String _route = widget.bundle.chama.bankAccount?.statementRoute ?? 'bank_email';
 
   // Main rules
-  late final Json _rules = widget.bundle.rules.rules;
+  late Json _rules = widget.bundle.rules.rules;
   late final _amount = TextEditingController(text: _shillings(_contrib['amount_cents'] as int));
   late final _dueDay = TextEditingController(text: '${_contrib['due_day']}');
   late final _grace = TextEditingController(text: '${_contrib['grace_days']}');
@@ -51,6 +52,27 @@ class _SetupViewState extends ConsumerState<SetupView> {
   Json get _contrib => _rules['contributions'] as Json;
   Json get _lateFine => (_rules['fines'] as Json)['late_contribution'] as Json;
   static String _shillings(int cents) => (cents ~/ 100).toString();
+
+  @override
+  void didUpdateWidget(covariant SetupView old) {
+    super.didUpdateWidget(old);
+    // The full rules editor may have changed the main settings shown here.
+    if (!identical(old.bundle.rules.rules, widget.bundle.rules.rules)) {
+      _rules = widget.bundle.rules.rules;
+      _amount.text = _shillings(_contrib['amount_cents'] as int);
+      _dueDay.text = '${_contrib['due_day']}';
+      _grace.text = '${_contrib['grace_days']}';
+      _fine.text = _shillings(_lateFine['amount_cents'] as int);
+    }
+  }
+
+  Future<void> _editAll() async {
+    final saved = await context.push<bool>('/chamas/$_id/rules/edit');
+    if (saved == true && mounted) {
+      setState(() => _info = AppLocalizations.of(context).rulesSaved);
+      widget.onChanged();
+    }
+  }
 
   @override
   void dispose() {
@@ -214,6 +236,9 @@ class _SetupViewState extends ConsumerState<SetupView> {
               const SizedBox(height: JiraniSpace.m),
               PrimaryButton(label: l.saveRules, busy: _busy,
                   onPressed: () => _saveRules(l.rulesSaved)),
+              const SizedBox(height: JiraniSpace.s),
+              OutlinedButton.icon(icon: const Icon(Icons.tune), label: Text(l.editAllRules),
+                  onPressed: _busy ? null : _editAll),
             ]),
           section(l.tabRules, [RuleBookList(widget.bundle.rules.clauses(lang))]),
           if (founder)

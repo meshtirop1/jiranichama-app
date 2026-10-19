@@ -31,7 +31,10 @@ String stateLabel(AppLocalizations l, ChamaState s) => switch (s) {
 
 String entryLabel(AppLocalizations l, String type) => switch (type) {
       'contribution' => l.entryContribution,
+      'opening_balance' => l.entryOpening,
+      'contribution_pending_cash' => l.entryPendingCash,
       'fine_raised' => l.entryFineRaised,
+      'fine_waived' => l.entryFineWaived,
       'fine_paid' => l.entryFinePaid,
       'reversal' || 'correction' => l.entryReversal,
       'membership' => l.entryMembership,
@@ -43,6 +46,7 @@ String statementStateLabel(AppLocalizations l, String state) => switch (state) {
       'awaiting_confirmation' => l.statementAwaiting,
       'accepted' => l.statementAccepted,
       'needs_parser' => l.statementNeedsParser,
+      'needs_typing' => l.statementNeedsTyping,
       'held_mail_check' => l.statementHeld,
       _ => l.statementRejected,
     };
