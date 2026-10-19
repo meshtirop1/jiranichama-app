@@ -41,12 +41,6 @@ Future<void> _open(WidgetTester tester, FakeChamaRepository repo, String button)
   await tester.pumpAndSettle();
 }
 
-Future<void> _sms(WidgetTester tester) async {
-  await tester.enterText(find.byType(TextField).last, smsCode);
-  await tester.tap(find.text('Confirm'));
-  await tester.pumpAndSettle();
-}
-
 void main() {
   testWidgets('an official starts a drawn rotation; everyone sees the order', (tester) async {
     final repo = FakeChamaRepository(myRole: 'chair')..moneyOutOn = true;
