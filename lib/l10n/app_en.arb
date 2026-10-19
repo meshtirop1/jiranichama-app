@@ -723,5 +723,55 @@
   "errFillIn": "Fill in the missing details.",
   "errNotLinkable": "That cannot be linked or has already been dealt with.",
   "whyLabel": "Why",
-  "receiptLabel": "Receipt"
+  "receiptLabel": "Receipt",
+  "merryGoRound": "Merry-go-round",
+  "rotationOrderDraw": "Order: drawn by the app from the records (anyone can re-check)",
+  "rotationOrderFixed": "Order: set by the officials",
+  "rotationArrearsSkip": "Behind on contributions: moved to the end",
+  "rotationArrearsDeduct": "Behind on contributions: paid less what they owe",
+  "rotationArrearsBlock": "Behind on contributions: the rotation waits",
+  "rotationNotStarted": "No cycle is running.",
+  "startRotation": "Start the rotation",
+  "startRotationDrawConfirm": "The app will draw the order from the chama's records. Everyone will see the order and can re-check the draw.",
+  "setOrderTitle": "Set the order",
+  "cycleLine": "Cycle {cycle} · each turn receives {pot}",
+  "@cycleLine": {
+    "placeholders": {
+      "cycle": {
+        "type": "String"
+      },
+      "pot": {
+        "type": "String"
+      }
+    }
+  },
+  "drawSeedLine": "Drawn from the records (seed {seed}…, receipt {receipt}). Anyone can re-run the draw.",
+  "@drawSeedLine": {
+    "placeholders": {
+      "seed": {
+        "type": "String"
+      },
+      "receipt": {
+        "type": "String"
+      }
+    }
+  },
+  "turnNext": "Next",
+  "turnPending": "Waiting",
+  "turnPaid": "Paid",
+  "turnSkipped": "Skipped",
+  "proposeNextTurn": "Propose next payout",
+  "errTurnInProgress": "The current turn already has a payout proposal.",
+  "errTurnBlocked": "The member whose turn it is must catch up first (rule 8.2).",
+  "errRotationRunning": "A rotation is already running.",
+  "errRotationComplete": "Everyone has had their turn. Start a new cycle.",
+  "errNoRotationRunning": "Start the rotation first.",
+  "errOrderIncomplete": "Put every member in the order, once each.",
+  "rotationOrderLabel": "Order of turns",
+  "orderDraw": "Drawn by the app",
+  "orderFixed": "Set by the officials",
+  "arrearsLabel": "When the member is behind on contributions",
+  "arrearsSkip": "Move them to the end",
+  "arrearsDeduct": "Pay them less what they owe",
+  "arrearsBlock": "Wait until they catch up"
 }

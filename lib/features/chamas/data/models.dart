@@ -408,3 +408,36 @@ class UnapprovedDebit {
   String? get resolvedBy => json['resolved_by'] as String?;
   bool get open => state == 'open';
 }
+
+class RotationTurnInfo {
+  RotationTurnInfo(this.json);
+  final Json json;
+
+  int get position => json['position'] as int;
+  String get membershipId => json['membership_id'] as String;
+  String get memberCode => json['member_code'] as String;
+  String get name => json['name'] as String;
+  String get state => json['state'] as String;
+  String get note => json['note'] as String? ?? '';
+  String? get proposalId => json['proposal_id'] as String?;
+  String? get proposalState => json['proposal_state'] as String?;
+}
+
+/// The merry-go-round: settings from the rules, and the latest cycle (jiranichama-api
+/// docs/flows/rotation.md).
+class RotationInfo {
+  RotationInfo(this.json);
+  final Json json;
+
+  Json? get settings => json['settings'] as Json?;
+  String? get order => settings?['order'] as String?;
+  String? get arrears => settings?['arrears'] as String?;
+  int? get cycleNo => json['cycle_no'] as int?;
+  String? get seed => json['seed'] as String?;
+  String? get receipt => json['receipt'] as String?;
+  bool get running => json['running'] == true;
+  Kes? get pot => json['pot_cents'] == null ? null : Kes(json['pot_cents'] as int);
+  int? get nextPosition => json['next_position'] as int?;
+  List<RotationTurnInfo> get turns =>
+      [for (final t in json['turns'] as List) RotationTurnInfo(t as Json)];
+}

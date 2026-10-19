@@ -13,7 +13,8 @@ gets the sealed PDF, and the test checks its code on the public check endpoint, 
 opens the chama statement. Last, a statement with a damaged row: the secretary types the
 row in and the chair confirms. Then money out: two officials switch it on, the treasurer
 proposes the member's payout, the treasurer and chair approve, the chair marks it paid,
-and the next statement's debit matches it. Screenshots land in `build/e2e_screenshots/`; the last
+and the next statement's debit matches it. Last, the chair starts a drawn merry-go-round
+cycle and proposes the first turn. Screenshots land in `build/e2e_screenshots/`; the last
 passing run is kept in [screenshots/phase1](../screenshots/phase1/).
 
 It is not part of CI, because it needs a running API and a device.

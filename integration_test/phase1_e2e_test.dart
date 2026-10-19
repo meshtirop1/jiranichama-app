@@ -573,5 +573,17 @@ void main() {
     await tap(find.text('Money out'));
     await waitFor(find.textContaining('Paid and matched to the bank'));
     await screenshot('payout_matched');
+
+    // 19. The merry-go-round: the chair starts a drawn cycle and proposes the first turn.
+    await tester.pageBack();
+    await tester.pumpAndSettle();
+    await tap(find.text('Merry-go-round'));
+    await tap(find.text('Start the rotation'));
+    await tap(find.widgetWithText(FilledButton, 'Start the rotation'), last: true);
+    await waitFor(find.textContaining('Cycle 1 · each turn receives'));
+    await screenshot('rotation_drawn');
+    await tap(find.text('Propose next payout'));
+    await waitFor(find.textContaining('Merry-go-round turn 1 of 4'));
+    await screenshot('rotation_first_turn_proposed');
   });
 }

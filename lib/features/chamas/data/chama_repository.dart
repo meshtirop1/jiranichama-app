@@ -68,6 +68,10 @@ abstract class ChamaRepository {
   Future<Proposal> markPaid(String proposalId, String bankReference,
       {required String idempotencyKey});
   Future<List<UnapprovedDebit>> unapprovedDebits(String id);
+  Future<RotationInfo> rotation(String id);
+  Future<RotationInfo> startRotation(String id,
+      {List<String>? order, required String idempotencyKey});
+  Future<Proposal> proposeNextTurn(String id, {required String idempotencyKey});
   Future<UnapprovedDebit> linkDebit(String debitId, String proposalId);
   Future<UnapprovedDebit> explainDebit(String debitId, String explanation);
 
@@ -360,4 +364,20 @@ class HttpChamaRepository implements ChamaRepository {
   Future<UnapprovedDebit> explainDebit(String debitId, String explanation) async =>
       UnapprovedDebit(await _api.post('/unapproved-debits/$debitId/explain/', auth: true,
           body: {'explanation': explanation}));
+
+  // Merry-go-round
+  @override
+  Future<RotationInfo> rotation(String id) async =>
+      RotationInfo(await _api.get('/chamas/$id/rotation/') as Json);
+
+  @override
+  Future<RotationInfo> startRotation(String id,
+          {List<String>? order, required String idempotencyKey}) async =>
+      RotationInfo(await _api.post('/chamas/$id/rotation/',
+          body: {'order': ?order}, auth: true, idempotencyKey: idempotencyKey));
+
+  @override
+  Future<Proposal> proposeNextTurn(String id, {required String idempotencyKey}) async =>
+      Proposal(await _api.post('/chamas/$id/rotation/next/', body: {}, auth: true,
+          idempotencyKey: idempotencyKey));
 }
