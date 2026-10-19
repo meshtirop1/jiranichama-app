@@ -84,4 +84,31 @@ void main() {
     await _open(tester, repo, '');
     expect(find.textContaining('Not yet checked against the bank'), findsOneWidget);
   });
+
+  testWidgets('an overdue statement shows to the treasurer first', (tester) async {
+    final rec = _rec('match')..['statement'] = {'level': 1, 'days_overdue': 3,
+        'checked_to': '2026-03-01', 'every_days': 14, 'due_on': '2026-03-15'};
+    final treasurer = FakeChamaRepository(myRole: 'treasurer')..reconciliationJson = rec;
+    await _open(tester, treasurer, '');
+    expect(find.text('The bank statement is 3 day(s) overdue. Upload it from Bank statements.'),
+        findsOneWidget);
+  });
+
+  testWidgets('a member does not see level 1 or 2', (tester) async {
+    final rec = _rec('match')..['statement'] = {'level': 2, 'days_overdue': 9,
+        'checked_to': '2026-03-01', 'every_days': 14, 'due_on': '2026-03-15'};
+    final repo = FakeChamaRepository(myRole: 'member', founder: false)
+      ..reconciliationJson = rec;
+    await _open(tester, repo, '');
+    expect(find.textContaining('overdue'), findsNothing);
+  });
+
+  testWidgets('after 14 more days everyone sees records are not checked', (tester) async {
+    final rec = _rec('match')..['statement'] = {'level': 3, 'days_overdue': 15,
+        'checked_to': '2026-03-01', 'every_days': 14, 'due_on': '2026-03-15'};
+    final repo = FakeChamaRepository(myRole: 'member', founder: false)
+      ..reconciliationJson = rec;
+    await _open(tester, repo, '');
+    expect(find.text('Records not checked against the bank since 2026-03-01.'), findsOneWidget);
+  });
 }

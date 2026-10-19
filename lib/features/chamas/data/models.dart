@@ -462,6 +462,13 @@ class Reconciliation {
   String? get gapOpenedOn => json['gap_opened_on'] as String?;
   int get daysOpen => json['days_open'] as int;
   int get breachAfterDays => json['breach_after_days'] as int;
+
+  Json get _statement => (json['statement'] as Json?) ?? const {};
+
+  /// 0 fresh, 1 the treasurer is told, 2 every official, 3 every member.
+  int get statementLevel => _statement['level'] as int? ?? 0;
+  int get statementDaysOverdue => _statement['days_overdue'] as int? ?? 0;
+  String? get statementCheckedTo => _statement['checked_to'] as String?;
 }
 
 /// A members' vote (jiranichama-api docs/flows/votes.md).

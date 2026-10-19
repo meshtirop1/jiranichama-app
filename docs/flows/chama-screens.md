@@ -72,6 +72,11 @@ Near the top of every member's overview, the result of the daily check (5.5):
 - **BREACH** (red), with how many days it has been open; or
 - that no bank statement has been accepted yet.
 
+An overdue bank statement shows above it, to the people the rules' timetable is for: the
+treasurer when it falls overdue ("The bank statement is 3 day(s) overdue…"), every
+official after 7 more days, and every member after 14 more ("Records not checked against
+the bank since {date}.").
+
 ## Bank statements (officials)
 
 Upload a CSV statement; the list shows each statement's state, period, number of lines,
