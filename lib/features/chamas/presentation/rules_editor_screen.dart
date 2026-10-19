@@ -91,6 +91,8 @@ class _EditorState extends ConsumerState<_Editor> {
   late final _everyDays = TextEditingController(
       text: '${(_r['statements'] as Json)['every_days']}');
   late String _kycPayer = (_r['kyc'] as Json)['payer'] as String;
+  late String? _rotOrder = (_r['rotation'] as Json?)?['order'] as String?;
+  late String? _rotArrears = (_r['rotation'] as Json?)?['arrears'] as String?;
 
   Map<String, String> _errors = {};
   String? _error;
@@ -151,6 +153,7 @@ class _EditorState extends ConsumerState<_Editor> {
         'adoption': {'members_share_pct': _int(_share)},
         'statements': {'every_days': _int(_everyDays)},
         'kyc': {'payer': _kycPayer},
+        if (_rotOrder != null) 'rotation': {'order': _rotOrder, 'arrears': _rotArrears},
       };
 
   String _ruleMessage(AppLocalizations l, String code) => switch (code) {
@@ -342,6 +345,35 @@ class _EditorState extends ConsumerState<_Editor> {
           _section(l.statements, [
             _number('every_days', _everyDays, l.statementEveryDays, 'statements/every_days'),
           ]),
+          if (_rotOrder != null)
+            _section(l.merryGoRound, [
+              Text(l.rotationOrderLabel, style: Theme.of(context).textTheme.titleSmall),
+              const SizedBox(height: JiraniSpace.xs),
+              SegmentedButton<String>(
+                key: const ValueKey('rotation-order'),
+                segments: [
+                  ButtonSegment(value: 'draw', label: Text(l.orderDraw)),
+                  ButtonSegment(value: 'fixed', label: Text(l.orderFixed)),
+                ],
+                selected: {_rotOrder!},
+                showSelectedIcon: false,
+                onSelectionChanged: (s) => setState(() => _rotOrder = s.first),
+              ),
+              const SizedBox(height: JiraniSpace.s),
+              Text(l.arrearsLabel, style: Theme.of(context).textTheme.titleSmall),
+              RadioGroup<String>(
+                groupValue: _rotArrears,
+                onChanged: (v) => setState(() => _rotArrears = v ?? _rotArrears),
+                child: Column(children: [
+                  RadioListTile(key: const ValueKey('arrears-skip'), value: 'skip',
+                      contentPadding: EdgeInsets.zero, title: Text(l.arrearsSkip)),
+                  RadioListTile(key: const ValueKey('arrears-deduct'), value: 'deduct',
+                      contentPadding: EdgeInsets.zero, title: Text(l.arrearsDeduct)),
+                  RadioListTile(key: const ValueKey('arrears-block'), value: 'block',
+                      contentPadding: EdgeInsets.zero, title: Text(l.arrearsBlock)),
+                ]),
+              ),
+            ]),
           _section(l.secKyc, [
             SegmentedButton<String>(
               key: const ValueKey('kyc'),

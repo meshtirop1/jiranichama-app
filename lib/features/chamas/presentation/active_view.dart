@@ -140,6 +140,14 @@ class _Overview extends ConsumerWidget {
           Notice(l.recordsOnlyNote),
         ],
         const SizedBox(height: JiraniSpace.m),
+        if (bundle.rules.rules['rotation'] != null) ...[
+          OutlinedButton.icon(
+            icon: const Icon(Icons.autorenew),
+            label: Text(l.merryGoRound),
+            onPressed: () => context.push('/chamas/${chama.id}/rotation'),
+          ),
+          const SizedBox(height: JiraniSpace.s),
+        ],
         OutlinedButton.icon(
           icon: const Icon(Icons.outbox_outlined),
           label: Text(l.moneyOut),

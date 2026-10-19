@@ -122,6 +122,7 @@ class FakeChamaRepository implements ChamaRepository {
     'adoption': {'members_share_pct': 51},
     'statements': {'every_days': 14},
     'kyc': {'payer': 'chama'},
+    'rotation': {'order': 'draw', 'arrears': 'skip'},
   };
   Json? savedRules;
 
@@ -506,6 +507,52 @@ class FakeChamaRepository implements ChamaRepository {
       ..['resolved_by'] = 'Jane';
     calls.add('explain:$debitId:$explanation');
     return UnapprovedDebit(d);
+  }
+
+  // Merry-go-round
+  Json? rotationJson;
+
+  @override
+  Future<RotationInfo> rotation(String id) async => RotationInfo(rotationJson ?? {
+        'settings': {'order': 'draw', 'arrears': 'skip'}, 'cycle_no': null, 'method': null,
+        'seed': null, 'receipt': null, 'running': false, 'pot_cents': null,
+        'next_position': null, 'turns': <Json>[],
+      });
+
+  @override
+  Future<RotationInfo> startRotation(String id,
+      {List<String>? order, required String idempotencyKey}) async {
+    calls.add('startRotation:${order?.join(",") ?? "draw"}');
+    final ids = order ?? ['m4', 'm1', 'm2'];
+    final names = {'m1': ('Jane', 'JC-4821-001'), 'm2': ('Peter', 'JC-4821-002'),
+                   'm4': ('Wanjiru', 'JC-4821-004')};
+    rotationJson = {
+      'settings': {'order': order == null ? 'draw' : 'fixed', 'arrears': 'skip'},
+      'cycle_no': 1, 'method': order == null ? 'draw' : 'fixed',
+      'seed': order == null ? 'ab12cd34ef56ab12cd34ef56' : '', 'receipt': 'ROT12345',
+      'running': true, 'pot_cents': 300000, 'next_position': 1,
+      'turns': [
+        for (var i = 0; i < ids.length; i++)
+          {'position': i + 1, 'membership_id': ids[i], 'member_code': names[ids[i]]!.$2,
+           'name': names[ids[i]]!.$1, 'state': 'pending', 'note': '', 'proposal_id': null,
+           'proposal_state': null},
+      ],
+    };
+    return RotationInfo(rotationJson!);
+  }
+
+  @override
+  Future<Proposal> proposeNextTurn(String id, {required String idempotencyKey}) async {
+    calls.add('proposeNextTurn');
+    final first = ((rotationJson!['turns'] as List).first as Map);
+    final p = _proposalJson({'kind': 'payout', 'amount_cents': 300000,
+        'purpose': 'Merry-go-round turn 1 of 3, cycle 1'})
+      ..['payee_name'] = first['name']
+      ..['payee_member_code'] = first['member_code'];
+    proposalsList.insert(0, p);
+    first['proposal_id'] = p['id'];
+    first['proposal_state'] = 'collecting_approvals';
+    return Proposal(p);
   }
 
   // Typed-in statement lines

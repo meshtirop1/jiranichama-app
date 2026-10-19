@@ -139,6 +139,21 @@ A **Money out** button on the overview, for every member.
   amount; the explanation or link then shows to everyone.
 - The overview also says when payments are waiting for your approval.
 
+## Merry-go-round
+
+For chamas whose rules have a rotation, a **Merry-go-round** button on the overview.
+- The rules' settings in words: how the order is made (drawn, or set by the officials)
+  and what happens to a member behind on contributions (moved to the end, paid less
+  what they owe, or the rotation waits).
+- **Start the rotation** (officials): for a drawn order, a confirmation that the app
+  draws from the records and everyone can re-check; for a fixed order, a list to move
+  members up and down.
+- The cycle: what each turn receives, the draw's seed and receipt, and every turn in
+  order (next, waiting, paid, or skipped with the reason), with its payout's state.
+- **Propose next payout** (officials, money out on) fills in the member and the pot and
+  opens the proposal, which then goes through the usual approvals.
+- The full rules editor has a Merry-go-round section for both settings.
+
 ## Design notes
 
 - **The main action is pinned to the bottom** of the join, confirm-rules and setup
