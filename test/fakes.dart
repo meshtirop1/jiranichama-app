@@ -510,6 +510,51 @@ class FakeChamaRepository implements ChamaRepository {
     return UnapprovedDebit(d);
   }
 
+  // Members' votes
+  final votesList = <Json>[];
+
+  Json _voteJson(String id) => votesList.firstWhere((v) => v['id'] == id);
+
+  void _castFake(String voteId, String choice) {
+    final v = _voteJson(voteId);
+    v['cast'] = (v['cast'] as int) + 1;
+    (v['voted'] as List).add('Jane');
+    v['i_can_vote'] = false;
+    v['i_voted'] = true;
+    v['my_choice'] = v['secret'] == true ? null : choice;
+    calls.add('ballot:$voteId:$choice');
+  }
+
+  @override
+  Future<List<VoteInfo>> votes(String id) async => [for (final v in votesList) VoteInfo(v)];
+
+  @override
+  Future<ChallengeSent> startBallot(String voteId, String choice) async => _sent;
+
+  @override
+  Future<VoteInfo> castBallot(String voteId, String choice,
+      {required String challengeId, required String code}) async {
+    _codeCheck(code);
+    _castFake(voteId, choice);
+    return VoteInfo(_voteJson(voteId));
+  }
+
+  @override
+  Future<Json> ballotPayload(String voteId, String choice) async {
+    final v = _voteJson(voteId);
+    final payload = <String, Object?>{'v': 1, 'purpose': 'cast_ballot', 'chama_id': 'c1',
+        'vote_id': voteId, 'question': v['question'], 'choice': choice, 'nonce': 'n-vote'};
+    return {'device_id': 'dev-1', 'payload': payload,
+            'payload_hash': sha256Hex(canonicalJson(payload))};
+  }
+
+  @override
+  Future<VoteInfo> submitSignedBallot(String voteId, Json body) async {
+    calls.add('signedBallot:$voteId:${body['signature']}');
+    _castFake(voteId, body['choice'] as String);
+    return VoteInfo(_voteJson(voteId));
+  }
+
   // Daily reconciliation
   Json reconciliationJson = {
     'status': 'no_statement', 'checked_on': null, 'bank_cents': null, 'records_cents': null,

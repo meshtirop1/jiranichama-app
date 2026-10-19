@@ -69,6 +69,12 @@ abstract class ChamaRepository {
       {required String idempotencyKey});
   Future<List<UnapprovedDebit>> unapprovedDebits(String id);
   Future<Reconciliation> reconciliation(String id);
+  Future<List<VoteInfo>> votes(String id);
+  Future<ChallengeSent> startBallot(String voteId, String choice);
+  Future<VoteInfo> castBallot(String voteId, String choice,
+      {required String challengeId, required String code});
+  Future<Json> ballotPayload(String voteId, String choice);
+  Future<VoteInfo> submitSignedBallot(String voteId, Json body);
   Future<String> attestNonce();
   Future<ChallengeSent> startRegisterDevice(Json body);
   Future<Json> registerDevice(Json body, {required String challengeId, required String code});
@@ -413,4 +419,27 @@ class HttpChamaRepository implements ChamaRepository {
   @override
   Future<Reconciliation> reconciliation(String id) async =>
       Reconciliation(await _api.get('/chamas/$id/reconciliation/') as Json);
+
+  // Members' votes
+  @override
+  Future<List<VoteInfo>> votes(String id) async =>
+      [for (final v in await _api.get('/chamas/$id/votes/') as List) VoteInfo(v as Json)];
+
+  @override
+  Future<ChallengeSent> startBallot(String voteId, String choice) async => ChallengeSent(
+      await _api.post('/votes/$voteId/ballots/', auth: true, body: {'choice': choice}));
+
+  @override
+  Future<VoteInfo> castBallot(String voteId, String choice,
+          {required String challengeId, required String code}) async =>
+      VoteInfo(await _api.post('/votes/$voteId/ballots/', auth: true,
+          body: {'choice': choice, 'challenge_id': challengeId, 'code': code}));
+
+  @override
+  Future<Json> ballotPayload(String voteId, String choice) =>
+      _api.post('/votes/$voteId/signing-payload/', auth: true, body: {'choice': choice});
+
+  @override
+  Future<VoteInfo> submitSignedBallot(String voteId, Json body) async =>
+      VoteInfo(await _api.post('/votes/$voteId/signed-ballots/', auth: true, body: body));
 }

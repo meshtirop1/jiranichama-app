@@ -219,6 +219,8 @@ void main() {
     await tap(find.text('Edit all rules'));
     await waitFor(find.text('All rules'));
     await type(find.byKey(const ValueKey('cash_days')), '4');
+    // Above KES 1,000 a payout needs a members' vote (used in step 22).
+    await type(find.byKey(const ValueKey('tier-0-upto')), '1000');
     await type(find.byKey(const ValueKey('entry_fee')), '200');
     await tap(find.text('Each member pays'));
     await screenshot('rules_editor');
@@ -624,5 +626,34 @@ void main() {
     await waitFor(bankCheck);
     await waitFor(find.textContaining('not yet matched to a member'));
     await screenshot('bank_check_gap');
+
+    // 22. Members' vote: the first merry-go-round turn (KES 4,000) is above the vote level,
+    // so members vote. Whoever is being paid does not; two others vote yes, the chair
+    // with the phone key, the next by SMS code.
+    Future<bool> appears(Finder f, {int seconds = 8}) async {
+      for (var i = 0; i < seconds * 2; i++) {
+        await tester.pumpAndSettle();
+        if (f.evaluate().isNotEmpty) return true;
+        await Future<void>.delayed(const Duration(milliseconds: 500));
+      }
+      return false;
+    }
+
+    var votesCast = 0;
+    for (final local in [founder, treasurer, secretary, member]) {
+      if (votesCast == 2) break;
+      if (local != founder) await signInAgain(local);
+      final needed = find.textContaining('Your vote is needed');
+      if (!await appears(needed)) continue; // this one is being paid
+      await tap(needed);
+      await tap(find.text('Vote yes'));
+      if (local != founder) await confirmSms(local);
+      await waitFor(find.text('You voted yes.'), seconds: 90);
+      votesCast++;
+      if (votesCast == 2) await screenshot('members_voting');
+      await tester.pageBack();
+      await tester.pumpAndSettle();
+    }
+    expect(votesCast, 2);
   });
 }

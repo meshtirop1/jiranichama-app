@@ -12,6 +12,7 @@ import '../data/models.dart';
 import 'chama_screen.dart';
 import 'cash_screen.dart';
 import 'money_out_screen.dart';
+import 'vote_screen.dart';
 import 'records_tab.dart';
 import 'widgets/rule_book_list.dart';
 
@@ -138,6 +139,7 @@ class _Overview extends ConsumerWidget {
             ),
           ),
         _BankCheck(chamaId: chama.id),
+        _OpenVotes(chamaId: chama.id),
         _CashToConfirm(chamaId: chama.id, myId: me?.id),
         _MoneyOutNotices(chamaId: chama.id, moneyOut: chama.mode == 'money_out'),
         if (chama.mode == 'records_only') ...[
@@ -309,5 +311,30 @@ class _BankCheck extends ConsumerWidget {
           ),
       ]),
     );
+  }
+}
+
+/// Votes this member can still cast, so nobody misses one.
+class _OpenVotes extends ConsumerWidget {
+  const _OpenVotes({required this.chamaId});
+
+  final String chamaId;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l = AppLocalizations.of(context);
+    final open = (ref.watch(votesProvider(chamaId)).value ?? const [])
+        .where((v) => v.iCanVote).toList();
+    return Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+      for (final v in open)
+        Padding(
+          padding: const EdgeInsets.only(top: JiraniSpace.s),
+          child: InkWell(
+            onTap: () => Navigator.of(context).push(MaterialPageRoute(
+                builder: (_) => VoteScreen(chamaId: chamaId, voteId: v.id))),
+            child: Notice(l.voteWaiting(v.question), tone: NoticeTone.warning),
+          ),
+        ),
+    ]);
   }
 }

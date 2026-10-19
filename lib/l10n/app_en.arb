@@ -871,5 +871,71 @@
         "type": "String"
       }
     }
-  }
+  },
+  "membersVote": "Members' vote",
+  "voteOpen": "Open: members are voting",
+  "votePassed": "Passed",
+  "voteFailed": "Failed: the members said no",
+  "voteLapsed": "Lapsed: not enough members voted",
+  "voteYes": "Vote yes",
+  "voteNo": "Vote no",
+  "voteYesPrompt": "Vote YES",
+  "voteNoPrompt": "Vote NO",
+  "voteCloses": "Closes {when}",
+  "@voteCloses": {
+    "placeholders": {
+      "when": {
+        "type": "String"
+      }
+    }
+  },
+  "voteTurnout": "{cast} of {eligible} have voted · {quorum} needed for it to count",
+  "@voteTurnout": {
+    "placeholders": {
+      "cast": {
+        "type": "String"
+      },
+      "eligible": {
+        "type": "String"
+      },
+      "quorum": {
+        "type": "String"
+      }
+    }
+  },
+  "voteRule": "It passes with more than {pct}% yes.",
+  "@voteRule": {
+    "placeholders": {
+      "pct": {
+        "type": "String"
+      }
+    }
+  },
+  "voteSecret": "Secret vote: who voted is shown, not how.",
+  "youVoted": "You have voted.",
+  "youVotedYes": "You voted yes.",
+  "youVotedNo": "You voted no.",
+  "voteTally": "Yes {yes} · No {no}",
+  "@voteTally": {
+    "placeholders": {
+      "yes": {
+        "type": "String"
+      },
+      "no": {
+        "type": "String"
+      }
+    }
+  },
+  "whoVoted": "Who has voted",
+  "voteWaiting": "Your vote is needed: {question}",
+  "@voteWaiting": {
+    "placeholders": {
+      "question": {
+        "type": "String"
+      }
+    }
+  },
+  "errAlreadyVoted": "You have already voted. The first vote counts.",
+  "errVoteClosed": "This vote has closed.",
+  "errNotEligible": "You do not vote on this one."
 }
