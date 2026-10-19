@@ -7,6 +7,11 @@ it touches.
 
 - [Sign-in](flows/sign-in.md): phone, SMS code, PIN.
 - [Checking the chain on the phone](flows/chain-check.md): how a phone catches changed history.
+- [Chama screens](flows/chama-screens.md): home, create and set up, join, confirm the rules, the active chama, statements, unmatched payments.
+
+## Operations
+
+- [End-to-end test on a device](operations/end-to-end.md): the full Phase 1 walk against a real API, with screenshots.
 
 ## Modules
 
@@ -16,8 +21,10 @@ it touches.
 
 ## Where we are
 
-Phase 0 of the proposal: the app shell, sign-in, both languages, the design system
-package, and the domain package that recomputes the server's hashes.
+Phase 0 is done (shell, sign-in, both languages, design system, domain package). Phase 1
+screens are in progress: chamas, setup, joining, confirming the rules, position and how
+to pay, records checked on the phone (hashes and platform signatures), statements and the
+unmatched queue are built.
 
 ## Not in Phase 0, on purpose
 
@@ -25,10 +32,9 @@ The proposal's full app stack arrives with the features that need it:
 
 | Piece | Arrives in | Why not now |
 | --- | --- | --- |
-| OpenAPI-generated Dio client and `freezed` models | Phase 1 | Sign-in is four calls; the generated client earns its keep with the chama endpoints |
+| OpenAPI-generated Dio client and `freezed` models | Later in Phase 1 | Hand-written readers in `features/chamas/data/models.dart` follow the schema names; generating them is a follow-up |
 | Drift (SQLCipher) offline ledger | Phase 1 | Needs the ledger endpoints to sync from |
-| Platform signature check on the phone (ECDSA P-256) | Phase 1 | Needs the published platform key endpoint |
 | `jirani_secure_keys` signing plugin (Keystore / Secure Enclave) | Phase 2 | Approvals ship in Phase 2 |
 | App Check, freeRASP, certificate pinning | Phase 2 | Before money-out goes live (Gate B) |
 | Riverpod code generation | When providers multiply | Plain providers are clearer at this size |
-| Figma design tokens | Phase 1 (with the designer) | `jirani_ui` tokens are placeholders until then |
+| Figma design tokens | Phase 1 (with the designer) | The brand green `#1B6B4A` is decided; the rest of `jirani_ui` waits for Figma |

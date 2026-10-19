@@ -6,6 +6,8 @@ import 'package:jiranichama/core/api/problem.dart';
 import 'package:jiranichama/core/providers.dart';
 import 'package:jiranichama/features/auth/data/auth_repository.dart';
 
+import 'fakes.dart';
+
 class FakeAuth implements AuthRepository {
   bool session = false;
   String? sentTo;
@@ -31,8 +33,14 @@ class FakeAuth implements AuthRepository {
     return const SignedIn(isNew: true, hasPin: false);
   }
 
+  String? name;
+
   @override
   Future<void> setPin(String pin) async => this.pin = pin;
+
+  @override
+  Future<void> setProfile({required String name, required String language}) async =>
+      this.name = name;
 
   @override
   Future<void> signOut() async => session = false;
@@ -40,7 +48,10 @@ class FakeAuth implements AuthRepository {
 
 Future<void> _pumpApp(WidgetTester tester, FakeAuth auth) async {
   await tester.pumpWidget(ProviderScope(
-    overrides: [authRepositoryProvider.overrideWithValue(auth)],
+    overrides: [
+      authRepositoryProvider.overrideWithValue(auth),
+      chamaRepositoryProvider.overrideWithValue(FakeChamaRepository(state: 'none')),
+    ],
     child: const JiraniApp(),
   ));
   await tester.pumpAndSettle();
@@ -74,16 +85,23 @@ void main() {
     expect(find.text('Set your app PIN'), findsOneWidget);
 
     final fields = find.byType(TextField);
-    await tester.enterText(fields.at(0), '482916');
-    await tester.enterText(fields.at(1), '482917');
+    await tester.enterText(fields.at(1), '482916');
+    await tester.enterText(fields.at(2), '482916');
+    await tester.tap(find.text('Save PIN'));
+    await tester.pumpAndSettle();
+    expect(find.text('Enter your name.'), findsOneWidget);
+
+    await tester.enterText(fields.at(0), 'Wanjiru Kamau');
+    await tester.enterText(fields.at(2), '482917');
     await tester.tap(find.text('Save PIN'));
     await tester.pumpAndSettle();
     expect(find.text('The two PINs are not the same.'), findsOneWidget);
 
-    await tester.enterText(fields.at(1), '482916');
+    await tester.enterText(fields.at(2), '482916');
     await tester.tap(find.text('Save PIN'));
     await tester.pumpAndSettle();
     expect(auth.pin, '482916');
+    expect(auth.name, 'Wanjiru Kamau');
     expect(find.text('Your chamas'), findsOneWidget);
 
     await tester.tap(find.byTooltip('Sign out'));
