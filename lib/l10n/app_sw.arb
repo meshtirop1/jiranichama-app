@@ -878,5 +878,6 @@
   "errElectionNeeded": "Viongozi waliobaki ni wachache mno kuidhinisha hili. Chama kinahitaji uchaguzi.",
   "errElectionOpen": "Uchaguzi wa nafasi hii unaendelea tayari, au nafasi imejazwa.",
   "errOfficialHandOver": "Kiongozi anakabidhi nafasi kwa uchaguzi kabla ya kuondoka.",
-  "errDeathDetails": "Weka jina na simu ya ndugu wa karibu, na picha ya hati."
+  "errDeathDetails": "Weka jina na simu ya ndugu wa karibu, na picha ya hati.",
+  "recFromBankApi": "Salio limesomwa moja kwa moja kutoka benki."
 }

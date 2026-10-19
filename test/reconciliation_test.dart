@@ -58,6 +58,13 @@ void main() {
     expect(find.text('Records match the bank · checked 2026-03-10'), findsOneWidget);
   });
 
+  testWidgets("a balance read from the bank's API says so", (tester) async {
+    final repo = FakeChamaRepository(myRole: 'member', founder: false)
+      ..reconciliationJson = {..._rec('match'), 'bank_source': 'bank_api'};
+    await _open(tester, repo, '');
+    expect(find.text('Balance read straight from the bank.'), findsOneWidget);
+  });
+
   testWidgets('a gap shows what it is made of', (tester) async {
     final repo = FakeChamaRepository(myRole: 'member', founder: false)
       ..reconciliationJson = _rec('open', gap: 50000, unmatched: 30000, days: 2);

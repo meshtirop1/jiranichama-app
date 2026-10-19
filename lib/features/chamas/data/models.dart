@@ -456,6 +456,8 @@ class Reconciliation {
   /// no_statement, match, open or breach.
   String get status => json['status'] as String;
   String? get checkedOn => json['checked_on'] as String?;
+  /// Where the bank's balance came from: "statement", or "bank_api" (read from the bank).
+  bool get fromBankApi => json['bank_source'] == 'bank_api';
   Kes? get bank => json['bank_cents'] == null ? null : Kes(json['bank_cents'] as int);
   Kes? get records => json['records_cents'] == null ? null : Kes(json['records_cents'] as int);
   Kes get gap => Kes(json['gap_cents'] as int);

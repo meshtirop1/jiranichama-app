@@ -338,6 +338,12 @@ class _BankCheck extends ConsumerWidget {
         for (final line in lines)
           Padding(padding: const EdgeInsets.only(top: JiraniSpace.xs),
               child: Text(line, style: text.bodySmall)),
+        if (r.fromBankApi)
+          Padding(
+            padding: const EdgeInsets.only(top: JiraniSpace.xs),
+            child: Text(l.recFromBankApi, key: const ValueKey('rec-bank-api'),
+                style: text.bodySmall),
+          ),
         if (r.bank != null && r.records != null && r.status != 'match')
           Padding(
             padding: const EdgeInsets.only(top: JiraniSpace.xs),
