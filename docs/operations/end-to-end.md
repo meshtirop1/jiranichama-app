@@ -2,7 +2,7 @@
 
 `integration_test/phase1_e2e_test.dart` walks the whole of Phase 1 through the real app
 against a real local API: four people sign in and out on one device (founder/chair,
-treasurer, secretary, member), set up a chama, join with invite codes, adopt the rules
+treasurer, secretary, member), set up a chama (including the full rules editor), join with invite codes, adopt the rules
 by SMS code, upload a bank statement that a second official confirms, see payments
 matched and the records checked on the phone, assign an unmatched payment, and send it
 back with "This was not me". It then brings in an opening balance (drafted by the

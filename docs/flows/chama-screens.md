@@ -21,6 +21,25 @@ an invite code.
    - **Send the rules for confirmation**, once the bank account is in.
    Everyone else sees "the founder is still setting up" and the rule book.
 
+### All rules (founder, during setup)
+
+Below the main four settings, **Edit all rules** opens every setting in rules schema v1:
+- **Contributions**: amount, due day, grace days, days to bank meeting cash, and the order
+  a payment pays things off (months behind, fines, this month; arrows move them).
+- **Late fine**: on or off, amount, and a monthly limit (empty for none).
+- **Officials**: which of chair, treasurer and secretary the chama has (at least two).
+- **Approving money out**: up to four levels, each with a limit (the last covers any
+  amount), how many officials approve, and whether members also vote; hours to approve.
+  These are used once the chama pays out through the app.
+- **Membership**: entry fee, and whether new members need a vote.
+- **Adopting these rules**: the share of members who must confirm.
+- **Bank statements**: how often a new one is due.
+- **ID checks**: the chama pays, or each member pays.
+
+**Save rules** sends the whole set. The API checks ranges and contradictions; each error
+comes back with the setting's path and a stable code, and shows under that setting in the
+member's language. Saving returns to setup, which shows the new main settings.
+
 ## Join
 
 Type the invite code, read the chama's rule book, then **Join and accept these rules**.
@@ -115,6 +134,5 @@ choose the member and write why it belongs to them.
 
 ## Not yet
 
-Monthly statements made and sent automatically, the full rules editor (all
-settings, not only the main four), the encrypted offline copy of the ledger, and pull to
+Monthly statements made and sent automatically, the encrypted offline copy of the ledger, and pull to
 refresh on every list.
