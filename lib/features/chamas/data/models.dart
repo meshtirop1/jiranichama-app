@@ -442,3 +442,21 @@ class RotationInfo {
   List<RotationTurnInfo> get turns =>
       [for (final t in json['turns'] as List) RotationTurnInfo(t as Json)];
 }
+
+/// Does the bank match the records? (jiranichama-api docs/flows/reconciliation.md)
+class Reconciliation {
+  Reconciliation(this.json);
+  final Json json;
+
+  /// no_statement, match, open or breach.
+  String get status => json['status'] as String;
+  String? get checkedOn => json['checked_on'] as String?;
+  Kes? get bank => json['bank_cents'] == null ? null : Kes(json['bank_cents'] as int);
+  Kes? get records => json['records_cents'] == null ? null : Kes(json['records_cents'] as int);
+  Kes get gap => Kes(json['gap_cents'] as int);
+  Kes get unmatched => Kes(json['unmatched_cents'] as int);
+  Kes get unexplained => Kes(json['unexplained_cents'] as int);
+  String? get gapOpenedOn => json['gap_opened_on'] as String?;
+  int get daysOpen => json['days_open'] as int;
+  int get breachAfterDays => json['breach_after_days'] as int;
+}

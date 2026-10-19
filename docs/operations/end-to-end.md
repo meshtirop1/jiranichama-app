@@ -14,8 +14,9 @@ opens the chama statement. Last, a statement with a damaged row: the secretary t
 row in and the chair confirms. Then money out: two officials switch it on, the treasurer
 proposes the member's payout, the treasurer and chair approve, the chair marks it paid,
 and the next statement's debit matches it. Last, the chair starts a drawn merry-go-round
-cycle and proposes the first turn, and finally sets up the phone key and approves a
-payment with it. Screenshots land in `build/e2e_screenshots/`; the last
+cycle and proposes the first turn, then sets up the phone key and approves a
+payment with it, and finally checks the overview shows the bank-against-records gap.
+Screenshots land in `build/e2e_screenshots/`; the last
 passing run is kept in [screenshots/phase1](../screenshots/phase1/).
 
 It is not part of CI, because it needs a running API and a device.

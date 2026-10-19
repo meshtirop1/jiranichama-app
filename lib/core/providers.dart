@@ -86,6 +86,10 @@ abstract class PhoneSigner {
   Future<CreatedKey> create(List<int> challenge);
   Future<void> remember(String deviceId);
   Future<String> sign(List<int> data, {required String title, required String subtitle});
+
+  /// On sign-out: the key belongs to the person who set it up, not to the next person
+  /// who signs in on this phone.
+  Future<void> forget();
 }
 
 class DevicePhoneSigner implements PhoneSigner {
@@ -118,6 +122,16 @@ class DevicePhoneSigner implements PhoneSigner {
   @override
   Future<String> sign(List<int> data, {required String title, required String subtitle}) =>
       keys.sign(data, title: title, subtitle: subtitle);
+
+  @override
+  Future<void> forget() async {
+    try {
+      await storage.delete(key: _idKey);
+      await keys.deleteKey();
+    } catch (_) {
+      // No keystore or secure storage on this platform: nothing to forget.
+    }
+  }
 }
 
 final phoneSignerProvider = Provider<PhoneSigner>((ref) => DevicePhoneSigner());

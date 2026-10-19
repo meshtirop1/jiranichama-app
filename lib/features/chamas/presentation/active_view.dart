@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:jirani_domain/jirani_domain.dart';
 import 'package:jirani_ui/jirani_ui.dart';
 
 import '../../../core/labels.dart';
@@ -13,6 +14,9 @@ import 'cash_screen.dart';
 import 'money_out_screen.dart';
 import 'records_tab.dart';
 import 'widgets/rule_book_list.dart';
+
+final reconciliationProvider = FutureProvider.autoDispose.family<Reconciliation, String>(
+    (ref, id) => ref.watch(chamaRepositoryProvider).reconciliation(id));
 
 final positionProvider = FutureProvider.autoDispose.family<Position, String>(
     (ref, membershipId) => ref.watch(chamaRepositoryProvider).position(membershipId));
@@ -133,6 +137,7 @@ class _Overview extends ConsumerWidget {
               ]),
             ),
           ),
+        _BankCheck(chamaId: chama.id),
         _CashToConfirm(chamaId: chama.id, myId: me?.id),
         _MoneyOutNotices(chamaId: chama.id, moneyOut: chama.mode == 'money_out'),
         if (chama.mode == 'records_only') ...[
@@ -251,5 +256,58 @@ class _MoneyOutNotices extends ConsumerWidget {
           ),
         ),
     ]);
+  }
+}
+
+/// Every morning the bank is checked against the records (5.5). Every member sees the
+/// same answer: a match, a gap (and what it is made of), or a breach.
+class _BankCheck extends ConsumerWidget {
+  const _BankCheck({required this.chamaId});
+
+  final String chamaId;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l = AppLocalizations.of(context);
+    final r = ref.watch(reconciliationProvider(chamaId)).value;
+    if (r == null) return const SizedBox.shrink();
+    final text = Theme.of(context).textTheme;
+    final lines = <String>[];
+    final String headline;
+    final NoticeTone tone;
+    switch (r.status) {
+      case 'match':
+        headline = l.recMatch(r.checkedOn ?? '');
+        tone = NoticeTone.info;
+      case 'open' || 'breach':
+        final amount = Kes(r.gap.cents.abs()).format();
+        headline = r.status == 'breach'
+            ? l.recBreach(amount, '${r.daysOpen}')
+            : l.recGap(amount, r.gapOpenedOn ?? '');
+        tone = r.status == 'breach' ? NoticeTone.critical : NoticeTone.warning;
+        if (r.unmatched.cents != 0) lines.add(l.recUnmatched(r.unmatched.format()));
+        if (r.unexplained.cents != 0) {
+          lines.add(l.recUnexplained(Kes(r.unexplained.cents.abs()).format()));
+        }
+        if (r.status == 'open') lines.add(l.recBreachSoon('${r.breachAfterDays}'));
+      default:
+        headline = l.recNoStatement;
+        tone = NoticeTone.info;
+    }
+    return Padding(
+      padding: const EdgeInsets.only(top: JiraniSpace.s),
+      child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+        Notice(headline, tone: tone),
+        for (final line in lines)
+          Padding(padding: const EdgeInsets.only(top: JiraniSpace.xs),
+              child: Text(line, style: text.bodySmall)),
+        if (r.bank != null && r.records != null && r.status != 'match')
+          Padding(
+            padding: const EdgeInsets.only(top: JiraniSpace.xs),
+            child: Text(l.recBankRecords(r.bank!.format(), r.records!.format()),
+                style: text.bodySmall),
+          ),
+      ]),
+    );
   }
 }

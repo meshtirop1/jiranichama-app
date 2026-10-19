@@ -609,5 +609,20 @@ void main() {
     await tap(find.text('Approve'));
     await waitFor(find.textContaining('approved with their phone key'), seconds: 90);
     await screenshot('approved_with_phone_key');
+
+    // 21. Everyone sees whether the bank matches the records. Here it does not: two
+    // deposits are still unmatched, so the gap is shown with what it is made of.
+    await tester.pageBack();
+    await tester.pumpAndSettle();
+    await tester.pageBack();
+    await tester.pumpAndSettle();
+    final bankCheck = find.textContaining('the bank differ by');
+    if (bankCheck.evaluate().isEmpty) {
+      await tester.dragUntilVisible(bankCheck, find.byType(ListView).first,
+          const Offset(0, 300), maxIteration: 12);
+    }
+    await waitFor(bankCheck);
+    await waitFor(find.textContaining('not yet matched to a member'));
+    await screenshot('bank_check_gap');
   });
 }

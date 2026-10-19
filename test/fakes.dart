@@ -510,6 +510,16 @@ class FakeChamaRepository implements ChamaRepository {
     return UnapprovedDebit(d);
   }
 
+  // Daily reconciliation
+  Json reconciliationJson = {
+    'status': 'no_statement', 'checked_on': null, 'bank_cents': null, 'records_cents': null,
+    'gap_cents': 0, 'unmatched_cents': 0, 'unexplained_cents': 0, 'gap_opened_on': null,
+    'days_open': 0, 'breach_after_days': 7, 'history': <Json>[],
+  };
+
+  @override
+  Future<Reconciliation> reconciliation(String id) async => Reconciliation(reconciliationJson);
+
   // Phone signing keys
   String? tamperAmount;
 
@@ -754,6 +764,15 @@ class FakePhoneSigner implements PhoneSigner {
   Future<void> remember(String deviceId) async {
     remembered = deviceId;
     hasKeyAndId = true;
+  }
+
+  bool forgotten = false;
+
+  @override
+  Future<void> forget() async {
+    forgotten = true;
+    hasKeyAndId = false;
+    remembered = null;
   }
 
   @override

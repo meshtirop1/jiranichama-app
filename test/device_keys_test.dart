@@ -111,4 +111,17 @@ void main() {
     expect(repo.calls.where((c) => c.startsWith('signature')), isEmpty);
     expect(find.text('Waiting for approvals'), findsOneWidget);
   });
+
+  testWidgets("signing out forgets this phone's key", (tester) async {
+    final repo = FakeChamaRepository(myRole: 'chair')..moneyOutOn = true;
+    final signer = FakePhoneSigner(hasKeyAndId: true);
+    await _open(tester, repo, signer);
+    await tester.pageBack();
+    await tester.pumpAndSettle();
+    await tester.pageBack();
+    await tester.pumpAndSettle();
+    await tester.tap(find.byTooltip('Sign out'));
+    await tester.pumpAndSettle();
+    expect(signer.forgotten, isTrue);
+  });
 }
