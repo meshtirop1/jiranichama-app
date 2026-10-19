@@ -1371,5 +1371,72 @@
   "loanWhyArrears": "Your contributions are behind. Catch up first.",
   "loanWhyOpen": "You already have a loan. One loan at a time.",
   "loanWhyOverLimit": "That is more than you can borrow now.",
-  "loanWhyTerm": "That is longer than the rules allow."
+  "loanWhyTerm": "That is longer than the rules allow.",
+  "finesTitle": "Fines",
+  "finesNone": "No fines.",
+  "finesNoneOwed": "You owe no fines",
+  "finesMineOwed": "You owe {amount}",
+  "@finesMineOwed": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "waiversToDecide": "{count, plural, =1{1 waiver to decide} other{{count} waivers to decide}}",
+  "@waiversToDecide": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "fineOwed": "owed",
+  "finePaid": "paid",
+  "fineWaived": "waived",
+  "fineReversed": "reversed",
+  "fineLine": "Rule {rule} · {period} · {state} · receipt {receipt}",
+  "@fineLine": {
+    "placeholders": {
+      "rule": {
+        "type": "String"
+      },
+      "period": {
+        "type": "String"
+      },
+      "state": {
+        "type": "String"
+      },
+      "receipt": {
+        "type": "String"
+      }
+    }
+  },
+  "waiverRequested": "Waiver asked",
+  "waiverWaived": "Waived",
+  "waiverRefused": "Waiver refused",
+  "waiverExpired": "Waiver not decided in time",
+  "waiverLine": "{state}: {reason} ({approvals} of {needed} officials)",
+  "@waiverLine": {
+    "placeholders": {
+      "state": {
+        "type": "String"
+      },
+      "reason": {
+        "type": "String"
+      },
+      "approvals": {
+        "type": "int"
+      },
+      "needed": {
+        "type": "int"
+      }
+    }
+  },
+  "waiverAsk": "Ask for a waiver",
+  "waiverApprove": "Approve the waiver (SMS code)",
+  "waiverDecline": "Decline",
+  "errOwnFine": "Nobody decides a waiver of their own fine.",
+  "errFineNotOpen": "Only an unpaid fine can be waived.",
+  "waiverReasonLabel": "Reason"
 }

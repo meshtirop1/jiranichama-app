@@ -76,6 +76,12 @@ abstract class ChamaRepository {
   Future<List<RuleProposal>> ruleProposals(String id);
   Future<List<Meeting>> meetings(String id);
   Future<List<LoanInfo>> loans(String id);
+  Future<List<FineInfo>> fines(String id);
+  Future<FineInfo> requestWaiver(String fineId, String reason);
+  Future<ChallengeSent> startWaiverApproval(String waiverId);
+  Future<FineInfo> approveWaiver(String waiverId,
+      {required String challengeId, required String code});
+  Future<FineInfo> declineWaiver(String waiverId, String reason);
   Future<LoanQuote> loanQuote(String id, {required int amountCents, required int termMonths});
   Future<LoanInfo> requestLoan(String id, Json body, {required String idempotencyKey});
   Future<LoanInfo> cancelLoan(String loanId);
@@ -456,6 +462,28 @@ class HttpChamaRepository implements ChamaRepository {
   @override
   Future<List<VoteInfo>> votes(String id) async =>
       [for (final v in await _api.get('/chamas/$id/votes/') as List) VoteInfo(v as Json)];
+
+  @override
+  Future<List<FineInfo>> fines(String id) async =>
+      [for (final f in await _api.get('/chamas/$id/fines/') as List) FineInfo(f as Json)];
+
+  @override
+  Future<FineInfo> requestWaiver(String fineId, String reason) async => FineInfo(
+      await _api.post('/fines/$fineId/waiver/', body: {'reason': reason}, auth: true));
+
+  @override
+  Future<ChallengeSent> startWaiverApproval(String waiverId) async => ChallengeSent(
+      await _api.post('/waivers/$waiverId/approve/', body: {}, auth: true));
+
+  @override
+  Future<FineInfo> approveWaiver(String waiverId,
+          {required String challengeId, required String code}) async =>
+      FineInfo(await _api.post('/waivers/$waiverId/approve/', auth: true,
+          body: {'challenge_id': challengeId, 'sms_code': code}));
+
+  @override
+  Future<FineInfo> declineWaiver(String waiverId, String reason) async => FineInfo(
+      await _api.post('/waivers/$waiverId/decline/', body: {'reason': reason}, auth: true));
 
   @override
   Future<List<LoanInfo>> loans(String id) async =>

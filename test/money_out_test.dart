@@ -171,6 +171,7 @@ void main() {
     await _open(tester, repo, '');
     expect(find.textContaining('KES 45,000 left the bank on 2026-03-14 with no approval'),
         findsOneWidget);
+    await scrollTo(tester, find.textContaining('KES 45,000 left the bank'));
     await tester.tap(find.textContaining('KES 45,000 left the bank'));
     await tester.pumpAndSettle();
     await tester.tap(find.text('Explain'));

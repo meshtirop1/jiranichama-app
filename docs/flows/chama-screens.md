@@ -217,6 +217,17 @@ The rules of an active chama change only by a members' vote (API
   the API checks the complete result, so a change that clashes with another setting is
   caught before anyone votes.
 
+## Fines and waivers (5.9)
+
+API flow: `docs/flows/fine-waivers.md`.
+- **Overview**: a Fines card with what I owe in fines and how many waivers wait for my
+  decision.
+- **Fines**: every fine in the chama, with who, the rule, the month, its state and its
+  receipt, plus the latest waiver with its reason and approvals so far.
+- A member can **Ask for a waiver** of their own unpaid fine, with a reason.
+- An official who may decide sees **Approve the waiver (SMS code)** and **Decline**.
+  Nobody sees these for their own fine.
+
 ## Loans (5.8, switched off for now)
 
 Shown only where the chama data says `loans_on` (the API's `loans` flag, off until the

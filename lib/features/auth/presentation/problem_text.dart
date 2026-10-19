@@ -40,6 +40,8 @@ String problemText(AppLocalizations l, Object error) {
     'no_change' => l.errNoRuleChange,
     'meeting_state' => l.errMeetingState,
     'loans_off' => l.errLoansOff,
+    'own_fine' => l.errOwnFine,
+    'fine_not_open' => l.errFineNotOpen,
     'too_new' || 'in_arrears' || 'loan_open' || 'over_limit' || 'term_too_long' =>
       loanReasonText(l, error.code),
     'guarantors_needed' => l.errGuarantorsNeeded,

@@ -580,6 +580,57 @@ class FakeChamaRepository implements ChamaRepository {
     return VoteInfo(_voteJson(voteId));
   }
 
+  // Fines and waivers
+  final finesList = <Json>[];
+
+  Json newFine({String id = 'f1', bool mine = true, Json? waiver}) => {
+        'id': id, 'member': mine ? 'Me' : 'Mary', 'member_id': mine ? 'm4' : 'm3',
+        'mine': mine, 'rule_ref': '3.2', 'period': '2026-09', 'amount_cents': 20000,
+        'paid_cents': 0, 'outstanding_cents': 20000, 'state': 'raised',
+        'cause': 'late_contribution', 'receipt': 'FINE1234', 'waiver': waiver,
+        'created_at': 'x',
+      };
+
+  Json _fineJson(String id) => finesList.firstWhere((f) => f['id'] == id);
+
+  Json _fineOfWaiver(String waiverId) =>
+      finesList.firstWhere((f) => (f['waiver'] as Map?)?['id'] == waiverId);
+
+  @override
+  Future<List<FineInfo>> fines(String id) async => [for (final f in finesList) FineInfo(f)];
+
+  @override
+  Future<FineInfo> requestWaiver(String fineId, String reason) async {
+    calls.add('requestWaiver:$fineId:$reason');
+    return FineInfo(_fineJson(fineId)..['waiver'] = {
+      'id': 'w-$fineId', 'reason': reason, 'state': 'requested', 'state_reason': '',
+      'needs_officials': 2, 'needs_vote': false, 'deadline_at': 'x', 'approvals': 0,
+      'i_can_decide': false, 'created_at': 'x'});
+  }
+
+  @override
+  Future<ChallengeSent> startWaiverApproval(String waiverId) async => _sent;
+
+  @override
+  Future<FineInfo> approveWaiver(String waiverId,
+      {required String challengeId, required String code}) async {
+    _codeCheck(code);
+    calls.add('approveWaiver:$waiverId');
+    final f = _fineOfWaiver(waiverId);
+    (f['waiver'] as Map)
+      ..['approvals'] = 1
+      ..['i_can_decide'] = false;
+    return FineInfo(f);
+  }
+
+  @override
+  Future<FineInfo> declineWaiver(String waiverId, String reason) async {
+    calls.add('declineWaiver:$waiverId:$reason');
+    final f = _fineOfWaiver(waiverId);
+    (f['waiver'] as Map)['i_can_decide'] = false;
+    return FineInfo(f);
+  }
+
   // Loans
   final loansList = <Json>[];
 

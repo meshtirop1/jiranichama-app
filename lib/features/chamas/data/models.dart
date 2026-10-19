@@ -667,3 +667,33 @@ class LoanQuote {
   int get totalInterestCents => json['total_interest_cents'] as int;
   int get totalCents => json['total_cents'] as int;
 }
+
+/// A fine and its latest waiver (jiranichama-api docs/flows/fine-waivers.md).
+class FineInfo {
+  FineInfo(this.json);
+  final Json json;
+
+  String get id => json['id'] as String;
+  String get member => json['member'] as String;
+  bool get mine => json['mine'] == true;
+  String get ruleRef => json['rule_ref'] as String;
+  String get period => json['period'] as String;
+  int get amountCents => json['amount_cents'] as int;
+  int get outstandingCents => json['outstanding_cents'] as int;
+  String get state => json['state'] as String;
+  String get receipt => json['receipt'] as String;
+  WaiverInfo? get waiver =>
+      json['waiver'] == null ? null : WaiverInfo(json['waiver'] as Json);
+}
+
+class WaiverInfo {
+  WaiverInfo(this.json);
+  final Json json;
+
+  String get id => json['id'] as String;
+  String get reason => json['reason'] as String;
+  String get state => json['state'] as String;
+  int get needsOfficials => json['needs_officials'] as int;
+  int get approvals => json['approvals'] as int;
+  bool get iCanDecide => json['i_can_decide'] == true;
+}
