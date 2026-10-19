@@ -578,5 +578,13 @@
   "errPayloadChanged": "Unachoidhinisha kimebadilika. Angalia tena.",
   "errOtherPhone": "Idhini zako zimewekwa kwenye simu nyingine.",
   "errKeyNotTrusted": "Simu hii haiwezi kuhifadhi ufunguo kwa usalama. Idhinisha kwa nambari ya SMS.",
-  "errAttestationInvalid": "Ufunguo wa simu hii haukuweza kuhakikiwa."
+  "errAttestationInvalid": "Ufunguo wa simu hii haukuweza kuhakikiwa.",
+  "recMatch": "Kumbukumbu zinalingana na benki · imekaguliwa {date}",
+  "recGap": "Kumbukumbu na benki zinatofautiana kwa {amount} tangu {date}.",
+  "recBreach": "TAHADHARI: kumbukumbu na benki zimetofautiana kwa {amount} kwa siku {days}. Viongozi wanapaswa kueleza.",
+  "recUnmatched": "{amount} ni malipo ambayo bado hayajaunganishwa na mwanachama.",
+  "recUnexplained": "{amount} haielezwi na rekodi yoyote.",
+  "recNoStatement": "Bado haijakaguliwa dhidi ya benki: hakuna taarifa ya benki iliyokubaliwa.",
+  "recBreachSoon": "Itakuwa tahadhari, na kila mwanachama ataambiwa, baada ya siku {days}.",
+  "recBankRecords": "Benki {bank} · kumbukumbu {records}"
 }

@@ -62,6 +62,16 @@ The rule book, how many founding members have confirmed and how many are needed,
   signature. On a payment the treasurer assigned to me, **This was not me** sends it back.
 - **Members** and **Rules**.
 
+## Does the bank match the records?
+
+Near the top of every member's overview, the result of the daily check (5.5):
+- **Records match the bank · checked {date}**, or
+- **The records and the bank differ by KES X since {date}** (amber): how much is payments
+  not yet matched to a member, how much nothing explains, and that it becomes a breach,
+  and everyone is told, after 7 days; with the bank and records figures; or
+- **BREACH** (red), with how many days it has been open; or
+- that no bank statement has been accepted yet.
+
 ## Bank statements (officials)
 
 Upload a CSV statement; the list shows each statement's state, period, number of lines,
@@ -154,7 +164,8 @@ fingerprint icon. A payload that does not match what is on screen is never signe
 Backing out sends nothing.
 
 Officials on phones without a screen lock or fingerprint, older than Android 11, or on
-iPhone (for now) keep SMS codes.
+iPhone (for now) keep SMS codes. Signing out forgets the phone's key, so the next person
+to sign in on that phone never inherits it.
 
 ## Merry-go-round
 

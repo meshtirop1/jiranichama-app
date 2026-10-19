@@ -805,5 +805,71 @@
   "errPayloadChanged": "What you are approving has changed. Look again.",
   "errOtherPhone": "Your approvals are set up on another phone.",
   "errKeyNotTrusted": "This phone cannot keep a signing key safely. Approve by SMS code instead.",
-  "errAttestationInvalid": "This phone's key could not be checked."
+  "errAttestationInvalid": "This phone's key could not be checked.",
+  "recMatch": "Records match the bank · checked {date}",
+  "@recMatch": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "recGap": "The records and the bank differ by {amount} since {date}.",
+  "@recGap": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "recBreach": "BREACH: the records and the bank have differed by {amount} for {days} days. Officials must explain it.",
+  "@recBreach": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "days": {
+        "type": "String"
+      }
+    }
+  },
+  "recUnmatched": "{amount} is payments not yet matched to a member.",
+  "@recUnmatched": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "recUnexplained": "{amount} is not explained by any record.",
+  "@recUnexplained": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "recNoStatement": "Not yet checked against the bank: no bank statement has been accepted.",
+  "recBreachSoon": "It becomes a breach, and every member is told, after {days} days.",
+  "@recBreachSoon": {
+    "placeholders": {
+      "days": {
+        "type": "String"
+      }
+    }
+  },
+  "recBankRecords": "Bank {bank} · records {records}",
+  "@recBankRecords": {
+    "placeholders": {
+      "bank": {
+        "type": "String"
+      },
+      "records": {
+        "type": "String"
+      }
+    }
+  }
 }

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/providers.dart';
@@ -24,6 +26,8 @@ class SessionController extends Notifier<SessionStatus> {
 
   Future<void> signOut() async {
     await ref.read(authRepositoryProvider).signOut();
+    // Not awaited: sign-out never waits on the keystore.
+    unawaited(ref.read(phoneSignerProvider).forget());
     state = SessionStatus.signedOut;
   }
 }

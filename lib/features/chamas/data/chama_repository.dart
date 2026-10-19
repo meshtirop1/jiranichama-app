@@ -68,6 +68,7 @@ abstract class ChamaRepository {
   Future<Proposal> markPaid(String proposalId, String bankReference,
       {required String idempotencyKey});
   Future<List<UnapprovedDebit>> unapprovedDebits(String id);
+  Future<Reconciliation> reconciliation(String id);
   Future<String> attestNonce();
   Future<ChallengeSent> startRegisterDevice(Json body);
   Future<Json> registerDevice(Json body, {required String challengeId, required String code});
@@ -408,4 +409,8 @@ class HttpChamaRepository implements ChamaRepository {
   @override
   Future<Proposal> submitSignature(String proposalId, Json body) async =>
       Proposal(await _api.post('/proposals/$proposalId/signatures/', auth: true, body: body));
+
+  @override
+  Future<Reconciliation> reconciliation(String id) async =>
+      Reconciliation(await _api.get('/chamas/$id/reconciliation/') as Json);
 }
