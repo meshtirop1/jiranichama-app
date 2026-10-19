@@ -612,5 +612,13 @@
   "statementOverdue": "Taarifa ya benki imechelewa siku {days}. Ipakie kutoka Taarifa za benki.",
   "statementNotCheckedSince": "Kumbukumbu hazijakaguliwa dhidi ya benki tangu {date}.",
   "sinceGoingLive": "chama kilipoanza",
-  "fromMpesa": "Kutoka M-Pesa sasa hivi"
+  "fromMpesa": "Kutoka M-Pesa sasa hivi",
+  "inviteMember": "Alika mwanachama",
+  "inviteBySms": "Hawana simu janja",
+  "inviteBySmsHelp": "Wanapata kanuni kuu kwa SMS na kujibu NDIYO na nambari ili kujiunga.",
+  "sendSmsInvite": "Tuma mwaliko wa SMS",
+  "createInviteCode": "Unda nambari ya mwaliko",
+  "inviteSmsSent": "Imetumwa kwa {phone}. Wanajibu NDIYO na nambari ili kujiunga.",
+  "inviteCodeToShare": "Nambari ya mwaliko {code}: wanaiweka kwenye programu ili kujiunga.",
+  "errSmsInviteNotAllowed": "Mialiko ya SMS ni kwa wanachama wa chama kinachoendelea, kwa nambari ya simu."
 }

@@ -13,7 +13,8 @@ abstract class ChamaRepository {
       required String accountNo, String paybill, required String statementRoute});
   Future<RuleBook> rules(String id);
   Future<RuleBook> saveRules(String id, Json rules);
-  Future<Invite> invite(String id, {required String role, String? phone});
+  Future<Invite> invite(String id, {required String role, String? phone, bool bySms,
+      String language});
   Future<Chama> submit(String id);
   Future<ChallengeSent> startAdoption(String id);
   Future<Chama> confirmAdoption(String id, {required String challengeId, required String code});
@@ -130,9 +131,12 @@ class HttpChamaRepository implements ChamaRepository {
       RuleBook({...await _api.put('/chamas/$id/rules/', rules), 'status': 'draft'});
 
   @override
-  Future<Invite> invite(String id, {required String role, String? phone}) async =>
-      Invite(await _api.post('/chamas/$id/invites/', auth: true,
-          body: {'role': role, if (phone != null && phone.isNotEmpty) 'phone': phone}));
+  Future<Invite> invite(String id, {required String role, String? phone, bool bySms = false,
+          String language = 'en'}) async =>
+      Invite(await _api.post('/chamas/$id/invites/', auth: true, body: {
+        'role': role, if (phone != null && phone.isNotEmpty) 'phone': phone,
+        if (bySms) 'by_sms': true, if (bySms) 'language': language,
+      }));
 
   @override
   Future<Chama> submit(String id) async =>

@@ -35,6 +35,7 @@ String problemText(AppLocalizations l, Object error) {
     'bad_dates' => l.errBadDates,
     'money_out_off' => l.errMoneyOutOff,
     'use_device_key' => l.errUseDeviceKey,
+    'sms_invite_not_allowed' => l.errSmsInviteNotAllowed,
     'already_voted' => l.errAlreadyVoted,
     'vote_closed' => l.errVoteClosed,
     'not_eligible' => l.errNotEligible,

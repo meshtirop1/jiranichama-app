@@ -955,5 +955,27 @@
     }
   },
   "sinceGoingLive": "the chama went live",
-  "fromMpesa": "From M-Pesa just now"
+  "fromMpesa": "From M-Pesa just now",
+  "inviteMember": "Invite a member",
+  "inviteBySms": "They have no smartphone",
+  "inviteBySmsHelp": "They get the main rules by SMS and reply YES with a code to join.",
+  "sendSmsInvite": "Send the SMS invite",
+  "createInviteCode": "Create an invite code",
+  "inviteSmsSent": "Sent to {phone}. They reply YES with the code to join.",
+  "@inviteSmsSent": {
+    "placeholders": {
+      "phone": {
+        "type": "String"
+      }
+    }
+  },
+  "inviteCodeToShare": "Invite code {code}: they enter it in the app to join.",
+  "@inviteCodeToShare": {
+    "placeholders": {
+      "code": {
+        "type": "String"
+      }
+    }
+  },
+  "errSmsInviteNotAllowed": "SMS invites are for members of an active chama, with a phone number."
 }

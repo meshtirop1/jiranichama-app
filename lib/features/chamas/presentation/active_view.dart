@@ -49,6 +49,17 @@ class ActiveView extends StatelessWidget {
           _Overview(bundle: bundle),
           RecordsTab(bundle: bundle),
           ListView(children: [
+            if (bundle.chama.iAmOfficial)
+              Padding(
+                padding: const EdgeInsets.all(JiraniSpace.m),
+                child: OutlinedButton.icon(
+                  icon: const Icon(Icons.person_add_alt_1_outlined),
+                  label: Text(l.inviteMember),
+                  onPressed: () => showModalBottomSheet<void>(
+                      context: context, isScrollControlled: true,
+                      builder: (_) => _InviteSheet(chamaId: bundle.chama.id)),
+                ),
+              ),
             for (final m in bundle.members)
               ListTile(title: Text(m.name),
                   subtitle: Text('${roleLabel(l, m.role)} · ${m.memberCode}'),
@@ -347,5 +358,95 @@ class _OpenVotes extends ConsumerWidget {
           ),
         ),
     ]);
+  }
+}
+
+/// Invite a member to an active chama: a code to share with someone who has the app, or
+/// an SMS for someone without a smartphone, who replies YES with the code (5.2a).
+class _InviteSheet extends ConsumerStatefulWidget {
+  const _InviteSheet({required this.chamaId});
+
+  final String chamaId;
+
+  @override
+  ConsumerState<_InviteSheet> createState() => _InviteSheetState();
+}
+
+class _InviteSheetState extends ConsumerState<_InviteSheet> {
+  final _phone = TextEditingController();
+  bool _bySms = false;
+  String _language = 'en';
+  String? _result;
+  String? _error;
+  bool _busy = false;
+
+  @override
+  void dispose() {
+    _phone.dispose();
+    super.dispose();
+  }
+
+  Future<void> _send() async {
+    final l = AppLocalizations.of(context);
+    setState(() {
+      _busy = true;
+      _error = null;
+    });
+    try {
+      final inv = await ref.read(chamaRepositoryProvider).invite(widget.chamaId,
+          role: 'member', phone: _phone.text.trim(), bySms: _bySms, language: _language);
+      setState(() => _result = _bySms ? l.inviteSmsSent(inv.phoneHint.isEmpty ? _phone.text.trim() : inv.phoneHint)
+          : l.inviteCodeToShare(inv.code));
+    } catch (e) {
+      setState(() => _error = problemText(l, e));
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
+    return Padding(
+      padding: EdgeInsets.only(left: JiraniSpace.m, right: JiraniSpace.m, top: JiraniSpace.m,
+          bottom: MediaQuery.of(context).viewInsets.bottom + JiraniSpace.m),
+      child: Column(mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+        Text(l.inviteMember, style: Theme.of(context).textTheme.titleLarge),
+        const SizedBox(height: JiraniSpace.s),
+        TextField(key: const ValueKey('invite-member-phone'), controller: _phone,
+            keyboardType: TextInputType.phone,
+            decoration: InputDecoration(labelText: l.invitePhoneLabel)),
+        SwitchListTile(
+          key: const ValueKey('invite-by-sms'),
+          contentPadding: EdgeInsets.zero,
+          title: Text(l.inviteBySms),
+          subtitle: Text(l.inviteBySmsHelp),
+          value: _bySms,
+          onChanged: (v) => setState(() => _bySms = v),
+        ),
+        if (_bySms)
+          SegmentedButton<String>(
+            segments: const [
+              ButtonSegment(value: 'en', label: Text('English')),
+              ButtonSegment(value: 'sw', label: Text('Kiswahili')),
+            ],
+            selected: {_language},
+            showSelectedIcon: false,
+            onSelectionChanged: (s) => setState(() => _language = s.first),
+          ),
+        if (_error != null) ...[
+          const SizedBox(height: JiraniSpace.s),
+          Notice(_error!, tone: NoticeTone.critical),
+        ],
+        if (_result != null) ...[
+          const SizedBox(height: JiraniSpace.s),
+          Notice(_result!),
+        ],
+        const SizedBox(height: JiraniSpace.m),
+        PrimaryButton(label: _bySms ? l.sendSmsInvite : l.createInviteCode, busy: _busy,
+            onPressed: _send),
+      ]),
+    );
   }
 }

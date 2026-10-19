@@ -270,4 +270,23 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.textContaining('From M-Pesa just now'), findsOneWidget);
   });
+
+  testWidgets('an official invites a member without a smartphone by SMS', (tester) async {
+    final repo = FakeChamaRepository(myRole: 'chair');
+    await _pump(tester, repo);
+    await _openChama(tester);
+    await tester.tap(find.text('Members'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Invite a member'));
+    await tester.pumpAndSettle();
+    await tester.enterText(find.byKey(const ValueKey('invite-member-phone')), '0799111222');
+    await tester.tap(find.byKey(const ValueKey('invite-by-sms')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Kiswahili'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Send the SMS invite'));
+    await tester.pumpAndSettle();
+    expect(repo.calls, contains('smsInvite:0799111222:sw'));
+    expect(find.textContaining('They reply YES with the code'), findsOneWidget);
+  });
 }

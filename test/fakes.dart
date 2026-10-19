@@ -184,7 +184,9 @@ class FakeChamaRepository implements ChamaRepository {
   }
 
   @override
-  Future<Invite> invite(String id, {required String role, String? phone}) async {
+  Future<Invite> invite(String id, {required String role, String? phone, bool bySms = false,
+      String language = 'en'}) async {
+    if (bySms) calls.add('smsInvite:$phone:$language');
     calls.add('invite:$role:${phone ?? ''}');
     return Invite({'code': 'KQWERT', 'role': role, 'phone_hint': '', 'state': 'pending'});
   }

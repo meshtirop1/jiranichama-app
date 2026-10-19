@@ -174,6 +174,14 @@ Officials on phones without a screen lock or fingerprint, older than Android 11,
 iPhone (for now) keep SMS codes. Signing out forgets the phone's key, so the next person
 to sign in on that phone never inherits it.
 
+## Inviting members after the chama is active
+
+Officials have **Invite a member** on the Members tab: a phone number, and **They have
+no smartphone** for someone on a basic phone, in English or Kiswahili. Without the
+switch it creates an invite code to share; they enter it in the app. With it, they get
+the main rules by SMS and reply YES with the code to join (jiranichama-api
+docs/flows/sms-commands.md).
+
 ## Members' votes
 
 A payout above the rules' vote level opens a members' vote alongside the officials'
