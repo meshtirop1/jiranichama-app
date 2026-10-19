@@ -1622,5 +1622,166 @@
   "errElectionOpen": "An election for this role is already under way, or the role is filled.",
   "errOfficialHandOver": "An official hands over the role in an election before leaving.",
   "errDeathDetails": "Give the next of kin's name and phone, and a photo of the document.",
-  "recFromBankApi": "Balance read straight from the bank."
+  "recFromBankApi": "Balance read straight from the bank.",
+  "growthTitle": "Growth",
+  "growthSubtitle": "Numbers, investments and partners",
+  "growthNetWorth": "Net worth {amount}",
+  "@growthNetWorth": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "growthNumbers": "Numbers",
+  "growthInvestments": "Investments",
+  "growthPartners": "Partners",
+  "numMoney": "Money",
+  "numMoneyLine": "Contributed {contributed} · bank {bank} · investments {investments} · net worth {net}",
+  "@numMoneyLine": {
+    "placeholders": {
+      "contributed": {
+        "type": "String"
+      },
+      "bank": {
+        "type": "String"
+      },
+      "investments": {
+        "type": "String"
+      },
+      "net": {
+        "type": "String"
+      }
+    }
+  },
+  "numMonths": "Month by month",
+  "numMonthLine": "Paid {paid} of {due} · late {late} · fines {fines}",
+  "@numMonthLine": {
+    "placeholders": {
+      "paid": {
+        "type": "String"
+      },
+      "due": {
+        "type": "String"
+      },
+      "late": {
+        "type": "String"
+      },
+      "fines": {
+        "type": "String"
+      }
+    }
+  },
+  "numBehind": "{count, plural, =0{Nobody is behind} =1{1 member behind} other{{count} members behind}}",
+  "@numBehind": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "numBehindLine": "Behind {arrears} · fines {fines}",
+  "@numBehindLine": {
+    "placeholders": {
+      "arrears": {
+        "type": "String"
+      },
+      "fines": {
+        "type": "String"
+      }
+    }
+  },
+  "numMeetings": "Meetings",
+  "numAttendance": "{attended} of {expected} attended",
+  "@numAttendance": {
+    "placeholders": {
+      "attended": {
+        "type": "int"
+      },
+      "expected": {
+        "type": "int"
+      }
+    }
+  },
+  "invTotals": "{count} held · cost {cost} · worth {value}",
+  "@invTotals": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "cost": {
+        "type": "String"
+      },
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "invLine": "Cost {cost} · worth {value} · income {income} · {state}",
+  "@invLine": {
+    "placeholders": {
+      "cost": {
+        "type": "String"
+      },
+      "value": {
+        "type": "String"
+      },
+      "income": {
+        "type": "String"
+      },
+      "state": {
+        "type": "String"
+      }
+    }
+  },
+  "invHeld": "held",
+  "invSold": "sold",
+  "invValuationWaiting": "Valuation {value} on {date} waits for a second official",
+  "@invValuationWaiting": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "invConfirm": "Confirm",
+  "invAddValuation": "Add a valuation",
+  "invRecord": "Record an investment",
+  "invSave": "Save",
+  "invName": "Name",
+  "invCost": "Cost (KES)",
+  "invValue": "Value (KES)",
+  "invSource": "Where the value comes from",
+  "invValuationIntro": "A valuation counts once a different official confirms it.",
+  "kindLand": "Land",
+  "kindShares": "Shares",
+  "kindMmf": "Money market fund",
+  "kindBond": "Bond",
+  "kindBusiness": "Business",
+  "kindOther": "Other",
+  "refIntro": "JiraniChama lends and insures nothing. The chama can be introduced to a licensed partner only if the members vote for it.",
+  "refPartners": "Licensed partners",
+  "refNoPartners": "No partners yet.",
+  "refLicence": "Licensed by {regulator}, {number}",
+  "@refLicence": {
+    "placeholders": {
+      "regulator": {
+        "type": "String"
+      },
+      "number": {
+        "type": "String"
+      }
+    }
+  },
+  "refPropose": "Ask the members to agree",
+  "refWithdraw": "Withdraw",
+  "refVoting": "Members are voting",
+  "refConsented": "Members agreed; not yet sent",
+  "refRefused": "Members did not agree",
+  "refWithdrawn": "Withdrawn",
+  "refSent": "Sent to the partner",
+  "errPurchaseNotPaid": "Link a money-out payment that has been paid."
 }

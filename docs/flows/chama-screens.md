@@ -220,6 +220,21 @@ The rules of an active chama change only by a members' vote (API
   the API checks the complete result, so a change that clashes with another setting is
   caught before anyone votes.
 
+## Growth (Phase 5)
+
+A Growth card on the overview shows the net worth (bank plus investments) and opens three
+tabs (API: `docs/flows/analytics.md`, `investments.md`, `referrals.md`):
+- **Numbers**, for every member: the money (contributed, bank, investments, net worth),
+  each month's share paid with late money and fines, who is behind, and meeting
+  attendance.
+- **Investments**: each holding at cost and at its latest confirmed value, with income
+  so far. Officials record one (kind, name, cost) and add a valuation with its source; a
+  valuation waits until a different official confirms it.
+- **Partners**: what JiraniChama does and does not do, any referrals with where they
+  stand, and the licensed partners with their regulator and licence number. An official
+  can ask the members to agree to a referral (it goes to a members' vote) and withdraw it
+  until it is sent.
+
 ## Running the chama (5.12, 5.13, 5.14)
 
 The overview ends with the places to go: Fines, **Running the chama**, Meetings and

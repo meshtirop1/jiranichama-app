@@ -781,3 +781,83 @@ class ExitQuote {
   int get settlementCents => json['settlement_cents'] as int;
   int get noticeDays => json['notice_days'] as int;
 }
+
+/// What the chama owns (jiranichama-api docs/flows/investments.md).
+class Portfolio {
+  Portfolio(this.json);
+  final Json json;
+
+  int get held => json['held'] as int;
+  int get costCents => json['cost_cents'] as int;
+  int get valueCents => json['value_cents'] as int;
+  int? get netWorthCents => json['net_worth_cents'] as int?;
+  List<InvestmentInfo> get investments =>
+      [for (final i in json['investments'] as List) InvestmentInfo(i as Json)];
+}
+
+class InvestmentInfo {
+  InvestmentInfo(this.json);
+  final Json json;
+
+  String get id => json['id'] as String;
+  String get name => json['name'] as String;
+  String get state => json['state'] as String;
+  int get costCents => json['cost_cents'] as int;
+  int get valueCents => json['value_cents'] as int;
+  int get incomeCents => json['income_cents'] as int;
+  List<({String id, int valueCents, String asOf, String? confirmedBy})> get valuations => [
+        for (final v in json['valuations'] as List)
+          (id: (v as Map)['id'] as String, valueCents: v['value_cents'] as int,
+           asOf: v['as_of'] as String, confirmedBy: v['confirmed_by'] as String?),
+      ];
+}
+
+/// The numbers for running the chama (jiranichama-api docs/flows/analytics.md).
+class Analytics {
+  Analytics(this.json);
+  final Json json;
+
+  List<({String period, int dueCents, int paidCents, int? paidPct, int lateCents,
+      int finesRaisedCents})> get months => [
+        for (final m in json['months'] as List)
+          (period: (m as Map)['period'] as String, dueCents: m['due_cents'] as int,
+           paidCents: m['paid_cents'] as int, paidPct: m['paid_pct'] as int?,
+           lateCents: m['late_cents'] as int,
+           finesRaisedCents: m['fines_raised_cents'] as int),
+      ];
+  List<({String name, int arrearsCents, int finesCents})> get behind => [
+        for (final b in json['behind'] as List)
+          (name: (b as Map)['name'] as String, arrearsCents: b['arrears_cents'] as int,
+           finesCents: b['fines_cents'] as int),
+      ];
+  int get behindCount => json['behind_count'] as int;
+  List<({String title, int attended, int expected})> get meetings => [
+        for (final m in json['meetings'] as List)
+          (title: ((m as Map)['title'] as String?) ?? '', attended: m['attended'] as int,
+           expected: m['expected'] as int),
+      ];
+  Json get _money => json['money'] as Json;
+  int get contributedCents => _money['contributed_cents'] as int;
+  int? get bankCents => _money['bank_cents'] as int?;
+  int get investmentsCents => _money['investments_cents'] as int;
+  int? get netWorthCents => _money['net_worth_cents'] as int?;
+}
+
+class PartnerInfo {
+  PartnerInfo(this.json);
+  final Json json;
+
+  String get id => json['id'] as String;
+  String get name => json['name'] as String;
+  String get regulatorName => json['regulator_name'] as String;
+  String get licenceNumber => json['licence_number'] as String;
+}
+
+class ReferralInfo {
+  ReferralInfo(this.json);
+  final Json json;
+
+  String get id => json['id'] as String;
+  String get partnerName => (json['partner'] as Map)['name'] as String;
+  String get state => json['state'] as String;
+}

@@ -41,6 +41,7 @@ String problemText(AppLocalizations l, Object error) {
     'meeting_state' => l.errMeetingState,
     'loans_off' => l.errLoansOff,
     'own_fine' => l.errOwnFine,
+    'purchase_not_paid' => l.errPurchaseNotPaid,
     'awaiting_response' => l.errAwaitingResponse,
     'not_enough_deciders' => l.errNotEnoughDeciders,
     'outcome_pending' || 'not_deciding' || 'dispute_closed' => l.errDisputeStage,

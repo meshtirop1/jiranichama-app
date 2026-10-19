@@ -580,6 +580,83 @@ class FakeChamaRepository implements ChamaRepository {
     return VoteInfo(_voteJson(voteId));
   }
 
+  // Growth: investments, numbers, referrals
+  Json portfolioJson = {'held': 0, 'cost_cents': 0, 'value_cents': 0, 'bank_cents': 1000000,
+      'net_worth_cents': 1000000, 'investments': <Json>[]};
+  final partnersList = <Json>[];
+  final referralsList = <Json>[];
+
+  @override
+  Future<Portfolio> portfolio(String id) async => Portfolio(portfolioJson);
+
+  @override
+  Future<void> recordInvestment(String id, Json body) async {
+    calls.add('investment:${body['kind']}:${body['name']}:${body['cost_cents']}');
+    (portfolioJson['investments'] as List).add({
+      'id': 'i1', 'kind': body['kind'], 'name': body['name'], 'state': 'held',
+      'cost_cents': body['cost_cents'], 'value_cents': body['cost_cents'],
+      'income_cents': 0, 'valuations': <Json>[]});
+    portfolioJson['held'] = 1;
+  }
+
+  @override
+  Future<void> valueInvestment(String investmentId, Json body) async {
+    calls.add('valuation:$investmentId:${body['value_cents']}:${body['source']}');
+    for (final i in portfolioJson['investments'] as List) {
+      if ((i as Map)['id'] == investmentId) {
+        (i['valuations'] as List).add({'id': 'v1', 'value_cents': body['value_cents'],
+            'as_of': body['as_of'], 'confirmed_by': null});
+      }
+    }
+  }
+
+  @override
+  Future<void> confirmValuation(String valuationId) async {
+    calls.add('confirmValuation:$valuationId');
+    for (final i in portfolioJson['investments'] as List) {
+      for (final v in (i as Map)['valuations'] as List) {
+        if ((v as Map)['id'] == valuationId) v['confirmed_by'] = 'JC-4821-002';
+      }
+    }
+  }
+
+  @override
+  Future<Analytics> analytics(String id) async => Analytics({
+        'months': [
+          {'period': '2026-09', 'due_cents': 400000, 'paid_cents': 300000, 'paid_pct': 75,
+           'on_time_cents': 200000, 'late_cents': 100000, 'fines_raised_cents': 20000,
+           'fines_paid_cents': 0, 'fines_waived_cents': 0},
+        ],
+        'members': 4,
+        'behind': [{'member_code': 'JC-4821-004', 'name': 'Wanjiru', 'arrears_cents': 100000,
+                    'fines_cents': 20000}],
+        'behind_count': 1,
+        'meetings': [{'title': 'AGM', 'starts_at': 'x', 'attended': 3, 'expected': 4,
+                      'attendance_pct': 75}],
+        'loans': null,
+        'money': {'contributed_cents': 300000, 'bank_cents': 1000000,
+                  'investments_cents': 0, 'net_worth_cents': 1000000},
+      });
+
+  @override
+  Future<List<PartnerInfo>> partners() async => [for (final p in partnersList) PartnerInfo(p)];
+
+  @override
+  Future<List<ReferralInfo>> referrals(String id) async =>
+      [for (final r in referralsList) ReferralInfo(r)];
+
+  @override
+  Future<void> proposeReferral(String id, String partnerId, String reason) async {
+    calls.add('referral:$partnerId:$reason');
+    referralsList.add({'id': 'r1', 'partner': partnersList.first, 'state': 'voting'});
+  }
+
+  @override
+  Future<void> withdrawReferral(String referralId) async {
+    calls.add('withdrawReferral:$referralId');
+    referralsList.firstWhere((r) => r['id'] == referralId)['state'] = 'withdrawn';
+  }
+
   // Disputes, elections, phones, exits
   final disputesList = <Json>[];
   Json electionsJson = {'elections': <Json>[], 'election_needed': <Json>[]};

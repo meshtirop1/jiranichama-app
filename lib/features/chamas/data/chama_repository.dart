@@ -77,6 +77,15 @@ abstract class ChamaRepository {
   Future<List<Meeting>> meetings(String id);
   Future<List<LoanInfo>> loans(String id);
   Future<List<FineInfo>> fines(String id);
+  Future<Portfolio> portfolio(String id);
+  Future<void> recordInvestment(String id, Json body);
+  Future<void> valueInvestment(String investmentId, Json body);
+  Future<void> confirmValuation(String valuationId);
+  Future<Analytics> analytics(String id);
+  Future<List<PartnerInfo>> partners();
+  Future<List<ReferralInfo>> referrals(String id);
+  Future<void> proposeReferral(String id, String partnerId, String reason);
+  Future<void> withdrawReferral(String referralId);
   Future<List<DisputeInfo>> disputes(String id);
   Future<DisputeInfo> raiseDispute(String id, Json body);
   Future<DisputeInfo> respondDispute(String disputeId, String text);
@@ -592,6 +601,50 @@ class HttpChamaRepository implements ChamaRepository {
       'next_of_kin_phone': nextOfKinPhone,
     }, fileField: document == null ? null : 'document', filename: document?.name,
         bytes: document?.bytes);
+  }
+
+  @override
+  Future<Portfolio> portfolio(String id) async =>
+      Portfolio(await _api.get('/chamas/$id/investments/') as Json);
+
+  @override
+  Future<void> recordInvestment(String id, Json body) async {
+    await _api.post('/chamas/$id/investments/', body: body, auth: true);
+  }
+
+  @override
+  Future<void> valueInvestment(String investmentId, Json body) async {
+    await _api.post('/investments/$investmentId/valuations/', body: body, auth: true);
+  }
+
+  @override
+  Future<void> confirmValuation(String valuationId) async {
+    await _api.post('/valuations/$valuationId/confirm/', body: {}, auth: true);
+  }
+
+  @override
+  Future<Analytics> analytics(String id) async =>
+      Analytics(await _api.get('/chamas/$id/analytics/') as Json);
+
+  @override
+  Future<List<PartnerInfo>> partners() async =>
+      [for (final p in await _api.get('/partners/') as List) PartnerInfo(p as Json)];
+
+  @override
+  Future<List<ReferralInfo>> referrals(String id) async => [
+        for (final r in await _api.get('/chamas/$id/referrals/') as List)
+          ReferralInfo(r as Json),
+      ];
+
+  @override
+  Future<void> proposeReferral(String id, String partnerId, String reason) async {
+    await _api.post('/chamas/$id/referrals/', auth: true,
+        body: {'partner_id': partnerId, 'reason': reason});
+  }
+
+  @override
+  Future<void> withdrawReferral(String referralId) async {
+    await _api.post('/referrals/$referralId/withdraw/', body: {}, auth: true);
   }
 
   @override
