@@ -239,3 +239,84 @@ class CashReceipt {
   String get state => json['state'] as String;
   bool get overdue => json['overdue'] == true;
 }
+
+/// One line on a member statement (jiranichama-api docs/flows/member-statements.md).
+class StatementLine {
+  StatementLine(this.json);
+  final Json json;
+
+  String get date => json['date'] as String;
+  String get receipt => json['receipt'] as String;
+  String get type => json['type'] as String;
+  String? get period => json['period'] as String?;
+  Kes get amount => Kes(json['amount_cents'] as int);
+  bool get reversed => json['reversed'] == true;
+  String? get reversesReceipt => json['reverses_receipt'] as String?;
+}
+
+/// A member's figures over a period. The position part is always as of today.
+class MemberStatement {
+  MemberStatement(this.json);
+  final Json json;
+
+  String get from => json['from'] as String;
+  String get to => json['to'] as String;
+  String get memberCode => (json['member'] as Json)['code'] as String;
+  String get memberName {
+    final name = ((json['member'] as Json)['name'] as String?)?.trim() ?? '';
+    return name.isEmpty ? memberCode : name;
+  }
+  List<StatementLine> get lines =>
+      [for (final l in json['lines'] as List) StatementLine(l as Json)];
+  Kes total(String key) => Kes((json['totals'] as Json)[key] as int? ?? 0);
+  Position get position => Position(json['position'] as Json);
+  String get positionOn => (json['position'] as Json)['on'] as String;
+}
+
+class ChamaStatementRow {
+  ChamaStatementRow(this.json);
+  final Json json;
+
+  String get code => json['code'] as String;
+  String get name => (json['name'] as String?)?.trim().isNotEmpty == true
+      ? json['name'] as String
+      : code;
+  Kes get contributed => Kes(json['contributed_cents'] as int);
+  Kes get savings => Kes(json['savings_cents'] as int);
+  Kes get arrears => Kes(json['arrears_cents'] as int);
+  Kes get fines => Kes(json['fines_cents'] as int);
+}
+
+class ChamaStatement {
+  ChamaStatement(this.json);
+  final Json json;
+
+  String get from => json['from'] as String;
+  String get to => json['to'] as String;
+  List<ChamaStatementRow> get members =>
+      [for (final m in json['members'] as List) ChamaStatementRow(m as Json)];
+  Kes total(String key) => Kes((json['totals'] as Json)[key] as int? ?? 0);
+  Json get _bank => json['bank'] as Json;
+  String? get reconciledTo => _bank['reconciled_to'] as String?;
+  Kes? get bankClosing =>
+      _bank['closing_cents'] == null ? null : Kes(_bank['closing_cents'] as int);
+  int get unmatchedCount => _bank['unmatched_count'] as int;
+  Kes get unmatched => Kes(_bank['unmatched_cents'] as int);
+  Kes get cashWaiting => Kes(_bank['cash_waiting_cents'] as int);
+}
+
+/// A sealed PDF statement. Anyone holding it can check it by its code.
+class IssuedDocument {
+  IssuedDocument(this.json);
+  final Json json;
+
+  String get id => json['id'] as String;
+  String get kind => json['kind'] as String;
+  String get verifyCode => json['verify_code'] as String;
+  String get verifyUrl => json['verify_url'] as String;
+  String get fingerprint => json['fingerprint'] as String;
+  String get sealReceipt => json['seal_receipt'] as String;
+
+  /// Read out over the phone as two groups of five.
+  String get spokenCode => '${verifyCode.substring(0, 5)}-${verifyCode.substring(5)}';
+}

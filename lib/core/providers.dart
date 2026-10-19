@@ -1,5 +1,9 @@
+import 'dart:io';
+
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:share_plus/share_plus.dart';
 
 import '../config.dart';
 import '../features/auth/data/auth_repository.dart';
@@ -43,3 +47,30 @@ class DeviceFileSource implements FileSource {
 }
 
 final fileSourceProvider = Provider<FileSource>((ref) => DeviceFileSource());
+
+/// Keeps a statement PDF on the phone and hands it to the share sheet (WhatsApp, email,
+/// print). Behind a provider so tests do not touch the file system or the share sheet.
+abstract class DocumentSaver {
+  /// Returns where the file was kept.
+  Future<String> save(String filename, List<int> bytes);
+  Future<void> share(String path, {required String text});
+}
+
+class DeviceDocumentSaver implements DocumentSaver {
+  @override
+  Future<String> save(String filename, List<int> bytes) async {
+    final dir = Directory('${(await getApplicationDocumentsDirectory()).path}/statements');
+    await dir.create(recursive: true);
+    final file = File('${dir.path}/$filename');
+    await file.writeAsBytes(bytes, flush: true);
+    return file.path;
+  }
+
+  @override
+  Future<void> share(String path, {required String text}) async {
+    await SharePlus.instance.share(ShareParams(
+        files: [XFile(path, mimeType: 'application/pdf')], text: text));
+  }
+}
+
+final documentSaverProvider = Provider<DocumentSaver>((ref) => DeviceDocumentSaver());

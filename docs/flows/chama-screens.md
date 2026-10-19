@@ -66,6 +66,23 @@ deposit", and as overdue if not banked in time. When the deposit appears on a st
 the treasurer opens it in Unmatched payments, taps the cash icon, and ticks the receipts
 it carries; the button only works when they add up to the deposit exactly.
 
+## Statements
+
+- **My statement**: "See my statement" under *Your position* on the overview. Tapping a
+  name on the Members tab opens that member's statement: the records are open, so any
+  member can read any member's figures.
+- **Chama statement**: a button on the overview for every member. Every member's totals,
+  and the bank side (the last reconciled bank statement, payments not yet matched, cash
+  waiting for the bank).
+- **Period**: since joining, this year, or the last 3 months. The position part is
+  always today's.
+- **Get PDF statement** asks the API for a sealed PDF in the language the app is in,
+  downloads it, keeps it on the phone (app documents, `statements/`) and shows the
+  10-character check code with **Share PDF** (WhatsApp, email, print). A member's PDF is
+  only for that member, an official or the auditor; others see why the button is missing.
+  Whoever receives the PDF scans its QR code, or opens the check address, to see that it
+  is genuine. See jiranichama-api docs/flows/member-statements.md.
+
 ## Unmatched payments
 
 Officials see payments the app could not match. Only the treasurer has **Assign**:
@@ -87,6 +104,6 @@ choose the member and write why it belongs to them.
 
 ## Not yet
 
-PDF member statements, the full rules editor (all
+Monthly statements made and sent automatically, the full rules editor (all
 settings, not only the main four), the encrypted offline copy of the ledger, and pull to
 refresh on every list.

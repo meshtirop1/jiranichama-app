@@ -226,6 +226,7 @@ void main() {
     final repo = FakeChamaRepository(myRole: 'treasurer');
     await _pump(tester, repo);
     await _openChama(tester);
+    await scrollTo(tester, find.text('Unmatched payments'));
     await tester.tap(find.text('Unmatched payments'));
     await tester.pumpAndSettle();
     expect(find.text('KES 300'), findsOneWidget);
@@ -246,6 +247,7 @@ void main() {
   testWidgets('a chair sees the unmatched queue but cannot assign', (tester) async {
     await _pump(tester, FakeChamaRepository(myRole: 'chair'));
     await _openChama(tester);
+    await scrollTo(tester, find.text('Unmatched payments'));
     await tester.tap(find.text('Unmatched payments'));
     await tester.pumpAndSettle();
     expect(find.text('KES 300'), findsOneWidget);

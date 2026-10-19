@@ -45,7 +45,10 @@ class ActiveView extends StatelessWidget {
           ListView(children: [
             for (final m in bundle.members)
               ListTile(title: Text(m.name),
-                  subtitle: Text('${roleLabel(l, m.role)} · ${m.memberCode}')),
+                  subtitle: Text('${roleLabel(l, m.role)} · ${m.memberCode}'),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: () => context.push(
+                      '/chamas/${bundle.chama.id}/members/${m.id}/statement')),
           ]),
           ListView(padding: const EdgeInsets.all(JiraniSpace.m),
               children: [RuleBookList(bundle.rules.clauses(lang))]),
@@ -100,6 +103,14 @@ class _Overview extends ConsumerWidget {
                           const SizedBox(height: JiraniSpace.s),
                           Text(l.nextDue(p.nextDue.format(), p.nextDuePeriod!)),
                         ],
+                        Align(
+                          alignment: Alignment.centerLeft,
+                          child: TextButton(
+                            onPressed: () => context.push(
+                                '/chamas/${chama.id}/members/${me.id}/statement'),
+                            child: Text(l.seeMyStatement),
+                          ),
+                        ),
                       ],
                     ),
                   ),
@@ -127,6 +138,12 @@ class _Overview extends ConsumerWidget {
           Notice(l.recordsOnlyNote),
         ],
         const SizedBox(height: JiraniSpace.m),
+        OutlinedButton.icon(
+          icon: const Icon(Icons.summarize_outlined),
+          label: Text(l.chamaStatement),
+          onPressed: () => context.push('/chamas/${chama.id}/statement'),
+        ),
+        const SizedBox(height: JiraniSpace.s),
         OutlinedButton.icon(
           icon: const Icon(Icons.payments_outlined),
           label: Text(l.cashAtMeetings),

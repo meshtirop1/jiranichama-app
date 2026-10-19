@@ -29,6 +29,7 @@ String problemText(AppLocalizations l, Object error) {
     'file_too_large' => l.errFileTooLarge,
     'amounts_differ' => l.errAmountsDiffer,
     'objection_closed' => l.errObjectionClosed,
+    'bad_dates' => l.errBadDates,
     _ => l.genericError,
   };
 }

@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:math';
 
 import 'package:dio/dio.dart';
@@ -33,6 +34,12 @@ class ApiClient {
 
   Future<dynamic> get(String path, {Map<String, Object?>? query}) =>
       _send('GET', path, query: query, auth: true);
+
+  /// A file (a statement PDF), as raw bytes.
+  Future<List<int>> getBytes(String path) async {
+    final data = await _send('GET', path, auth: true, bytes: true);
+    return data is List<int> ? data : const [];
+  }
 
   Future<Map<String, dynamic>> post(
     String path, {
@@ -76,6 +83,7 @@ class ApiClient {
     Map<String, Object?>? query,
     required bool auth,
     String? idempotencyKey,
+    bool bytes = false,
   }) async {
     Future<Response<Object?>> request() async {
       final headers = <String, String>{'Idempotency-Key': ?idempotencyKey};
@@ -87,7 +95,8 @@ class ApiClient {
         path,
         data: formData != null ? formData() : body,
         queryParameters: query,
-        options: Options(method: method, headers: headers),
+        options: Options(method: method, headers: headers,
+            responseType: bytes ? ResponseType.bytes : null),
       );
     }
 
@@ -128,6 +137,15 @@ class ApiClient {
   ApiProblem _problem(DioException e) {
     final response = e.response;
     if (response == null) return ApiProblem.network();
-    return ApiProblem.fromBody(response.statusCode, response.data);
+    var body = response.data;
+    if (body is List<int>) {
+      // A file download that failed: the error is still JSON, just undecoded.
+      try {
+        body = jsonDecode(utf8.decode(body));
+      } catch (_) {
+        body = null;
+      }
+    }
+    return ApiProblem.fromBody(response.statusCode, body);
   }
 }

@@ -35,7 +35,7 @@ Future<void> _open(WidgetTester tester, FakeChamaRepository repo, String button)
   await tester.tap(find.text('Umoja Women Group'));
   await tester.pumpAndSettle();
   if (button.isNotEmpty) {
-    await tester.ensureVisible(find.text(button));
+    await scrollTo(tester, find.text(button));
     await tester.tap(find.text(button));
     await tester.pumpAndSettle();
   }
