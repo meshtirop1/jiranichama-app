@@ -19,6 +19,8 @@ dependencies:
   intl: ^0.20.3
   jirani_domain:
     path: packages/jirani_domain
+  jirani_secure_keys:
+    path: packages/jirani_secure_keys
   jirani_ui:
     path: packages/jirani_ui
   path_provider: ^2.1.6

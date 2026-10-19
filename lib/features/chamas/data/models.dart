@@ -364,6 +364,7 @@ class ProposalAnswer {
   String get role => json['role'] as String;
   bool get approved => json['decision'] == 'approve';
   String get reason => json['reason'] as String? ?? '';
+  bool get byPhoneKey => json['method'] == 'device';
 }
 
 /// A payout (to a member) or withdrawal (to anyone else) waiting for, or past, approval.

@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:jirani_domain/jirani_domain.dart';
+import 'package:jirani_secure_keys/jirani_secure_keys.dart';
 import 'package:jiranichama/core/api/problem.dart';
 import 'package:jiranichama/core/providers.dart';
 import 'package:jiranichama/features/chamas/data/chama_repository.dart';
@@ -509,6 +510,50 @@ class FakeChamaRepository implements ChamaRepository {
     return UnapprovedDebit(d);
   }
 
+  // Phone signing keys
+  String? tamperAmount;
+
+  @override
+  Future<String> attestNonce() async => 'nonce-attest';
+
+  @override
+  Future<ChallengeSent> startRegisterDevice(Json body) async {
+    calls.add('startRegisterDevice:${body['public_key']}');
+    return _sent;
+  }
+
+  @override
+  Future<Json> registerDevice(Json body,
+      {required String challengeId, required String code}) async {
+    _codeCheck(code);
+    calls.add('registerDevice');
+    return {'id': 'dev-1', 'security_level': 'tee'};
+  }
+
+  @override
+  Future<Json> signingPayload(String proposalId) async {
+    final p = _prop(proposalId);
+    final payload = <String, Object?>{
+      'v': 1, 'purpose': 'approve_proposal', 'chama_id': 'c1', 'proposal_id': proposalId,
+      'kind': p['kind'], 'amount_cents': tamperAmount != null ? 1 : p['amount_cents'],
+      'deduct_cents': 0, 'payee': p['payee_name'], 'payee_account': p['payee_account'],
+      'purpose_text': p['purpose'], 'rule_version_id': null, 'nonce': 'nonce-sign',
+    };
+    return {'device_id': 'dev-1', 'payload': payload,
+            'payload_hash': sha256Hex(canonicalJson(payload))};
+  }
+
+  @override
+  Future<Proposal> submitSignature(String proposalId, Json body) async {
+    calls.add('signature:$proposalId:${body['signature']}');
+    final p = _prop(proposalId);
+    (p['approvals'] as List).add({'name': 'Jane', 'role': 'chair', 'decision': 'approve',
+        'reason': '', 'method': 'device', 'at': 'x'});
+    p['approved'] = (p['approved'] as int) + 1;
+    p['can_answer'] = false;
+    return Proposal(p);
+  }
+
   // Merry-go-round
   Json? rotationJson;
 
@@ -680,4 +725,41 @@ class FakeFileSource implements FileSource {
   @override
   Future<PickedFile?> pickStatement() async =>
       PickedFile('march.csv', utf8.encode('Value Date,Narration,Debit,Credit,Balance\n'));
+}
+
+/// A phone key without the keystore: records what it was asked to sign.
+class FakePhoneSigner implements PhoneSigner {
+  FakePhoneSigner({this.isAvailable = true, this.hasKeyAndId = false});
+
+  bool isAvailable;
+  bool hasKeyAndId;
+  bool cancel = false;
+  final signed = <String>[];
+  String? remembered;
+
+  @override
+  Future<bool> available() async => isAvailable;
+
+  @override
+  Future<String?> deviceId() async => hasKeyAndId ? (remembered ?? 'dev-1') : null;
+
+  @override
+  Future<bool> ready() async => isAvailable && hasKeyAndId;
+
+  @override
+  Future<CreatedKey> create(List<int> challenge) async => const CreatedKey(
+      publicKey: 'PUBKEY', chain: ['LEAF', 'ROOT'], strongBox: false);
+
+  @override
+  Future<void> remember(String deviceId) async {
+    remembered = deviceId;
+    hasKeyAndId = true;
+  }
+
+  @override
+  Future<String> sign(List<int> data, {required String title, required String subtitle}) async {
+    if (cancel) throw const SecureKeysCancelled('back');
+    signed.add('$title|${utf8.decode(data)}');
+    return 'SIG';
+  }
 }

@@ -339,6 +339,13 @@ packages:
       relative: true
     source: path
     version: "0.1.0"
+  jirani_secure_keys:
+    dependency: "direct main"
+    description:
+      path: "packages/jirani_secure_keys"
+      relative: true
+    source: path
+    version: "0.1.0"
   jirani_ui:
     dependency: "direct main"
     description:

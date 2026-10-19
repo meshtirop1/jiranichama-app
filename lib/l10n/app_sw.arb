@@ -566,5 +566,17 @@
   "arrearsLabel": "Mwanachama akiwa na madeni ya michango",
   "arrearsSkip": "Mhamishie mwisho",
   "arrearsDeduct": "Mlipe ukiondoa deni",
-  "arrearsBlock": "Subiri mpaka amalize deni"
+  "arrearsBlock": "Subiri mpaka amalize deni",
+  "fingerprintCardTitle": "Idhinisha kwa alama ya kidole",
+  "fingerprintCardBody": "Weka simu hii mara moja. Kisha idhini zitahitaji alama ya kidole, uso au PIN ya simu, na hakuna anayeweza kuidhinisha kwa niaba yako kwa nambari ya SMS.",
+  "setUpThisPhone": "Weka simu hii",
+  "phoneReady": "Simu hii inaidhinisha malipo kwa alama yako ya kidole.",
+  "approvePromptTitle": "Idhinisha {amount} kwa {payee}",
+  "answeredApprovedPhone": "{name} ({role}) ameidhinisha kwa ufunguo wa simu",
+  "errUseDeviceKey": "Idhinisha kwenye simu uliyoweka, kwa alama ya kidole.",
+  "errSignatureInvalid": "Sahihi ya simu haikuthibitishwa. Jaribu tena.",
+  "errPayloadChanged": "Unachoidhinisha kimebadilika. Angalia tena.",
+  "errOtherPhone": "Idhini zako zimewekwa kwenye simu nyingine.",
+  "errKeyNotTrusted": "Simu hii haiwezi kuhifadhi ufunguo kwa usalama. Idhinisha kwa nambari ya SMS.",
+  "errAttestationInvalid": "Ufunguo wa simu hii haukuweza kuhakikiwa."
 }

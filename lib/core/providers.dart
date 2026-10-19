@@ -2,6 +2,8 @@ import 'dart:io';
 
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:jirani_secure_keys/jirani_secure_keys.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
 
@@ -74,3 +76,48 @@ class DeviceDocumentSaver implements DocumentSaver {
 }
 
 final documentSaverProvider = Provider<DocumentSaver>((ref) => DeviceDocumentSaver());
+
+/// The phone's signing key (6.7): made once, used after a fingerprint, face or PIN.
+/// Remembers which registered device it is, so approvals go to the right key.
+abstract class PhoneSigner {
+  Future<bool> available();
+  Future<String?> deviceId();
+  Future<bool> ready();
+  Future<CreatedKey> create(List<int> challenge);
+  Future<void> remember(String deviceId);
+  Future<String> sign(List<int> data, {required String title, required String subtitle});
+}
+
+class DevicePhoneSigner implements PhoneSigner {
+  DevicePhoneSigner({this.keys = const SecureKeys(),
+      this.storage = const FlutterSecureStorage()});
+
+  final SecureKeys keys;
+  final FlutterSecureStorage storage;
+  static const _idKey = 'signing_device_id';
+
+  @override
+  Future<bool> available() => keys.isAvailable();
+
+  @override
+  Future<String?> deviceId() => storage.read(key: _idKey);
+
+  @override
+  Future<bool> ready() async =>
+      await keys.hasKey() && (await deviceId()) != null;
+
+  @override
+  Future<CreatedKey> create(List<int> challenge) async {
+    await storage.delete(key: _idKey);
+    return keys.createKey(challenge);
+  }
+
+  @override
+  Future<void> remember(String deviceId) => storage.write(key: _idKey, value: deviceId);
+
+  @override
+  Future<String> sign(List<int> data, {required String title, required String subtitle}) =>
+      keys.sign(data, title: title, subtitle: subtitle);
+}
+
+final phoneSignerProvider = Provider<PhoneSigner>((ref) => DevicePhoneSigner());

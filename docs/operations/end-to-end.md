@@ -14,7 +14,8 @@ opens the chama statement. Last, a statement with a damaged row: the secretary t
 row in and the chair confirms. Then money out: two officials switch it on, the treasurer
 proposes the member's payout, the treasurer and chair approve, the chair marks it paid,
 and the next statement's debit matches it. Last, the chair starts a drawn merry-go-round
-cycle and proposes the first turn. Screenshots land in `build/e2e_screenshots/`; the last
+cycle and proposes the first turn, and finally sets up the phone key and approves a
+payment with it. Screenshots land in `build/e2e_screenshots/`; the last
 passing run is kept in [screenshots/phase1](../screenshots/phase1/).
 
 It is not part of CI, because it needs a running API and a device.
@@ -60,3 +61,12 @@ sleeping phone. Each run uses fresh phone numbers, so runs never collide.
   and each correction names the receipt it corrects.
 - On a real phone, typing into a field right after closing a dropdown can be lost; the
   test now focuses the field first and checks the text arrived.
+
+## The phone-key step
+
+Signing needs a screen lock. On the emulator (never on a real phone):
+`adb shell locksettings set-pin 1234` and
+`adb shell settings put system screen_off_timeout 2147483647`. The prompt is Android's
+own screen, outside the app, so the test cannot press it. While the test runs, a helper
+on the computer watches for the credential prompt (`dumpsys window windows`) and types
+the PIN (`adb shell input text 1234`, then Enter).

@@ -139,6 +139,23 @@ A **Money out** button on the overview, for every member.
   amount; the explanation or link then shows to everyone.
 - The overview also says when payments are waiting for your approval.
 
+### Approving with the fingerprint (6.7)
+
+On Money out, an official sees **Approve with your fingerprint** with **Set up this
+phone**. Setting up makes a key in the phone's keystore, locked behind the fingerprint,
+face or phone PIN, with an attestation that the phone vouches for it. An SMS code
+confirms the account owner is holding the phone.
+
+From then on **Approve** on a proposal fetches the exact payload with a fresh nonce. The
+app checks it is the proposal on screen (amount, payee, hash), then Android asks for
+the fingerprint, face or PIN ("Approve KES 20,000 to Wanjiru"). The key signs, and
+nothing else is asked. The answer shows "approved with their phone key" and a
+fingerprint icon. A payload that does not match what is on screen is never signed.
+Backing out sends nothing.
+
+Officials on phones without a screen lock or fingerprint, older than Android 11, or on
+iPhone (for now) keep SMS codes.
+
 ## Merry-go-round
 
 For chamas whose rules have a rotation, a **Merry-go-round** button on the overview.
