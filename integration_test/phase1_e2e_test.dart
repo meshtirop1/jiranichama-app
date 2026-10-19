@@ -85,18 +85,23 @@ void main() {
 
     // Wait on the plain finder; pick the first or last match only when acting, because a
     // first/last finder over no matches throws even when printed.
-    Future<void> tap(Finder finder, {bool last = false}) async {
-      debugPrint('E2E tap $finder');
+    // Lists build lazily: a widget far down the screen is not in the tree until scrolled
+    // to. If it is not there yet, scroll the list down looking for it.
+    Future<void> reveal(Finder finder) async {
       await tester.pumpAndSettle();
       if (finder.evaluate().isEmpty && find.byType(ListView).evaluate().isNotEmpty) {
-        // Lists build lazily: a button far down the screen is not in the tree yet.
         try {
           await tester.dragUntilVisible(finder, find.byType(ListView).first,
-              const Offset(0, -300), maxIteration: 8);
+              const Offset(0, -300), maxIteration: 12);
         } catch (_) {
-          // Not in this list; it may still appear (a network call), so wait below.
+          // Not in this list; it may still appear (a network call), so wait after.
         }
       }
+    }
+
+    Future<void> tap(Finder finder, {bool last = false}) async {
+      debugPrint('E2E tap $finder');
+      await reveal(finder);
       await waitFor(finder);
       final target = last ? finder.last : finder.first;
       await tester.ensureVisible(target);
@@ -107,6 +112,7 @@ void main() {
 
     Future<void> type(Finder field, String text, {bool last = false}) async {
       debugPrint('E2E type into $field');
+      await reveal(field);
       await waitFor(field);
       final target = last ? field.last : field.first;
       for (var attempt = 0; attempt < 3; attempt++) {
@@ -208,6 +214,16 @@ void main() {
     await tap(find.text('Officials upload them'));
     await tap(find.text('Save bank account'));
     await waitFor(find.textContaining('account ending 9012'));
+
+    // The founder sets rules beyond the main four in the full editor.
+    await tap(find.text('Edit all rules'));
+    await waitFor(find.text('All rules'));
+    await type(find.byKey(const ValueKey('cash_days')), '4');
+    await type(find.byKey(const ValueKey('entry_fee')), '200');
+    await tap(find.text('Each member pays'));
+    await screenshot('rules_editor');
+    await tap(find.text('Save rules'));
+    await waitFor(find.text('Edit all rules')); // back on setup: saved and closed
 
     final invites = <String, String>{};
     for (final (role, local) in [('Treasurer', treasurer), ('Secretary', secretary),

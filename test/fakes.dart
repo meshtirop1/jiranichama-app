@@ -109,6 +109,18 @@ class FakeChamaRepository implements ChamaRepository {
                       'grace_days': 2, 'allocation_order': ['arrears', 'fines', 'current']},
     'fines': {'late_contribution': {'enabled': true, 'amount_cents': 20000,
                                     'monthly_cap_cents': null}},
+    'officials': {'roles': ['chair', 'treasurer', 'secretary']},
+    'approvals': {
+      'tiers': [
+        {'up_to_cents': 5000000, 'officials': 2, 'member_vote': false},
+        {'up_to_cents': null, 'officials': 2, 'member_vote': true},
+      ],
+      'deadline_hours': 72,
+    },
+    'membership': {'entry_fee_cents': 0, 'new_members_need_vote': false},
+    'adoption': {'members_share_pct': 51},
+    'statements': {'every_days': 14},
+    'kyc': {'payer': 'chama'},
   };
   Json? savedRules;
 
@@ -154,6 +166,15 @@ class FakeChamaRepository implements ChamaRepository {
 
   @override
   Future<RuleBook> saveRules(String id, Json rules) async {
+    // A little of the API's validation, enough to show errors coming back per setting.
+    final dueDay = (rules['contributions'] as Map)['due_day'] as int;
+    if (dueDay < 1 || dueDay > 28) {
+      throw ApiProblem(code: 'rules_invalid', detail: '', status: 400, extra: {
+        'errors': [
+          {'path': 'contributions/due_day', 'code': 'out_of_range', 'message': 'x'},
+        ],
+      });
+    }
     savedRules = rules;
     calls.add('rules');
     return RuleBook({'status': 'draft', 'rules': rules, 'book': _book});

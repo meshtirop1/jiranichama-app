@@ -518,5 +518,56 @@
     }
   },
   "typedIn": "Typed in",
-  "typedLinesSaved": "Saved. Another official now confirms the statement."
+  "typedLinesSaved": "Saved. Another official now confirms the statement.",
+  "editAllRules": "Edit all rules",
+  "rulesEditorTitle": "All rules",
+  "rulesEditorIntro": "These become the chama's constitution once members adopt them. Every setting shows in the rule book members confirm.",
+  "secContributions": "Contributions",
+  "frequencyMonthly": "Paid every month.",
+  "cashBankingDaysLabel": "Days to bank cash from a meeting",
+  "allocationTitle": "When a payment comes in, it pays in this order",
+  "allocArrears": "Months behind",
+  "allocFines": "Fines",
+  "allocCurrent": "This month",
+  "moveUp": "Move up",
+  "moveDown": "Move down",
+  "secLateFine": "Late fine",
+  "lateFineOn": "Charge a late fine",
+  "fineAmountLabel": "Fine (KES)",
+  "fineCapLabel": "Most fines in a month (KES, empty for no limit)",
+  "secOfficials": "Officials",
+  "officialsHelp": "At least two. Nobody approves a payout to themselves.",
+  "secApprovals": "Approving money out",
+  "approvalsPhase2": "Used once the chama pays out through the app.",
+  "tierUpTo": "Up to (KES)",
+  "tierAnyAmount": "Any larger amount",
+  "tierOfficials": "Officials who must approve: {n}",
+  "@tierOfficials": {
+    "placeholders": {
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "tierMemberVote": "Members also vote",
+  "addTier": "Add a level",
+  "removeTier": "Remove this level",
+  "deadlineHoursLabel": "Hours to approve before it lapses",
+  "secMembership": "Membership",
+  "entryFeeLabel": "Entry fee (KES)",
+  "newMembersVote": "New members need a members' vote",
+  "secAdoption": "Adopting these rules",
+  "membersSharePct": "Share of members who must confirm (%)",
+  "statementEveryDays": "A new bank statement at least every (days)",
+  "secKyc": "ID checks",
+  "kycPayerChama": "The chama pays",
+  "kycPayerMember": "Each member pays",
+  "ruleOutOfRange": "This value is out of range.",
+  "ruleTiersLastUnlimited": "The last level must cover any amount.",
+  "ruleTiersOnlyLast": "Only the last level can be without a limit.",
+  "ruleTiersOrder": "Each level's limit must be higher than the one before.",
+  "ruleTiersOfficialsOrder": "A larger amount cannot need fewer officials.",
+  "ruleTiersTooMany": "Too many officials: the person being paid never approves.",
+  "ruleFineNeedsAmount": "A late fine that is on needs an amount.",
+  "ruleFineCapBelow": "The monthly limit cannot be lower than one fine."
 }

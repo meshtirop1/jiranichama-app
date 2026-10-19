@@ -5,7 +5,10 @@ import '../../../l10n/app_localizations.dart';
 /// every message exists in both languages.
 String problemText(AppLocalizations l, Object error) {
   if (error is! ApiProblem) return l.genericError;
-  final fields = (error.extra['errors'] as Map?) ?? const {};
+  // Field errors come as a map from form validation, but as a list from the rules check
+  // (path, code, message); only the map form names fields here.
+  final rawErrors = error.extra['errors'];
+  final fields = rawErrors is Map ? rawErrors : const {};
   return switch (error.code) {
     'network' => l.networkError,
     'otp_wrong' || 'signing_wrong' => l.codeWrong((error.extra['attempts_left'] as int?) ?? 0),
