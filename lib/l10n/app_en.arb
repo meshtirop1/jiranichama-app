@@ -937,5 +937,22 @@
   },
   "errAlreadyVoted": "You have already voted. The first vote counts.",
   "errVoteClosed": "This vote has closed.",
-  "errNotEligible": "You do not vote on this one."
+  "errNotEligible": "You do not vote on this one.",
+  "statementOverdue": "The bank statement is {days} day(s) overdue. Upload it from Bank statements.",
+  "@statementOverdue": {
+    "placeholders": {
+      "days": {
+        "type": "String"
+      }
+    }
+  },
+  "statementNotCheckedSince": "Records not checked against the bank since {date}.",
+  "@statementNotCheckedSince": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "sinceGoingLive": "the chama went live"
 }

@@ -138,7 +138,7 @@ class _Overview extends ConsumerWidget {
               ]),
             ),
           ),
-        _BankCheck(chamaId: chama.id),
+        _BankCheck(chamaId: chama.id, myRole: chama.myRole),
         _OpenVotes(chamaId: chama.id),
         _CashToConfirm(chamaId: chama.id, myId: me?.id),
         _MoneyOutNotices(chamaId: chama.id, moneyOut: chama.mode == 'money_out'),
@@ -264,9 +264,10 @@ class _MoneyOutNotices extends ConsumerWidget {
 /// Every morning the bank is checked against the records (5.5). Every member sees the
 /// same answer: a match, a gap (and what it is made of), or a breach.
 class _BankCheck extends ConsumerWidget {
-  const _BankCheck({required this.chamaId});
+  const _BankCheck({required this.chamaId, required this.myRole});
 
   final String chamaId;
+  final String? myRole;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -296,9 +297,19 @@ class _BankCheck extends ConsumerWidget {
         headline = l.recNoStatement;
         tone = NoticeTone.info;
     }
+    // An overdue bank statement: the treasurer first, then every official, then everyone.
+    final level = r.statementLevel;
+    final official = officialRoles.contains(myRole);
+    final Widget? overdue = level >= 3
+        ? Notice(l.statementNotCheckedSince(r.statementCheckedTo ?? l.sinceGoingLive),
+            tone: NoticeTone.critical)
+        : (level == 2 && official) || (level == 1 && myRole == 'treasurer')
+            ? Notice(l.statementOverdue('${r.statementDaysOverdue}'), tone: NoticeTone.warning)
+            : null;
     return Padding(
       padding: const EdgeInsets.only(top: JiraniSpace.s),
       child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+        if (overdue != null) ...[overdue, const SizedBox(height: JiraniSpace.s)],
         Notice(headline, tone: tone),
         for (final line in lines)
           Padding(padding: const EdgeInsets.only(top: JiraniSpace.xs),

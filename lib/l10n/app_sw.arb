@@ -608,5 +608,8 @@
   "voteWaiting": "Kura yako inahitajika: {question}",
   "errAlreadyVoted": "Umeshapiga kura. Kura ya kwanza ndiyo inahesabiwa.",
   "errVoteClosed": "Kura hii imefungwa.",
-  "errNotEligible": "Hupigi kura hii."
+  "errNotEligible": "Hupigi kura hii.",
+  "statementOverdue": "Taarifa ya benki imechelewa siku {days}. Ipakie kutoka Taarifa za benki.",
+  "statementNotCheckedSince": "Kumbukumbu hazijakaguliwa dhidi ya benki tangu {date}.",
+  "sinceGoingLive": "chama kilipoanza"
 }
