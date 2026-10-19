@@ -289,4 +289,23 @@ void main() {
     expect(repo.calls, contains('smsInvite:0799111222:sw'));
     expect(find.textContaining('They reply YES with the code'), findsOneWidget);
   });
+
+  testWidgets('the records tab checks the chain against the public anchor', (tester) async {
+    final repo = FakeChamaRepository(myRole: 'member', founder: false)..anchorLastEntry();
+    await _pump(tester, repo);
+    await _openChama(tester);
+    await tester.tap(find.text('Records'));
+    await tester.pumpAndSettle();
+    expect(find.textContaining('Matches the public anchor of 2026-03-10'), findsOneWidget);
+  });
+
+  testWidgets('a chain that does not fit the anchor is flagged', (tester) async {
+    final repo = FakeChamaRepository(myRole: 'member', founder: false)
+      ..anchorLastEntry(tamper: true);
+    await _pump(tester, repo);
+    await _openChama(tester);
+    await tester.tap(find.text('Records'));
+    await tester.pumpAndSettle();
+    expect(find.textContaining('Does NOT match the public anchor'), findsOneWidget);
+  });
 }

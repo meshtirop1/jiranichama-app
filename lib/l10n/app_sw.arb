@@ -620,5 +620,7 @@
   "createInviteCode": "Unda nambari ya mwaliko",
   "inviteSmsSent": "Imetumwa kwa {phone}. Wanajibu NDIYO na nambari ili kujiunga.",
   "inviteCodeToShare": "Nambari ya mwaliko {code}: wanaiweka kwenye programu ili kujiunga.",
-  "errSmsInviteNotAllowed": "Mialiko ya SMS ni kwa wanachama wa chama kinachoendelea, kwa nambari ya simu."
+  "errSmsInviteNotAllowed": "Mialiko ya SMS ni kwa wanachama wa chama kinachoendelea, kwa nambari ya simu.",
+  "anchorOk": "Inalingana na nanga ya umma ya {date}: simu hii imehakiki mnyororo hadi kipengee #{seq}.",
+  "anchorBad": "HAILINGANI na nanga ya umma ya {date}. Waambie viongozi na JiraniChama."
 }

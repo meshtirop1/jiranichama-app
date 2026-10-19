@@ -16,3 +16,5 @@ Pure Dart, no Flutter imports, so it is fast to test and could run anywhere.
 - `test/vectors/` are copies of the API's vectors. Never edit them by hand; when the API
   regenerates them, copy them over.
 - A change to hashing must match a server change and a new `hashVersion`.
+
+- `anchor.dart`: `anchorLeaf` and `verifyAnchorPath` for the nightly public anchor (same hashing as the API).

@@ -512,6 +512,26 @@ class FakeChamaRepository implements ChamaRepository {
     return UnapprovedDebit(d);
   }
 
+  // Public anchors
+  List<Json> anchorsList = [];
+
+  @override
+  Future<List<AnchorProof>> anchors(String id) async =>
+      [for (final a in anchorsList) AnchorProof(a)];
+
+  /// An anchor of exactly this chain's last entry: a one-leaf tree, root = leaf.
+  void anchorLastEntry({String chamaId = 'c1', bool tamper = false}) {
+    final last = ledgerItems.last;
+    final seq = (last['document'] as Map)['seq'] as int;
+    final hash = last['hash'] as String;
+    final leaf = anchorLeaf(chamaId, seq, tamper ? '00' * 32 : hash);
+    anchorsList = [
+      {'anchor_id': 'a1', 'at': '2026-03-10T00:30:00Z', 'merkle_root': leaf, 'seq': seq,
+       'hash': hash, 'leaf': leaf, 'path': <Json>[], 'ots_status': 'submitted',
+       'ots_calendar': 'x'},
+    ];
+  }
+
   // Members' votes
   final votesList = <Json>[];
 

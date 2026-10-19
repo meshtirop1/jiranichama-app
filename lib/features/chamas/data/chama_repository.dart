@@ -24,6 +24,7 @@ abstract class ChamaRepository {
   Future<List<Member>> members(String id);
   Future<Position> position(String membershipId);
   Future<LedgerPage> ledger(String id, {int afterSeq = 0});
+  Future<List<AnchorProof>> anchors(String id);
   Future<String> platformKeyPem();
   Future<List<Statement>> statements(String id);
   Future<Statement> uploadStatement(String id, {required String filename,
@@ -446,4 +447,9 @@ class HttpChamaRepository implements ChamaRepository {
   @override
   Future<VoteInfo> submitSignedBallot(String voteId, Json body) async =>
       VoteInfo(await _api.post('/votes/$voteId/signed-ballots/', auth: true, body: body));
+
+  @override
+  Future<List<AnchorProof>> anchors(String id) async => [
+        for (final a in await _api.get('/chamas/$id/anchors/') as List) AnchorProof(a as Json)
+      ];
 }

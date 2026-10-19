@@ -977,5 +977,24 @@
       }
     }
   },
-  "errSmsInviteNotAllowed": "SMS invites are for members of an active chama, with a phone number."
+  "errSmsInviteNotAllowed": "SMS invites are for members of an active chama, with a phone number.",
+  "anchorOk": "Matches the public anchor of {date}: this phone checked the chain up to entry #{seq} against it.",
+  "@anchorOk": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      },
+      "seq": {
+        "type": "String"
+      }
+    }
+  },
+  "anchorBad": "Does NOT match the public anchor of {date}. Tell the officials and JiraniChama.",
+  "@anchorBad": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  }
 }

@@ -495,3 +495,16 @@ class VoteInfo {
   String? get myChoice => json['my_choice'] as String?;
   String? get receipt => json['result_receipt'] as String?;
 }
+
+/// The chama's place in a nightly public anchor (jiranichama-api docs/flows/anchoring.md).
+class AnchorProof {
+  AnchorProof(this.json);
+  final Json json;
+
+  String get at => json['at'] as String;
+  String get merkleRoot => json['merkle_root'] as String;
+  int get seq => json['seq'] as int;
+  String get hash => json['hash'] as String;
+  List<Map<String, Object?>> get path =>
+      [for (final p in json['path'] as List) Map<String, Object?>.from(p as Map)];
+}
