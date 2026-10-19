@@ -1621,5 +1621,6 @@
   "errElectionNeeded": "Too few officials remain to approve this. The chama needs an election.",
   "errElectionOpen": "An election for this role is already under way, or the role is filled.",
   "errOfficialHandOver": "An official hands over the role in an election before leaving.",
-  "errDeathDetails": "Give the next of kin's name and phone, and a photo of the document."
+  "errDeathDetails": "Give the next of kin's name and phone, and a photo of the document.",
+  "recFromBankApi": "Balance read straight from the bank."
 }

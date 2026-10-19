@@ -64,6 +64,9 @@ The rule book, how many founding members have confirmed and how many are needed,
 
 ## Does the bank match the records?
 
+Where the chama's bank is read through its API (Phase 4, API `docs/flows/bank-feeds.md`),
+the card adds "Balance read straight from the bank."
+
 Near the top of every member's overview, the result of the daily check (5.5):
 - **Records match the bank · checked {date}**, or
 - **The records and the bank differ by KES X since {date}** (amber): how much is payments
