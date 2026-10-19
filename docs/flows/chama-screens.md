@@ -217,6 +217,32 @@ The rules of an active chama change only by a members' vote (API
   the API checks the complete result, so a change that clashes with another setting is
   caught before anyone votes.
 
+## Running the chama (5.12, 5.13, 5.14)
+
+The overview ends with the places to go: Fines, **Running the chama**, Meetings and
+(where switched on) Loans. Anything that needs me shows as a warning above the Running
+the chama card: an election is needed, a new phone waits for my vouching, or a dispute
+waits for my answer.
+
+- **Disputes** (API `docs/flows/disputes.md`): **Raise a problem** (reason, words,
+  optionally officials only). A dispute shows who raised it, who is involved, where it
+  stands, the messages, and the outcome with how many officials agreed and its receipt.
+  Anyone can **Respond**. An uninvolved official can **Propose an outcome** (no change,
+  reverse the entry, correct or refund a member's amount) and others **Agree** with an
+  SMS code or **Disagree**. The member who raised it can withdraw it, and they or an
+  official can take it outside the chama.
+- **New phones** (API `docs/flows/device-keys.md`): officials see another official's
+  new phone after a lost one, are told to call them first, and **Vouch** with an SMS code.
+- **Elections** (API `docs/flows/elections.md`): officials **Hold an election**: the role,
+  the candidate (members only), and whether it is an acting official for an empty role.
+  Each election shows its state, "starts when their phone is set up" for a winner without
+  a key, and "update the bank signatories" with **Bank updated** for officials.
+- **Leaving and deaths** (API `docs/flows/exits.md`): a member taps **Leave the chama**,
+  reads what comes back (savings, fines, loan, deduction, notice), and confirms with an
+  SMS code; during the notice they can **Stay in the chama**. Officials **Record a
+  member's death** with the next of kin's name and phone and a photo of the permit or
+  certificate. Every exit and death is listed with its date, amount and state.
+
 ## Fines and waivers (5.9)
 
 API flow: `docs/flows/fine-waivers.md`.

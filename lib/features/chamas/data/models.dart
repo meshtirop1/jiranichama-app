@@ -697,3 +697,85 @@ class WaiverInfo {
   int get approvals => json['approvals'] as int;
   bool get iCanDecide => json['i_can_decide'] == true;
 }
+
+/// A dispute (jiranichama-api docs/flows/disputes.md).
+class DisputeInfo {
+  DisputeInfo(this.json);
+  final Json json;
+
+  String get id => json['id'] as String;
+  String get raisedBy => json['raised_by'] as String;
+  bool get mine => json['mine'] == true;
+  String get text => json['text'] as String;
+  String get state => json['state'] as String;
+  bool get open => state == 'awaiting_response' || state == 'deciding';
+  List<String> get involved => (json['involved_names'] as List).cast<String>();
+  bool get iAmInvolved => json['i_am_involved'] == true;
+  bool get iCanDecide => json['i_can_decide'] == true;
+  String get decidedBy => json['decided_by'] as String;
+  String get outcome => json['outcome'] as String? ?? '';
+  String get outcomeText => json['outcome_text'] as String? ?? '';
+  int get agreed => json['agreed'] as int? ?? 0;
+  int get officialsNeeded => json['officials_needed'] as int? ?? 2;
+  String? get receipt => json['receipt'] as String?;
+  List<({String by, String kind, String text})> get messages => [
+        for (final m in json['messages'] as List)
+          (by: (m as Map)['by'] as String, kind: m['kind'] as String,
+           text: m['text'] as String? ?? ''),
+      ];
+}
+
+class ElectionInfo {
+  ElectionInfo(this.json);
+  final Json json;
+
+  String get id => json['id'] as String;
+  String get role => json['role'] as String;
+  String get candidate => json['candidate'] as String;
+  String get state => json['state'] as String;
+  bool get candidateReady => json['candidate_ready'] == true;
+  bool get mandateNeeded => json['mandate_needed'] == true;
+  String? get mandateConfirmedAt => json['mandate_confirmed_at'] as String?;
+}
+
+class ElectionsInfo {
+  ElectionsInfo(this.json);
+  final Json json;
+
+  List<ElectionInfo> get elections =>
+      [for (final e in json['elections'] as List) ElectionInfo(e as Json)];
+  bool get electionNeeded => (json['election_needed'] as List).isNotEmpty;
+}
+
+class WaitingPhone {
+  WaitingPhone(this.json);
+  final Json json;
+
+  String get id => json['id'] as String;
+  String get owner => json['owner'] as String;
+}
+
+class ExitInfo {
+  ExitInfo(this.json);
+  final Json json;
+
+  String get id => json['id'] as String;
+  String get member => json['member'] as String;
+  bool get mine => json['mine'] == true;
+  String get kind => json['kind'] as String;
+  String get exitOn => json['exit_on'] as String;
+  String get state => json['state'] as String;
+  int get settlementCents => ((json['quote'] as Map)['settlement_cents'] as int?) ?? 0;
+}
+
+class ExitQuote {
+  ExitQuote(this.json);
+  final Json json;
+
+  int get savingsCents => json['savings_cents'] as int;
+  int get finesCents => json['fines_cents'] as int;
+  int get loanCents => json['loan_cents'] as int;
+  int get deductionCents => json['deduction_cents'] as int;
+  int get settlementCents => json['settlement_cents'] as int;
+  int get noticeDays => json['notice_days'] as int;
+}

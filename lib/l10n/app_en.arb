@@ -1438,5 +1438,188 @@
   "waiverDecline": "Decline",
   "errOwnFine": "Nobody decides a waiver of their own fine.",
   "errFineNotOpen": "Only an unpaid fine can be waived.",
-  "waiverReasonLabel": "Reason"
+  "waiverReasonLabel": "Reason",
+  "govTitle": "Running the chama",
+  "govSubtitle": "Disputes, elections, leaving · {open} open disputes",
+  "@govSubtitle": {
+    "placeholders": {
+      "open": {
+        "type": "int"
+      }
+    }
+  },
+  "govElectionNeeded": "Too few officials remain to approve money out. The chama needs an election.",
+  "govPhonesWaiting": "{count, plural, =1{An official's new phone waits for you to vouch} other{{count} officials' new phones wait for you to vouch}}",
+  "@govPhonesWaiting": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "govDisputesForMe": "A dispute needs your answer.",
+  "govPhoneOf": "{name}'s new phone",
+  "@govPhoneOf": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "govPhoneCheck": "Call them first to check it is really them.",
+  "govVouch": "Vouch (SMS code)",
+  "dspTitle": "Disputes",
+  "dspOne": "Dispute",
+  "dspRaise": "Raise a problem",
+  "dspIntro": "Say what you think is wrong. Every member sees it; the people involved have 72 hours to respond. Nothing in the records changes until it is settled.",
+  "dspWhatsWrong": "What is wrong?",
+  "dspPrivate": "A personal matter: officials only",
+  "dspSend": "Raise it",
+  "dspAwaiting": "Waiting for responses",
+  "dspDeciding": "An outcome is being decided",
+  "dspResolved": "Settled",
+  "dspWithdrawn": "Withdrawn",
+  "dspEscalated": "Taken outside the chama",
+  "dspBy": "Raised by {name} · involves {involved}",
+  "@dspBy": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "involved": {
+        "type": "String"
+      }
+    }
+  },
+  "dspOutcome": "{outcome}: {text} ({agreed} of {needed} officials agree)",
+  "@dspOutcome": {
+    "placeholders": {
+      "outcome": {
+        "type": "String"
+      },
+      "text": {
+        "type": "String"
+      },
+      "agreed": {
+        "type": "int"
+      },
+      "needed": {
+        "type": "int"
+      }
+    }
+  },
+  "dspReceipt": "On the record, receipt {code}",
+  "@dspReceipt": {
+    "placeholders": {
+      "code": {
+        "type": "String"
+      }
+    }
+  },
+  "dspRespond": "Respond",
+  "dspPropose": "Propose an outcome",
+  "dspAgree": "Agree (SMS code)",
+  "dspDisagree": "Disagree",
+  "dspWithdraw": "Withdraw",
+  "dspEscalate": "Take it outside the chama",
+  "dspWhere": "Where (mediation, court, police)",
+  "dspWhy": "Why",
+  "dspMember": "Member",
+  "dspAmount": "Amount (KES)",
+  "outNoChange": "No change",
+  "outReversal": "Reverse the entry",
+  "outCorrection": "Correct a member's amount",
+  "outRefund": "Refund a member",
+  "rsnWrongAmount": "The amount is wrong",
+  "rsnNotMine": "It is not mine",
+  "rsnWrongRule": "The rule was applied wrongly",
+  "rsnNotApproved": "It was not approved",
+  "rsnOther": "Something else",
+  "elTitle": "Elections",
+  "elHold": "Hold an election",
+  "elIntro": "The members vote. The new official starts once their phone is set up to sign; until then the current one stays.",
+  "elStart": "Start the vote",
+  "elActingSwitch": "Acting official now (the role is empty); members confirm within 30 days",
+  "elVoting": "Members are voting",
+  "elWon": "Won",
+  "elInOffice": "In office",
+  "elActing": "Acting",
+  "elLost": "Not elected",
+  "elCancelled": "Cancelled",
+  "elWaitingKey": "starts when their phone is set up",
+  "elMandateNeeded": "update the bank signatories",
+  "elMandateDone": "Bank updated",
+  "exitTitle": "Leaving and deaths",
+  "exitLeave": "Leave the chama",
+  "exitLeaveConfirm": "Leave (SMS code)",
+  "exitQuoteText": "Savings {savings}, less fines {fines}, loan {loan} and deduction {deduction}. You get back {settlement} after {days} days' notice, approved by the officials.",
+  "@exitQuoteText": {
+    "placeholders": {
+      "savings": {
+        "type": "String"
+      },
+      "fines": {
+        "type": "String"
+      },
+      "loan": {
+        "type": "String"
+      },
+      "deduction": {
+        "type": "String"
+      },
+      "settlement": {
+        "type": "String"
+      },
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "exitStay": "Stay in the chama",
+  "exitLeaving": "{name} is leaving",
+  "@exitLeaving": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "exitDied": "{name} has died",
+  "@exitDied": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "exitLine": "{date} · {amount} · {state}",
+  "@exitLine": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      },
+      "amount": {
+        "type": "String"
+      },
+      "state": {
+        "type": "String"
+      }
+    }
+  },
+  "deathRecord": "Record a member's death",
+  "deathIntro": "With a photo of the burial permit or death certificate. The savings go to the next of kin through money out.",
+  "deathNokName": "Next of kin's name",
+  "deathNokPhone": "Next of kin's phone",
+  "deathDocument": "Photo of the permit or certificate",
+  "deathSave": "Record",
+  "errAwaitingResponse": "The people involved still have time to respond.",
+  "errNotEnoughDeciders": "Too few officials are free of this dispute to settle it.",
+  "errDisputeStage": "Not possible at this stage of the dispute.",
+  "errNotReversible": "Only an entry not yet reversed can be reversed.",
+  "errDisputed": "A dispute about this is open; it waits until it is settled.",
+  "errDevicePending": "Your new phone is waiting to be confirmed. You can read, but not approve or vote yet.",
+  "errElectionNeeded": "Too few officials remain to approve this. The chama needs an election.",
+  "errElectionOpen": "An election for this role is already under way, or the role is filled.",
+  "errOfficialHandOver": "An official hands over the role in an election before leaving.",
+  "errDeathDetails": "Give the next of kin's name and phone, and a photo of the document."
 }
