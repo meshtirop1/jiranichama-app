@@ -41,6 +41,7 @@ class UnmatchedScreen extends ConsumerWidget {
                 child: ListTile(
                   title: MoneyText(line.amount),
                   subtitle: Text([line.valueDate, line.narration,
+                    if (line.fromMpesa) l.fromMpesa,
                     if (line.typedIn) l.typedIn].join(' · ')),
                   trailing: bundle != null && bundle.chama.iAmTreasurer
                       ? Wrap(spacing: JiraniSpace.xs, children: [

@@ -254,4 +254,20 @@ void main() {
     expect(find.text('KES 300'), findsOneWidget);
     expect(find.text('Assign'), findsNothing);
   });
+
+  testWidgets('a payment straight from M-Pesa is tagged in the unmatched queue',
+      (tester) async {
+    final repo = FakeChamaRepository(myRole: 'treasurer');
+    repo.unmatchedList
+      ..clear()
+      ..add({'id': 'txn-9', 'amount_cents': 50000, 'value_date': '2026-03-05',
+             'narration': 'M-PESA RKTQDM7W6U JANE', 'state': 'unmatched',
+             'source': 'daraja'});
+    await _pump(tester, repo);
+    await _openChama(tester);
+    await scrollTo(tester, find.text('Unmatched payments'));
+    await tester.tap(find.text('Unmatched payments'));
+    await tester.pumpAndSettle();
+    expect(find.textContaining('From M-Pesa just now'), findsOneWidget);
+  });
 }

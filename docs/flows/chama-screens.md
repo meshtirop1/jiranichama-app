@@ -130,7 +130,9 @@ it carries; the button only works when they add up to the deposit exactly.
 
 ## Unmatched payments
 
-Officials see payments the app could not match. Only the treasurer has **Assign**:
+Officials see payments the app could not match. A payment that came straight from the
+chama's M-Pesa paybill (seconds after it was made) says "From M-Pesa just now"; most
+such payments are matched before anyone looks. Only the treasurer has **Assign**:
 choose the member and write why it belongs to them.
 
 ## Money out

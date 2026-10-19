@@ -954,5 +954,6 @@
       }
     }
   },
-  "sinceGoingLive": "the chama went live"
+  "sinceGoingLive": "the chama went live",
+  "fromMpesa": "From M-Pesa just now"
 }

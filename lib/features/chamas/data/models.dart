@@ -217,6 +217,7 @@ class BankLine {
   String get valueDate => json['value_date'] as String;
   String get narration => json['narration'] as String? ?? '';
   bool get typedIn => json['typed_in'] == true;
+  bool get fromMpesa => json['source'] == 'daraja';
 }
 
 class OpeningLine {

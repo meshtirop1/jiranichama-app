@@ -611,5 +611,6 @@
   "errNotEligible": "Hupigi kura hii.",
   "statementOverdue": "Taarifa ya benki imechelewa siku {days}. Ipakie kutoka Taarifa za benki.",
   "statementNotCheckedSince": "Kumbukumbu hazijakaguliwa dhidi ya benki tangu {date}.",
-  "sinceGoingLive": "chama kilipoanza"
+  "sinceGoingLive": "chama kilipoanza",
+  "fromMpesa": "Kutoka M-Pesa sasa hivi"
 }
