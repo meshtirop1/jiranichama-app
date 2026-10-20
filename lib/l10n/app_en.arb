@@ -2059,5 +2059,17 @@
   "mandateTileMissing": "Not shown yet: tap to add the bank's mandate",
   "mandateOverview": "Who can withdraw at the bank has not been shown yet. Tap to see the signatories.",
   "entryStatementSealed": "Bank statement sealed",
-  "entryBankMandate": "Bank signatories confirmed"
+  "entryBankMandate": "Bank signatories confirmed",
+  "kycStart": "Check my ID",
+  "kycLast4": "ID ending {last4} checked.",
+  "kycPrivacyForm": "Your ID number goes to Smile ID once, to check it with the government registry. JiraniChama keeps only its last four digits; other members see only a tick.",
+  "kycIdType": "Kind of ID",
+  "kycIdNumber": "ID number",
+  "kycFirst": "First name, as on the ID",
+  "kycLast": "Other names, as on the ID",
+  "kycPaidBy": "Which chama pays for the check",
+  "kycSubmit": "Check my ID",
+  "kycTypeNational": "National ID",
+  "kycTypePassport": "Passport",
+  "kycTypeAlien": "Alien ID card"
 }

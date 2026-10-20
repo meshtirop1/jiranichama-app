@@ -11,6 +11,7 @@ import '../../core/tours.dart';
 import '../../l10n/app_localizations.dart';
 import '../auth/application/session.dart';
 import '../auth/presentation/problem_text.dart';
+import '../home/home_screen.dart';
 import 'accessibility_sheet.dart';
 import 'data/account_repository.dart';
 
@@ -18,6 +19,9 @@ final profileProvider = FutureProvider.autoDispose<Profile>((ref) {
   ref.cacheFor(const Duration(minutes: 5));
   return ref.watch(accountRepositoryProvider).profile();
 });
+
+final identityProvider = FutureProvider.autoDispose<IdentityStatus>(
+    (ref) => ref.watch(accountRepositoryProvider).identity());
 
 final _signerReadyProvider = FutureProvider.autoDispose<bool>((ref) async {
   try {
@@ -56,7 +60,8 @@ class SettingsScreen extends ConsumerWidget {
               _ => const SizedBox(height: 160, child: LoadingView()),
             },
             const SizedBox(height: JiraniSpace.m),
-            _KycCard(status: profile.value?.kycStatus ?? 'not_started'),
+            _KycCard(status: profile.value?.kycStatus ?? 'not_started',
+                profile: profile.value),
             const SizedBox(height: JiraniSpace.m),
             _Section(l.settingsPrefs, [
               _LanguageTile(profile: profile.value),
@@ -192,14 +197,17 @@ class _ProfileCard extends ConsumerWidget {
 }
 
 /// The ID check: what it is, who pays, why it matters, and where this person stands.
-class _KycCard extends StatelessWidget {
-  const _KycCard({required this.status});
+class _KycCard extends ConsumerWidget {
+  const _KycCard({required this.status, this.profile});
 
   final String status;
+  final Profile? profile;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final l = AppLocalizations.of(context);
+    final identity = ref.watch(identityProvider).value;
+    final status = identity?.status ?? this.status;
     final (label, tone, icon) = switch (status) {
       'verified' => (l.kycVerified, JiraniTone.good, Icons.verified_rounded),
       'pending' => (l.kycPending, JiraniTone.info, Icons.hourglass_top_rounded),
@@ -218,18 +226,141 @@ class _KycCard extends StatelessWidget {
         _Bullet(Icons.payments_outlined, l.kycWhoPays),
         _Bullet(Icons.shield_outlined, l.kycWhy),
         _Bullet(Icons.visibility_off_outlined, l.kycPrivacy),
-        if (status != 'verified') ...[
+        if (status == 'verified' && identity?.last4 != null)
+          Text(l.kycLast4(identity!.last4!), style: Theme.of(context).textTheme.bodySmall),
+        if (status != 'verified' && status != 'pending') ...[
           const SizedBox(height: JiraniSpace.s),
           FilledButton.tonalIcon(
-            onPressed: null,
+            key: const ValueKey('kyc-start'),
+            onPressed: identity?.available == true
+                ? () => showModalBottomSheet<void>(context: context, isScrollControlled: true,
+                    showDragHandle: true,
+                    builder: (_) => _KycSheet(identity: identity!, profile: profile))
+                : null,
+            style: FilledButton.styleFrom(minimumSize: const Size.fromHeight(48)),
             icon: const Icon(Icons.badge_outlined),
-            label: Text(l.kycSoon),
+            label: Text(identity?.available == true ? l.kycStart : l.kycSoon),
           ),
         ],
       ],
     );
   }
 }
+
+/// The ID check form: the kind of ID, its number, the name on it, and which of my chamas
+/// pays (rule 6.1). The number goes to Smile ID once; JiraniChama keeps only its last
+/// four digits.
+class _KycSheet extends ConsumerStatefulWidget {
+  const _KycSheet({required this.identity, required this.profile});
+
+  final IdentityStatus identity;
+  final Profile? profile;
+
+  @override
+  ConsumerState<_KycSheet> createState() => _KycSheetState();
+}
+
+class _KycSheetState extends ConsumerState<_KycSheet> {
+  late final _first = TextEditingController(
+      text: (widget.profile?.name ?? '').split(' ').first);
+  late final _last = TextEditingController(
+      text: (widget.profile?.name ?? '').split(' ').skip(1).join(' '));
+  final _number = TextEditingController();
+  String? _type;
+  String? _paidBy;
+  bool _busy = false;
+  String? _error;
+
+  @override
+  void dispose() {
+    _first.dispose();
+    _last.dispose();
+    _number.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
+    final country = widget.profile?.country ?? 'KE';
+    final types = widget.identity.idTypes(country);
+    _type ??= types.isEmpty ? null : types.first;
+    final chamas = ref.watch(chamaListProvider).value ?? const [];
+    _paidBy ??= chamas.isEmpty ? null : chamas.first.id;
+    return Padding(
+      padding: EdgeInsets.fromLTRB(JiraniSpace.m, 0, JiraniSpace.m,
+          MediaQuery.viewInsetsOf(context).bottom + JiraniSpace.l),
+      child: SingleChildScrollView(
+        child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+          Text(l.kycTitle, style: Theme.of(context).textTheme.titleLarge),
+          const SizedBox(height: JiraniSpace.s),
+          Notice(l.kycPrivacyForm),
+          const SizedBox(height: JiraniSpace.m),
+          DropdownButtonFormField<String>(
+            initialValue: _type,
+            decoration: InputDecoration(labelText: l.kycIdType),
+            items: [for (final t in types)
+              DropdownMenuItem(value: t, child: Text(idTypeLabel(l, t)))],
+            onChanged: (v) => setState(() => _type = v),
+          ),
+          const SizedBox(height: JiraniSpace.s),
+          TextField(key: const ValueKey('kyc-number'), controller: _number,
+              keyboardType: TextInputType.number,
+              decoration: InputDecoration(labelText: l.kycIdNumber)),
+          const SizedBox(height: JiraniSpace.s),
+          TextField(controller: _first, decoration: InputDecoration(labelText: l.kycFirst)),
+          const SizedBox(height: JiraniSpace.s),
+          TextField(controller: _last, decoration: InputDecoration(labelText: l.kycLast)),
+          if (chamas.isNotEmpty) ...[
+            const SizedBox(height: JiraniSpace.s),
+            DropdownButtonFormField<String>(
+              initialValue: _paidBy,
+              decoration: InputDecoration(labelText: l.kycPaidBy),
+              items: [for (final c in chamas)
+                DropdownMenuItem(value: c.id, child: Text(c.name))],
+              onChanged: (v) => setState(() => _paidBy = v),
+            ),
+          ],
+          if (_error != null) ...[
+            const SizedBox(height: JiraniSpace.s),
+            Notice(_error!, tone: NoticeTone.critical),
+          ],
+          const SizedBox(height: JiraniSpace.m),
+          FilledButton(
+            key: const ValueKey('kyc-submit'),
+            onPressed: _busy || _type == null ? null : () async {
+              setState(() {
+                _busy = true;
+                _error = null;
+              });
+              try {
+                await ref.read(accountRepositoryProvider).startIdentity(
+                    country: country, idType: _type!, idNumber: _number.text.trim(),
+                    firstName: _first.text.trim(), lastName: _last.text.trim(),
+                    paidBy: _paidBy);
+                ref.invalidate(identityProvider);
+                ref.invalidate(profileProvider);
+                if (context.mounted) Navigator.of(context).pop();
+              } catch (e) {
+                if (mounted) setState(() => _error = problemText(l, e));
+              } finally {
+                if (mounted) setState(() => _busy = false);
+              }
+            },
+            child: Text(l.kycSubmit),
+          ),
+        ]),
+      ),
+    );
+  }
+}
+
+String idTypeLabel(AppLocalizations l, String t) => switch (t) {
+      'NATIONAL_ID' || 'NATIONAL_ID_NO_PHOTO' || 'NIN' => l.kycTypeNational,
+      'PASSPORT' => l.kycTypePassport,
+      'ALIEN_CARD' => l.kycTypeAlien,
+      _ => t,
+    };
 
 class _Bullet extends StatelessWidget {
   const _Bullet(this.icon, this.text);

@@ -217,7 +217,18 @@ class _MembersTab extends StatelessWidget {
             ListTile(
               key: i == 0 ? tourKeys.members : null,
               leading: Avatar(m.name),
-              title: Text(m.name),
+              title: Row(children: [
+                Flexible(child: Text(m.name, overflow: TextOverflow.ellipsis)),
+                if (m.idChecked) ...[
+                  const SizedBox(width: 6),
+                  Tooltip(
+                    message: l.kycVerified,
+                    child: Icon(Icons.verified_rounded, size: 18,
+                        key: ValueKey('id-checked-${m.id}'),
+                        color: JiraniStatus.of(context).good),
+                  ),
+                ],
+              ]),
               subtitle: Text(m.memberCode),
               trailing: Row(mainAxisSize: MainAxisSize.min, children: [
                 StatusPill(roleLabel(l, m.role),

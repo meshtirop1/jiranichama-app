@@ -19,6 +19,20 @@ class Profile {
   String get joined => (json['date_joined'] as String? ?? '').split('T').first;
 }
 
+/// The person's ID check (Smile ID), as `/me/identity/` says.
+class IdentityStatus {
+  const IdentityStatus(this.json);
+
+  final Map<String, dynamic> json;
+
+  /// Smile ID is set up on the server: the check can be started.
+  bool get available => json['available'] == true;
+  String get status => json['status'] as String? ?? 'not_started';
+  String? get last4 => json['last4'] as String?;
+  List<String> idTypes(String country) =>
+      [for (final t in (json['id_types'] as Map? ?? const {})[country] as List? ?? []) '$t'];
+}
+
 /// A chama's way to register with the government, and how far its officials have got.
 class ChamaRegistration {
   const ChamaRegistration(this.json);
@@ -82,6 +96,10 @@ abstract class AccountRepository {
   Future<ChamaRegistration> updateRegistration(String chamaId, Map<String, Object?> change,
       String language);
   Future<List<int>> paper(String chamaId, String paper, String language);
+  Future<IdentityStatus> identity();
+  Future<IdentityStatus> startIdentity({required String country, required String idType,
+      required String idNumber, required String firstName, required String lastName,
+      String? paidBy});
 }
 
 class HttpAccountRepository implements AccountRepository {
@@ -117,6 +135,19 @@ class HttpAccountRepository implements AccountRepository {
   @override
   Future<List<int>> paper(String chamaId, String paper, String language) =>
       _api.getBytes('/chamas/$chamaId/registration/papers/$paper/?lang=$language');
+
+  @override
+  Future<IdentityStatus> identity() async =>
+      IdentityStatus((await _api.get('/me/identity/')) as Map<String, dynamic>);
+
+  @override
+  Future<IdentityStatus> startIdentity({required String country, required String idType,
+          required String idNumber, required String firstName, required String lastName,
+          String? paidBy}) async =>
+      IdentityStatus(await _api.post('/me/identity/', auth: true, body: {
+        'country': country, 'id_type': idType, 'id_number': idNumber,
+        'first_name': firstName, 'last_name': lastName, 'paid_by': ?paidBy,
+      }));
 }
 
 final accountRepositoryProvider = Provider<AccountRepository>(

@@ -108,6 +108,9 @@ class Member {
       : json['member_code'] as String;
   String get role => json['role'] as String;
   bool get isFounding => json['is_founding'] == true;
+
+  /// Passed the ID check. Only this tick is shared, never the ID itself.
+  bool get idChecked => json['id_checked'] == true;
   bool get adoptedRules => json['rules_adopted_at'] != null;
 }
 
