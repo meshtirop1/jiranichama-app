@@ -100,20 +100,37 @@ class _CashScreenState extends ConsumerState<CashScreen> {
               Notice(_error!, tone: NoticeTone.critical),
               const SizedBox(height: JiraniSpace.s),
             ],
+            if (items.isEmpty)
+              SurfaceCard(child: EmptyState(icon: Icons.payments_outlined,
+                  title: l.cashNoneTitle, message: l.cashNoneBody)),
             for (final r in items)
-              Card(
-                child: Padding(
-                  padding: const EdgeInsets.all(JiraniSpace.m),
-                  child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+              SurfaceCard(
+                margin: const EdgeInsets.only(bottom: 10),
+                child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
                     Row(children: [
-                      Expanded(child: Text('${r.memberCode} · ${r.receivedOn}')),
-                      MoneyText(r.amount),
+                      Avatar(_name(bundle, r.memberCode), size: 42),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                          Text(_name(bundle, r.memberCode),
+                              style: Theme.of(context).textTheme.titleSmall),
+                          Text('${r.memberCode} · ${r.receivedOn}',
+                              style: Theme.of(context).textTheme.bodySmall),
+                        ]),
+                      ),
+                      MoneyText(r.amount, style: Theme.of(context).textTheme.titleSmall),
                     ]),
-                    const SizedBox(height: JiraniSpace.xs),
-                    Text(cashStateLabel(l, r),
-                        style: TextStyle(color: r.overdue
-                            ? Theme.of(context).colorScheme.error
-                            : Theme.of(context).colorScheme.onSurfaceVariant)),
+                    const SizedBox(height: 10),
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: StatusPill(cashStateLabel(l, r), tone: switch (r.state) {
+                        _ when r.overdue => JiraniTone.critical,
+                        'banked' => JiraniTone.good,
+                        'declined' => JiraniTone.critical,
+                        _ => JiraniTone.warning,
+                      }),
+                    ),
                     if (r.state == 'recorded' && r.membershipId == myId) ...[
                       const SizedBox(height: JiraniSpace.s),
                       Row(children: [
@@ -128,13 +145,16 @@ class _CashScreenState extends ConsumerState<CashScreen> {
                       ]),
                     ],
                   ]),
-                ),
               ),
           ],
         ),
       ),
     );
   }
+
+  /// The member's name for a member code, or the code when the list is not loaded.
+  String _name(ChamaBundle? bundle, String code) =>
+      bundle?.members.where((m) => m.memberCode == code).firstOrNull?.name ?? code;
 }
 
 class _RecordCashDialog extends ConsumerStatefulWidget {

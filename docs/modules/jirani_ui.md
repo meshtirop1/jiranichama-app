@@ -33,6 +33,8 @@ redesign follows the money apps people in Kenya already trust:
 | `SectionHeader` | The heading over a group |
 | `StatusPill` | A short status on a soft pill ("Active", "Chairperson") |
 | `InfoRow` | A label and a figure in a card |
+| `TitledCard` | A card with a heading row (tinted icon, title, a line under it) and its content |
+| `FigureChip` | A small label and figure ("Arrears KES 1,000"), tinted when it matters |
 | `ToneIcon` | An icon on a tinted rounded square |
 | `Avatar` | Initials on a colour picked from the name, so the same person always looks the same |
 | `EmptyState` | What a screen shows when there is nothing yet |
@@ -45,3 +47,18 @@ redesign follows the money apps people in Kenya already trust:
 
 Text sizes must work up to 200%; tap targets are at least 48 points. The font's licence
 (SIL Open Font License) is in `packages/jirani_ui/fonts/OFL.txt`.
+
+## Every screen uses it
+
+Every screen in the app was moved onto these pieces on 2026-10-20, not just the main ones:
+
+- Lists are cards with avatars or tinted icons, the amount on the right, and the state as a
+  pill: fines, loans, meetings (with a calendar date block), money-out proposals, cash at
+  meetings, unmatched payments, statements and records.
+- Empty lists say what will appear there and why, instead of showing a blank screen.
+- Headline figures use `HeroCard`: my position, the chama statement total, growth.
+- Sections such as disputes, elections, leaving, a loan's guarantors and a meeting's
+  people are `TitledCard`s.
+- Progress is a bar: approvals collected, officials agreeing to switch on money out, and
+  each month's payments.
+

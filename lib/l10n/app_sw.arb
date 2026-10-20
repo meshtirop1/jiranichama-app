@@ -887,7 +887,7 @@
   "growthNumbers": "Takwimu",
   "growthInvestments": "Uwekezaji",
   "growthPartners": "Washirika",
-  "numMoney": "Pesa",
+  "numMoney": "Thamani halisi",
   "numMoneyLine": "Michango {contributed} · benki {bank} · uwekezaji {investments} · thamani yote {net}",
   "numMonths": "Mwezi kwa mwezi",
   "numMonthLine": "Imelipwa {paid} kati ya {due} · kuchelewa {late} · faini {fines}",
@@ -949,5 +949,11 @@
   "sectionShortcuts": "Njia za haraka",
   "sectionMore": "Zaidi kwa chama hiki",
   "sectionNeedsYou": "Inahitaji umakini wako",
-  "membersCount": "Wanachama {count}"
+  "membersCount": "Wanachama {count}",
+  "cashNoneTitle": "Bado hakuna pesa taslimu iliyorekodiwa",
+  "cashNoneBody": "Mweka hazina akirekodi pesa taslimu iliyolipwa mkutanoni, itaonekana hapa hadi mwanachama athibitishe na iwekwe benki.",
+  "statementsNoneTitle": "Bado hakuna taarifa za benki",
+  "statementsNoneBody": "Pakia taarifa ya benki ya chama kama faili ya CSV. Afisa wa pili anaithibitisha, kisha kila malipo yanalinganishwa na mwanachama.",
+  "moneyOutOn": "Kutoa pesa kumewashwa",
+  "moneyOutOffTitle": "Kutoa pesa kumezimwa"
 }

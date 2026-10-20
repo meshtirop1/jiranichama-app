@@ -137,17 +137,36 @@ class MeetingsScreen extends ConsumerWidget {
         error: (e, _) => Padding(padding: const EdgeInsets.all(JiraniSpace.m),
             child: Notice(problemText(l, e), tone: NoticeTone.critical)),
         data: (list) => list.isEmpty
-            ? Padding(padding: const EdgeInsets.all(JiraniSpace.m),
-                child: Notice(l.meetNoneYet))
-            : ListView(children: [
+            ? ListView(padding: const EdgeInsets.all(JiraniSpace.m), children: [
+                SurfaceCard(child: EmptyState(icon: Icons.event_available_outlined,
+                    title: l.meetNoneYet)),
+              ])
+            : ListView(padding: const EdgeInsets.fromLTRB(JiraniSpace.m, JiraniSpace.s,
+                JiraniSpace.m, 96), children: [
                 for (final m in list)
-                  ListTile(
-                    title: Text(m.title),
-                    subtitle: Text('${_when(context, m.startsAt)} · '
-                        '${meetingStateLabel(l, m.state)}'),
-                    trailing: const Icon(Icons.chevron_right),
+                  SurfaceCard(
+                    margin: const EdgeInsets.only(bottom: 10),
+                    padding: const EdgeInsets.all(12),
                     onTap: () => Navigator.of(context).push(MaterialPageRoute(
                         builder: (_) => MeetingScreen(chamaId: chamaId, meetingId: m.id))),
+                    child: Row(children: [
+                      _DateBlock(m.startsAt),
+                      const SizedBox(width: 14),
+                      Expanded(
+                        child: Column(crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                          Text(m.title, style: Theme.of(context).textTheme.titleSmall),
+                          const SizedBox(height: 2),
+                          Text(_when(context, m.startsAt),
+                              style: Theme.of(context).textTheme.bodySmall),
+                          const SizedBox(height: 6),
+                          StatusPill(meetingStateLabel(l, m.state),
+                              tone: _meetingTone(m.state)),
+                        ]),
+                      ),
+                      Icon(Icons.chevron_right_rounded,
+                          color: Theme.of(context).colorScheme.onSurfaceVariant),
+                    ]),
                   ),
               ]),
       ),
@@ -236,8 +255,10 @@ class _ScheduleMeetingScreenState extends ConsumerState<ScheduleMeetingScreen> {
           const SizedBox(height: JiraniSpace.s),
           Notice(_error!, tone: NoticeTone.critical),
         ],
+        const SizedBox(height: JiraniSpace.m),
         TextField(key: const ValueKey('meet-title'), controller: _title,
             decoration: InputDecoration(labelText: l.meetTitleLabel)),
+        const SizedBox(height: 12),
         Row(children: [
           Expanded(child: OutlinedButton.icon(
             key: const ValueKey('meet-day'),
@@ -261,11 +282,16 @@ class _ScheduleMeetingScreenState extends ConsumerState<ScheduleMeetingScreen> {
             },
           )),
         ]),
+        const SizedBox(height: 12),
         TextField(key: const ValueKey('meet-place'), controller: _place,
-            decoration: InputDecoration(labelText: l.meetPlaceLabel)),
+            decoration: InputDecoration(labelText: l.meetPlaceLabel,
+                prefixIcon: const Icon(Icons.place_outlined))),
+        const SizedBox(height: 12),
         TextField(key: const ValueKey('meet-link'), controller: _link,
             keyboardType: TextInputType.url,
-            decoration: InputDecoration(labelText: l.meetLinkLabel)),
+            decoration: InputDecoration(labelText: l.meetLinkLabel,
+                prefixIcon: const Icon(Icons.link_rounded))),
+        const SizedBox(height: 12),
         TextField(key: const ValueKey('meet-agenda'), controller: _agenda, maxLines: 4,
             decoration: InputDecoration(labelText: l.meetAgendaLabel)),
       ]),
@@ -358,15 +384,47 @@ class _MeetingScreenState extends ConsumerState<MeetingScreen> {
     return Scaffold(
       appBar: AppBar(title: Text(m.title)),
       body: ListView(padding: const EdgeInsets.all(JiraniSpace.m), children: [
-        Text(_when(context, m.startsAt), style: text.titleMedium),
-        if (m.place.isNotEmpty) Text(m.place),
-        if (m.onlineLink.isNotEmpty) SelectableText(m.onlineLink),
-        const SizedBox(height: JiraniSpace.s),
-        Notice(m.state == 'cancelled' ? l.meetCancelledBecause(m.cancelReason)
-            : meetingStateLabel(l, m.state)),
-        if (m.myStatus != null) ...[
-          const SizedBox(height: JiraniSpace.xs),
-          Text(l.meetMyStatus(personStatusLabel(l, m.myStatus!)), style: text.bodyMedium),
+        SurfaceCard(
+          child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            Row(children: [
+              _DateBlock(m.startsAt),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                  Text(_when(context, m.startsAt), style: text.titleMedium),
+                  const SizedBox(height: 6),
+                  if (m.state != 'cancelled')
+                    StatusPill(meetingStateLabel(l, m.state), tone: _meetingTone(m.state)),
+                ]),
+              ),
+            ]),
+            if (m.place.isNotEmpty || m.onlineLink.isNotEmpty) const Divider(height: 24),
+            if (m.place.isNotEmpty)
+              Row(children: [
+                Icon(Icons.place_outlined, size: 18,
+                    color: Theme.of(context).colorScheme.primary),
+                const SizedBox(width: 8),
+                Expanded(child: Text(m.place, style: text.bodyMedium)),
+              ]),
+            if (m.onlineLink.isNotEmpty) ...[
+              const SizedBox(height: 6),
+              Row(children: [
+                Icon(Icons.link_rounded, size: 18,
+                    color: Theme.of(context).colorScheme.primary),
+                const SizedBox(width: 8),
+                Expanded(child: SelectableText(m.onlineLink, style: text.bodyMedium)),
+              ]),
+            ],
+            if (m.myStatus != null) ...[
+              const SizedBox(height: 10),
+              Text(l.meetMyStatus(personStatusLabel(l, m.myStatus!)),
+                  style: text.titleSmall),
+            ],
+          ]),
+        ),
+        if (m.state == 'cancelled') ...[
+          const SizedBox(height: JiraniSpace.s),
+          Notice(l.meetCancelledBecause(m.cancelReason), tone: NoticeTone.critical),
         ],
         if (_error != null) ...[
           const SizedBox(height: JiraniSpace.s),
@@ -374,8 +432,9 @@ class _MeetingScreenState extends ConsumerState<MeetingScreen> {
         ],
         if (m.agenda.isNotEmpty) ...[
           const SizedBox(height: JiraniSpace.m),
-          Text(l.meetAgendaLabel, style: text.titleSmall),
-          Text(m.agenda),
+          TitledCard(title: l.meetAgendaLabel, icon: Icons.list_alt_rounded,
+              margin: EdgeInsets.zero,
+              children: [Text(m.agenda, style: text.bodyMedium)]),
         ],
         const SizedBox(height: JiraniSpace.m),
 
@@ -397,6 +456,7 @@ class _MeetingScreenState extends ConsumerState<MeetingScreen> {
             label: Text(l.meetCheckIn),
             onPressed: _busy ? null : _checkIn,
           ),
+          const SizedBox(height: JiraniSpace.s),
           TextButton(key: const ValueKey('meet-type-code'),
               onPressed: _busy ? null : _typeCode, child: Text(l.meetTypeCode)),
         ],
@@ -406,6 +466,7 @@ class _MeetingScreenState extends ConsumerState<MeetingScreen> {
           FilledButton(key: const ValueKey('meet-start'),
               onPressed: _busy ? null : () => _run(() => repo.startMeeting(m.id)),
               child: Text(l.meetStart)),
+          const SizedBox(height: JiraniSpace.s),
           TextButton(
             key: const ValueKey('meet-cancel'),
             onPressed: _busy ? null : () async {
@@ -424,6 +485,7 @@ class _MeetingScreenState extends ConsumerState<MeetingScreen> {
             onPressed: () => Navigator.of(context).push(MaterialPageRoute(
                 builder: (_) => _CodeScreen(meetingId: m.id))),
           ),
+          const SizedBox(height: JiraniSpace.s),
           OutlinedButton(
             key: const ValueKey('meet-close'),
             onPressed: _busy ? null : () async {
@@ -448,15 +510,29 @@ class _MeetingScreenState extends ConsumerState<MeetingScreen> {
               child: Text(minutes == null ? l.meetWriteMinutes : l.meetReviseMinutes)),
 
         // Who
-        const SizedBox(height: JiraniSpace.m),
-        Text(l.meetPeople(m.people.where((p) => p.status == 'present' || p.status == 'late')
-            .length, m.people.length), style: text.titleSmall),
+        SectionHeader(l.meetPeople(m.people.where((p) => p.status == 'present'
+            || p.status == 'late').length, m.people.length)),
+        SurfaceCard(
+          padding: const EdgeInsets.symmetric(vertical: 4),
+          child: Column(children: [
         for (final p in m.people)
           ListTile(
             key: ValueKey('meet-person-${p.memberCode}'),
-            dense: true,
+            leading: Avatar(p.name, size: 38),
             title: Text(p.name),
-            subtitle: Text([personStatusLabel(l, p.status), ?p.reason].join(' · ')),
+            subtitle: Padding(
+              padding: const EdgeInsets.only(top: 4),
+              child: Wrap(spacing: 6, runSpacing: 4,
+                  crossAxisAlignment: WrapCrossAlignment.center, children: [
+                StatusPill(personStatusLabel(l, p.status), tone: switch (p.status) {
+                  'present' => JiraniTone.good,
+                  'late' || 'apology' => JiraniTone.warning,
+                  'absent' => JiraniTone.critical,
+                  _ => JiraniTone.neutral,
+                }),
+                if (p.reason != null) Text(p.reason!, style: text.bodySmall),
+              ]),
+            ),
             trailing: m.iRun && m.state == 'in_progress'
                 && (p.status == 'expected' || p.status == 'apology')
                 ? Row(mainAxisSize: MainAxisSize.min, children: [
@@ -471,14 +547,20 @@ class _MeetingScreenState extends ConsumerState<MeetingScreen> {
                   ])
                 : null,
           ),
-        if (m.attendanceReceipt != null)
-          Text(l.meetAttendanceReceipt(m.attendanceReceipt!), style: text.bodySmall),
+          ]),
+        ),
+        if (m.attendanceReceipt != null) ...[
+          const SizedBox(height: JiraniSpace.s),
+          Notice(l.meetAttendanceReceipt(m.attendanceReceipt!), tone: NoticeTone.good),
+        ],
 
         // Minutes
         if (minutes != null) ...[
           const SizedBox(height: JiraniSpace.m),
-          Text(l.meetMinutesVersion(minutes.version), style: text.titleSmall),
-          if (minutes.text.isNotEmpty) Text(minutes.text),
+          TitledCard(title: l.meetMinutesVersion(minutes.version),
+              icon: Icons.description_outlined, tone: JiraniTone.info,
+              margin: EdgeInsets.zero, children: [
+          if (minutes.text.isNotEmpty) Text(minutes.text, style: text.bodyMedium),
           if (minutes.hasPhoto) _MinutesPhoto(minutesId: minutes.id),
           if (openMinutes)
             Text(l.meetObjectUntil(_when(context, minutes.objectionUntil)),
@@ -486,7 +568,8 @@ class _MeetingScreenState extends ConsumerState<MeetingScreen> {
           for (final o in minutes.objections)
             Padding(padding: const EdgeInsets.only(top: JiraniSpace.xs),
                 child: Notice(l.meetObjection(o.by, o.reason), tone: NoticeTone.warning)),
-          if (openMinutes)
+          if (openMinutes) ...[
+            const SizedBox(height: JiraniSpace.s),
             OutlinedButton(
               key: const ValueKey('meet-object'),
               onPressed: _busy ? null : () async {
@@ -496,8 +579,12 @@ class _MeetingScreenState extends ConsumerState<MeetingScreen> {
               },
               child: Text(l.meetObject),
             ),
-          if (m.sealedReceipt != null)
+          ],
+          if (m.sealedReceipt != null) ...[
+            const SizedBox(height: JiraniSpace.s),
             Text(l.meetSealedReceipt(m.sealedReceipt!), style: text.bodySmall),
+          ],
+          ]),
         ],
       ]),
     );
@@ -676,3 +763,40 @@ final _photoProvider = FutureProvider.autoDispose.family((ref, String id) async 
   final bytes = await ref.watch(chamaRepositoryProvider).minutesPhoto(id);
   return Uint8List.fromList(bytes);
 });
+
+JiraniTone _meetingTone(String state) => switch (state) {
+      'scheduled' => JiraniTone.info,
+      'in_progress' => JiraniTone.good,
+      'cancelled' => JiraniTone.critical,
+      'minutes_pending' || 'attendance_closed' => JiraniTone.warning,
+      _ => JiraniTone.neutral,
+    };
+
+/// The day of a meeting as a small calendar leaf: month above, day number below.
+class _DateBlock extends StatelessWidget {
+  const _DateBlock(this.iso);
+
+  final String iso;
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    final text = Theme.of(context).textTheme;
+    final t = DateTime.parse(iso).toLocal();
+    final month = MaterialLocalizations.of(context).formatShortMonthDay(t).split(' ').first;
+    return Container(
+      width: 52,
+      padding: const EdgeInsets.symmetric(vertical: 6),
+      decoration: BoxDecoration(
+        color: scheme.primaryContainer,
+        borderRadius: BorderRadius.circular(14),
+      ),
+      child: Column(children: [
+        Text(month.toUpperCase(), style: text.labelSmall?.copyWith(
+            color: scheme.onPrimaryContainer, letterSpacing: 1)),
+        Text('${t.day}', style: text.titleLarge?.copyWith(
+            color: scheme.onPrimaryContainer, fontWeight: FontWeight.w800, height: 1.1)),
+      ]),
+    );
+  }
+}

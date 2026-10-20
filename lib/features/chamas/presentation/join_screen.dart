@@ -79,8 +79,14 @@ class _JoinScreenState extends ConsumerState<JoinScreen> {
         padding: const EdgeInsets.all(JiraniSpace.l),
         children: [
           if (invite == null) ...[
+            const Align(alignment: Alignment.centerLeft,
+                child: ToneIcon(Icons.group_add_outlined, size: 56)),
+            const SizedBox(height: JiraniSpace.l),
             TextField(
               controller: _code,
+              textAlign: TextAlign.center,
+              style: Theme.of(context).textTheme.headlineSmall
+                  ?.copyWith(letterSpacing: 10, fontWeight: FontWeight.w800),
               textCapitalization: TextCapitalization.characters,
               inputFormatters: [
                 FilteringTextInputFormatter.allow(RegExp('[A-Za-z]')),
@@ -96,8 +102,14 @@ class _JoinScreenState extends ConsumerState<JoinScreen> {
             ],
             PrimaryButton(label: l.verify, busy: _busy, onPressed: _find),
           ] else ...[
-            Text(l.joinAs(invite.chamaName, roleLabel(l, invite.role)),
-                style: Theme.of(context).textTheme.titleMedium),
+            SurfaceCard(
+              child: Row(children: [
+                Avatar(invite.chamaName, size: 48),
+                const SizedBox(width: 14),
+                Expanded(child: Text(l.joinAs(invite.chamaName, roleLabel(l, invite.role)),
+                    style: Theme.of(context).textTheme.titleMedium)),
+              ]),
+            ),
             if (_error != null) ...[
               const SizedBox(height: JiraniSpace.m),
               Notice(_error!, tone: NoticeTone.critical),

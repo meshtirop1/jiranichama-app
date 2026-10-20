@@ -24,5 +24,15 @@
   appears in English only.
 - **An expired access token is refreshed once, silently.** If the refresh token is also
   expired, the session ends and the member signs in again.
+- **One refresh at a time.** Access tokens last 15 minutes, and refresh tokens are single
+  use (the server rotates them). When several screens hit an expired token together, only
+  one refresh is sent; the others wait for it and then retry with the new token. Before
+  2026-10-20 each screen refreshed on its own: the second refresh used the old token, was
+  refused, wiped the session, and the screens spun forever on 401s.
+- **A dead session goes back to sign-in.** If the refresh is refused, the API client says
+  so (`sessionEnded`) and the app returns to the phone screen instead of leaving screens
+  waiting.
+- **Loads are retried only when the server was not reached** (three tries, backing off).
+  A refusal such as 401, 403 or a rule is shown at once.
 
 The server side of this flow is `docs/flows/phone-sign-in.md` in the API repository.

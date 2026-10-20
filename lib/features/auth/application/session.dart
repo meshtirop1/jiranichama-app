@@ -10,6 +10,14 @@ enum SessionStatus { unknown, signedOut, needsPin, signedIn }
 class SessionController extends Notifier<SessionStatus> {
   @override
   SessionStatus build() {
+    // The session ended under us (the refresh token was refused): back to sign-in,
+    // instead of leaving every screen waiting on requests that will never succeed.
+    final sub = ref.read(apiClientProvider).sessionEnded.listen((_) {
+      if (state == SessionStatus.signedOut) return;
+      ref.read(signInEpochProvider.notifier).bump();
+      state = SessionStatus.signedOut;
+    });
+    ref.onDispose(sub.cancel);
     _restore();
     return SessionStatus.unknown;
   }

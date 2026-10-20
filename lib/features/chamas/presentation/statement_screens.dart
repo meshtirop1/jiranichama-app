@@ -76,10 +76,20 @@ class _MemberStatementScreenState extends ConsumerState<MemberStatementScreen> {
     final text = Theme.of(context).textTheme;
     final p = s.position;
     return [
-      Text('${s.memberName} (${s.memberCode})', style: text.titleMedium),
-      Text(l.periodRange(s.from, s.to)),
-      const SizedBox(height: JiraniSpace.s),
-      _Section(title: l.inThisPeriod, rows: [
+      Padding(
+        padding: const EdgeInsets.only(bottom: JiraniSpace.m),
+        child: Row(children: [
+          Avatar(s.memberName, size: 48),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+              Text('${s.memberName} (${s.memberCode})', style: text.titleMedium),
+              Text(l.periodRange(s.from, s.to), style: text.bodySmall),
+            ]),
+          ),
+        ]),
+      ),
+      _Section(title: l.inThisPeriod, icon: Icons.date_range_rounded, rows: [
         if (s.total('opening_cents').cents != 0) (l.openingSavings, s.total('opening_cents')),
         (l.contributed, s.total('contributed_cents')),
         if (s.total('fines_raised_cents').cents != 0)
@@ -88,17 +98,28 @@ class _MemberStatementScreenState extends ConsumerState<MemberStatementScreen> {
         if (s.total('fines_waived_cents').cents != 0)
           (l.finesWaived, s.total('fines_waived_cents')),
       ]),
-      _Section(title: l.positionOn(s.positionOn), rows: [
+      _Section(title: l.positionOn(s.positionOn), icon: Icons.account_balance_wallet_outlined,
+          tone: JiraniTone.good, rows: [
         (l.totalSavings, p.contributed),
         (l.arrears, p.arrears),
         (l.finesOwed, p.fines),
         if (p.credit.cents > 0) (l.creditLabel, p.credit),
         if (p.pendingCash.cents > 0) (l.pendingCash, p.pendingCash),
       ], footer: p.nextDuePeriod == null ? null : l.nextDue(p.nextDue.format(), p.nextDuePeriod!)),
+      SectionHeader(l.tabRecords),
       if (s.lines.isEmpty)
-        Padding(padding: const EdgeInsets.all(JiraniSpace.m), child: Text(l.noLinesInPeriod))
+        SurfaceCard(child: EmptyState(icon: Icons.receipt_long_outlined,
+            title: l.noLinesInPeriod))
       else
-        Card(child: Column(children: [for (final line in s.lines) _LineTile(line)])),
+        SurfaceCard(
+          padding: EdgeInsets.zero,
+          child: Column(children: [
+            for (final (i, line) in s.lines.indexed) ...[
+              if (i > 0) const Divider(indent: 66),
+              _LineTile(line),
+            ],
+          ]),
+        ),
     ];
   }
 }
@@ -132,26 +153,32 @@ class _ChamaStatementScreenState extends ConsumerState<ChamaStatementScreen> {
         loading: () => [const LinearProgressIndicator()],
         error: (e, _) => [Notice(problemText(l, e), tone: NoticeTone.critical)],
         data: (s) => [
-          Text(l.periodRange(s.from, s.to)),
-          const SizedBox(height: JiraniSpace.s),
-          Card(
+          HeroCard(
+            label: l.periodRange(s.from, s.to),
+            value: MoneyText(s.total('savings_cents'),
+                style: Theme.of(context).textTheme.displaySmall?.copyWith(color: Colors.white)),
+            children: [
+              HeroFigure(l.contributed, MoneyText(s.total('contributed_cents'),
+                  style: Theme.of(context).textTheme.titleSmall
+                      ?.copyWith(color: Colors.white))),
+              HeroFigure(l.tabMembers, Text('${s.members.length}')),
+            ],
+          ),
+          SectionHeader(l.tabMembers),
+          SurfaceCard(
+            padding: EdgeInsets.zero,
+            margin: const EdgeInsets.only(bottom: 12),
             child: Column(children: [
-              for (final m in s.members)
-                ListTile(
-                  title: Text('${m.name} (${m.code})'),
-                  subtitle: Text('${l.contributed}: ${m.contributed.format()} · '
-                      '${l.arrears}: ${m.arrears.format()} · ${l.finesOwed}: ${m.fines.format()}'),
-                  trailing: MoneyText(m.savings),
-                ),
-              ListTile(
-                title: Text(l.totalLabel, style: const TextStyle(fontWeight: FontWeight.w600)),
-                subtitle: Text('${l.contributed}: ${s.total('contributed_cents').format()}'),
-                trailing: MoneyText(s.total('savings_cents')),
-              ),
+              for (final (i, m) in s.members.indexed) ...[
+                if (i > 0) const Divider(indent: 70),
+                _MemberRow(m),
+              ],
             ]),
           ),
           _Section(
             title: l.bankHeading,
+            icon: Icons.account_balance_rounded,
+            tone: JiraniTone.info,
             rows: [
               if (s.bankClosing != null) (l.closingOnStatement, s.bankClosing!),
               (l.cashNotBanked, s.cashWaiting),
@@ -285,51 +312,97 @@ class _DocumentReady extends StatelessWidget {
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
     final text = Theme.of(context).textTheme;
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(JiraniSpace.m),
-        child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-          Text(l.pdfReady, style: text.titleMedium),
-          const SizedBox(height: JiraniSpace.xs),
-          Text(l.checkCode(doc.spokenCode), key: const ValueKey('check-code'),
-              style: text.bodyLarge),
-          const SizedBox(height: JiraniSpace.xs),
-          Text(l.anyoneCanCheck(doc.verifyUrl), style: text.bodySmall),
-          const SizedBox(height: JiraniSpace.s),
-          FilledButton.icon(icon: const Icon(Icons.share_outlined), label: Text(l.sharePdf),
-              onPressed: onShare),
-        ]),
-      ),
+    return TitledCard(
+      title: l.pdfReady,
+      icon: Icons.picture_as_pdf_outlined,
+      tone: JiraniTone.good,
+      children: [
+        Container(
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: Theme.of(context).colorScheme.surfaceContainerLow,
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Text(l.checkCode(doc.spokenCode), key: const ValueKey('check-code'),
+              style: text.titleMedium?.copyWith(letterSpacing: 1)),
+        ),
+        const SizedBox(height: JiraniSpace.s),
+        Text(l.anyoneCanCheck(doc.verifyUrl), style: text.bodySmall),
+        const SizedBox(height: JiraniSpace.m),
+        FilledButton.icon(icon: const Icon(Icons.share_outlined), label: Text(l.sharePdf),
+            onPressed: onShare),
+      ],
     );
   }
 }
 
 class _Section extends StatelessWidget {
-  const _Section({required this.title, required this.rows, this.header, this.footer});
+  const _Section({required this.title, required this.rows, this.header, this.footer,
+      this.icon, this.tone = JiraniTone.brand});
 
   final String title;
   final List<(String, Kes)> rows;
   final String? header;
   final String? footer;
+  final IconData? icon;
+  final JiraniTone tone;
 
   @override
   Widget build(BuildContext context) {
     final text = Theme.of(context).textTheme;
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(JiraniSpace.m),
-        child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-          Text(title, style: text.titleMedium),
-          if (header != null) ...[const SizedBox(height: JiraniSpace.xs), Text(header!)],
-          const SizedBox(height: JiraniSpace.xs),
-          for (final (label, amount) in rows)
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: JiraniSpace.xs),
-              child: Row(children: [Expanded(child: Text(label)), MoneyText(amount)]),
-            ),
-          if (footer != null) ...[const SizedBox(height: JiraniSpace.xs), Text(footer!)],
-        ]),
-      ),
+    return TitledCard(
+      title: title,
+      icon: icon,
+      tone: tone,
+      subtitle: header,
+      children: [
+        for (final (i, (label, amount)) in rows.indexed) ...[
+          if (i > 0) const Divider(),
+          InfoRow(label, MoneyText(amount, style: text.titleSmall)),
+        ],
+        if (footer != null) ...[
+          const SizedBox(height: JiraniSpace.s),
+          Notice(footer!, tone: NoticeTone.warning),
+        ],
+      ],
+    );
+  }
+}
+
+/// One member in the chama statement: who, their savings, and what they owe.
+class _MemberRow extends StatelessWidget {
+  const _MemberRow(this.m);
+
+  final ChamaStatementRow m;
+
+  @override
+  Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
+    final text = Theme.of(context).textTheme;
+    final arrears = m.arrears;
+    final fines = m.fines;
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(14, 12, 16, 12),
+      child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        Avatar(m.name, size: 42),
+        const SizedBox(width: 14),
+        Expanded(
+          child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            Text('${m.name} (${m.code})', style: text.titleSmall),
+            const SizedBox(height: 6),
+            Text('${l.contributed} ${m.contributed.format()}', style: text.bodySmall),
+            if (arrears.cents > 0 || fines.cents > 0) const SizedBox(height: 6),
+            Wrap(spacing: 6, runSpacing: 6, children: [
+              if (arrears.cents > 0)
+                FigureChip(l.arrears, arrears.format(), tone: JiraniTone.warning),
+              if (fines.cents > 0)
+                FigureChip(l.finesOwed, fines.format(), tone: JiraniTone.critical),
+            ]),
+          ]),
+        ),
+        const SizedBox(width: 8),
+        MoneyText(m.savings, style: text.titleSmall),
+      ]),
     );
   }
 }
@@ -348,11 +421,36 @@ class _LineTile extends StatelessWidget {
     final struck = line.reversed
         ? const TextStyle(decoration: TextDecoration.lineThrough)
         : null;
-    return ListTile(
-      dense: true,
-      title: Text(line.period == null ? what : '$what · ${line.period}', style: struck),
-      subtitle: Text([line.date, line.receipt, if (line.reversed) l.reversedLabel].join(' · ')),
-      trailing: MoneyText(line.amount, style: struck),
+    final text = Theme.of(context).textTheme;
+    final muted = Theme.of(context).colorScheme.onSurfaceVariant;
+    final incoming = line.type == 'contribution' || line.type == 'fine_paid';
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(14, 10, 16, 10),
+      child: Row(children: [
+        ToneIcon(
+          switch (line.type) {
+            'contribution' => Icons.south_west_rounded,
+            'fine_raised' => Icons.gavel_rounded,
+            'fine_paid' => Icons.task_alt_rounded,
+            'reversal' || 'correction' => Icons.undo_rounded,
+            _ => Icons.receipt_long_outlined,
+          },
+          tone: line.reversed ? JiraniTone.neutral : incoming ? JiraniTone.good
+              : line.type == 'fine_raised' ? JiraniTone.critical : JiraniTone.neutral,
+          size: 38,
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            Text(line.period == null ? what : '$what · ${line.period}',
+                style: text.titleSmall?.merge(struck)),
+            Text([line.date, line.receipt, if (line.reversed) l.reversedLabel].join(' · '),
+                style: text.bodySmall),
+          ]),
+        ),
+        MoneyText(line.amount, style: text.titleSmall?.merge(struck)
+            .copyWith(color: line.reversed ? muted : null)),
+      ]),
     );
   }
 }
