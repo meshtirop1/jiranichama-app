@@ -38,9 +38,13 @@ final anchorCheckProvider = FutureProvider.autoDispose.family<AnchorCheck?, Stri
 /// at the top says when the phone has finished checking them itself. A record the
 /// treasurer assigned to me can be sent back.
 class RecordsTab extends ConsumerWidget {
-  const RecordsTab({super.key, required this.bundle});
+  const RecordsTab({super.key, required this.bundle, this.chainKey, this.listKey});
 
   final ChamaBundle bundle;
+
+  /// Where a guided tour points: the chain check and the first record.
+  final GlobalKey? chainKey;
+  final GlobalKey? listKey;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -61,6 +65,7 @@ class RecordsTab extends ConsumerWidget {
         final newestFirst = items.reversed.toList();
         final header = <Widget>[
           AnimatedSwitcher(
+            key: chainKey,
             duration: const Duration(milliseconds: 250),
             child: switch (check) {
               AsyncData(:final value) => Notice(
@@ -98,7 +103,7 @@ class RecordsTab extends ConsumerWidget {
             itemBuilder: (context, index) {
               if (index < header.length) return header[index];
               final item = newestFirst[index - header.length];
-              return _EntryTile(
+              final tile = _EntryTile(
                 key: ValueKey(item.id),
                 item: item,
                 isReversed: reversed.contains(item.id),
@@ -109,6 +114,9 @@ class RecordsTab extends ConsumerWidget {
                     !reversed.contains(item.id),
                 onSentBack: () => ref.invalidate(ledgerItemsProvider(id)),
               );
+              return index == header.length && listKey != null
+                  ? KeyedSubtree(key: listKey, child: tile)
+                  : tile;
             },
           ),
         );

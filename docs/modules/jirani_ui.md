@@ -39,6 +39,7 @@ redesign follows the money apps people in Kenya already trust:
 | `Avatar` | Initials on a colour picked from the name, so the same person always looks the same |
 | `EmptyState` | What a screen shows when there is nothing yet |
 | `BrandMark` | The mark (members around the pot) used on sign-in, the splash and the home bar |
+| `showTour`, `TourStep` | Guided tours: dimmed screen, a spotlight that glides to each part with a pulsing ring, and an animated card explaining it (see [tours](../flows/tours.md)) |
 | `ActionBar` | Pins a screen's main action to the bottom (`Scaffold.bottomNavigationBar`) |
 | `PrimaryButton` | The one main action on a screen; shows a spinner while busy |
 | `DigitsField` | Codes and PINs: digits only, centred, fixed length, one-time-code autofill |
