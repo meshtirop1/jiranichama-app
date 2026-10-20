@@ -38,43 +38,62 @@ class UnmatchedScreen extends ConsumerWidget {
         data: (items) => ListView(
           padding: const EdgeInsets.all(JiraniSpace.m),
           children: [
-            if (items.isEmpty) Notice(l.unmatchedEmpty),
+            if (items.isEmpty)
+              SurfaceCard(child: EmptyState(icon: Icons.task_alt_rounded,
+                  title: l.unmatchedEmpty)),
             for (final line in items)
-              Card(
-                child: ListTile(
-                  title: MoneyText(line.amount),
-                  subtitle: Text([line.valueDate, line.narration,
-                    if (line.fromMpesa) l.fromMpesa,
-                    if (line.typedIn) l.typedIn].join(' · ')),
-                  trailing: bundle != null && bundle.chama.iAmTreasurer
-                      ? Wrap(spacing: JiraniSpace.xs, children: [
-                          TextButton(
-                            onPressed: () async {
-                              final done = await showDialog<bool>(
-                                context: context,
-                                builder: (_) => _AssignDialog(line: line, bundle: bundle),
-                              );
-                              if (done == true) ref.invalidate(unmatchedProvider(chamaId));
-                            },
-                            child: Text(l.assign),
-                          ),
-                          IconButton(
-                            tooltip: l.itsCash,
-                            icon: const Icon(Icons.payments_outlined),
-                            onPressed: () async {
-                              final done = await showDialog<bool>(
-                                context: context,
-                                builder: (_) => _BankCashDialog(line: line, chamaId: chamaId),
-                              );
-                              if (done == true) {
-                                ref.invalidate(unmatchedProvider(chamaId));
-                                ref.invalidate(cashProvider(chamaId));
-                              }
-                            },
-                          ),
-                        ])
-                      : null,
-                ),
+              SurfaceCard(
+                margin: const EdgeInsets.only(bottom: 10),
+                child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+                  Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                    const ToneIcon(Icons.south_west_rounded, tone: JiraniTone.warning,
+                        size: 42),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                        MoneyText(line.amount, style: Theme.of(context).textTheme.titleMedium),
+                        const SizedBox(height: 2),
+                        Text([line.valueDate, line.narration,
+                          if (line.fromMpesa) l.fromMpesa,
+                          if (line.typedIn) l.typedIn].join(' · '),
+                            style: Theme.of(context).textTheme.bodySmall),
+                      ]),
+                    ),
+                  ]),
+                  if (bundle != null && bundle.chama.iAmTreasurer) ...[
+                    const SizedBox(height: 12),
+                    Row(children: [
+                      Expanded(
+                        child: OutlinedButton(
+                          style: OutlinedButton.styleFrom(minimumSize: const Size(0, 44)),
+                          onPressed: () async {
+                            final done = await showDialog<bool>(
+                              context: context,
+                              builder: (_) => _AssignDialog(line: line, bundle: bundle),
+                            );
+                            if (done == true) ref.invalidate(unmatchedProvider(chamaId));
+                          },
+                          child: Text(l.assign),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      IconButton.outlined(
+                        tooltip: l.itsCash,
+                        icon: const Icon(Icons.payments_outlined),
+                        onPressed: () async {
+                          final done = await showDialog<bool>(
+                            context: context,
+                            builder: (_) => _BankCashDialog(line: line, chamaId: chamaId),
+                          );
+                          if (done == true) {
+                            ref.invalidate(unmatchedProvider(chamaId));
+                            ref.invalidate(cashProvider(chamaId));
+                          }
+                        },
+                      ),
+                    ]),
+                  ],
+                ]),
               ),
           ],
         ),

@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:math';
 
@@ -16,7 +17,13 @@ String newIdempotencyKey() {
 /// Thin JSON client for the JiraniChama API.
 ///
 /// Adds the access token, swaps an expired one for a new one once using the refresh
-/// token, and turns every failure into an [ApiProblem]. A client generated from the
+/// token, and turns every failure into an [ApiProblem].
+///
+/// Refresh tokens are single use (the server rotates them), so when several screens hit
+/// an expired token at once only one refresh is sent and the others wait for it. Without
+/// that, the second refresh used the old token, was refused, and ended the session while
+/// the screens kept spinning. When the session really is over, [sessionEnded] fires so
+/// the app can go back to sign-in. A client generated from the
 /// OpenAPI schema can replace the hand calls later; this class stays as its transport.
 class ApiClient {
   ApiClient({required String baseUrl, required this.tokens, Dio? dio})
@@ -31,6 +38,11 @@ class ApiClient {
 
   final Dio _dio;
   final TokenStore tokens;
+  final _ended = StreamController<void>.broadcast();
+  Future<bool>? _refreshing;
+
+  /// Fires when the session cannot be renewed (signed out elsewhere, or expired).
+  Stream<void> get sessionEnded => _ended.stream;
 
   Future<dynamic> get(String path, {Map<String, Object?>? query}) =>
       _send('GET', path, query: query, auth: true);
@@ -97,10 +109,12 @@ class ApiClient {
     String? idempotencyKey,
     bool bytes = false,
   }) async {
+    String? sentAccess;
     Future<Response<Object?>> request() async {
       final headers = <String, String>{'Idempotency-Key': ?idempotencyKey};
       if (auth) {
         final t = await tokens.read();
+        sentAccess = t?.access;
         if (t != null) headers['Authorization'] = 'Bearer ${t.access}';
       }
       return _dio.request<Object?>(
@@ -115,7 +129,7 @@ class ApiClient {
     try {
       return (await request()).data;
     } on DioException catch (e) {
-      if (auth && e.response?.statusCode == 401 && await _refresh()) {
+      if (auth && e.response?.statusCode == 401 && await _renew(sentAccess)) {
         try {
           return (await request()).data;
         } on DioException catch (retry) {
@@ -126,9 +140,19 @@ class ApiClient {
     }
   }
 
-  Future<bool> _refresh() async {
+  /// A fresh access token after a 401: someone else's new one if another request has
+  /// already refreshed, else the one refresh in flight (started here if none is).
+  Future<bool> _renew(String? sentAccess) async {
     final current = await tokens.read();
-    if (current == null) return false;
+    if (current == null) {
+      _ended.add(null);
+      return false;
+    }
+    if (current.access != sentAccess) return true;
+    return _refreshing ??= _refresh(current).whenComplete(() => _refreshing = null);
+  }
+
+  Future<bool> _refresh(Tokens current) async {
     try {
       final r = await _dio.post<Object?>('/auth/refresh/', data: {'refresh': current.refresh});
       final data = r.data;
@@ -143,6 +167,7 @@ class ApiClient {
       // Fall through: the session is over.
     }
     await tokens.clear();
+    _ended.add(null);
     return false;
   }
 

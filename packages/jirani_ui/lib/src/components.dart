@@ -536,3 +536,82 @@ class _MarkPainter extends CustomPainter {
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
+
+/// A card with a heading row (an optional tinted icon, a title, a line under it and
+/// something on the right), then its content: figures, a form, a list.
+class TitledCard extends StatelessWidget {
+  const TitledCard({
+    super.key,
+    required this.title,
+    required this.children,
+    this.icon,
+    this.tone = JiraniTone.brand,
+    this.subtitle,
+    this.trailing,
+    this.margin = const EdgeInsets.only(bottom: 12),
+  });
+
+  final String title;
+  final List<Widget> children;
+  final IconData? icon;
+  final JiraniTone tone;
+  final String? subtitle;
+  final Widget? trailing;
+  final EdgeInsetsGeometry margin;
+
+  @override
+  Widget build(BuildContext context) {
+    final text = Theme.of(context).textTheme;
+    return SurfaceCard(
+      margin: margin,
+      child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+        Row(children: [
+          if (icon != null) ...[ToneIcon(icon!, tone: tone, size: 38), const SizedBox(width: 12)],
+          Expanded(
+            child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+              Text(title, style: text.titleMedium),
+              if (subtitle != null && subtitle!.isNotEmpty) ...[
+                const SizedBox(height: 2),
+                Text(subtitle!, style: text.bodySmall),
+              ],
+            ]),
+          ),
+          ?trailing,
+        ]),
+        if (children.isNotEmpty) const SizedBox(height: 10),
+        ...children,
+      ]),
+    );
+  }
+}
+
+/// A small label and figure side by side ("Arrears KES 1,000"), tinted when it matters.
+class FigureChip extends StatelessWidget {
+  const FigureChip(this.label, this.value, {super.key, this.tone = JiraniTone.neutral});
+
+  final String label;
+  final String value;
+  final JiraniTone tone;
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    final text = Theme.of(context).textTheme;
+    final (strong, soft, _) = JiraniStatus.of(context).colors(scheme, tone);
+    final neutral = tone == JiraniTone.neutral;
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: neutral ? scheme.surfaceContainerLow : soft,
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Text.rich(TextSpan(children: [
+        TextSpan(text: '$label ', style: text.labelMedium?.copyWith(
+            color: neutral ? scheme.onSurfaceVariant : strong, fontWeight: FontWeight.w500)),
+        TextSpan(text: value, style: text.labelMedium?.copyWith(
+            color: neutral ? scheme.onSurface : strong, fontWeight: FontWeight.w800,
+            fontFeatures: const [FontFeature.tabularFigures()])),
+      ])),
+    );
+  }
+}

@@ -1637,7 +1637,7 @@
   "growthNumbers": "Numbers",
   "growthInvestments": "Investments",
   "growthPartners": "Partners",
-  "numMoney": "Money",
+  "numMoney": "Net worth",
   "numMoneyLine": "Contributed {contributed} · bank {bank} · investments {investments} · net worth {net}",
   "@numMoneyLine": {
     "placeholders": {
@@ -1846,5 +1846,11 @@
   "sectionMore": "More for this chama",
   "sectionNeedsYou": "Needs your attention",
   "membersCount": "{count} members",
-  "@membersCount": {"placeholders": {"count": {"type": "int"}}}
+  "@membersCount": {"placeholders": {"count": {"type": "int"}}},
+  "cashNoneTitle": "No cash recorded yet",
+  "cashNoneBody": "When the treasurer records cash paid at a meeting, it shows here until the member confirms it and it is banked.",
+  "statementsNoneTitle": "No bank statements yet",
+  "statementsNoneBody": "Upload the chama's bank statement as a CSV file. A second official confirms it, then every payment is matched to a member.",
+  "moneyOutOn": "Payouts are switched on",
+  "moneyOutOffTitle": "Payouts are switched off"
 }

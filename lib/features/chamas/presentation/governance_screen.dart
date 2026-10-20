@@ -218,7 +218,6 @@ class _GovernanceScreenState extends ConsumerState<GovernanceScreen> {
   @override
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
-    final text = Theme.of(context).textTheme;
     final official = widget.chama.iAmOfficial;
     final disputes = ref.watch(disputesProvider(_id)).value ?? const <DisputeInfo>[];
     final elections = ref.watch(electionsProvider(_id)).value;
@@ -233,53 +232,64 @@ class _GovernanceScreenState extends ConsumerState<GovernanceScreen> {
       appBar: AppBar(title: Text(l.govTitle)),
       body: ListView(padding: const EdgeInsets.all(JiraniSpace.m), children: [
         SupportNotice(chamaId: _id),
-        if (_error != null) Notice(_error!, tone: NoticeTone.critical),
-        if (elections != null && elections.electionNeeded)
+        if (_error != null) ...[
+          Notice(_error!, tone: NoticeTone.critical),
+          const SizedBox(height: JiraniSpace.s),
+        ],
+        if (elections != null && elections.electionNeeded) ...[
           Notice(l.govElectionNeeded, tone: NoticeTone.warning),
-
+          const SizedBox(height: JiraniSpace.s),
+        ],
         // New phones
         for (final p in phones)
-          Card(
+          TitledCard(
             key: ValueKey('phone-${p.id}'),
-            child: Padding(
-              padding: const EdgeInsets.all(JiraniSpace.m),
-              child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-                Text(l.govPhoneOf(p.owner), style: text.titleSmall),
-                Text(l.govPhoneCheck, style: text.bodySmall),
-                const SizedBox(height: JiraniSpace.s),
-                FilledButton(onPressed: _busy ? null : () => _vouch(p),
-                    child: Text(l.govVouch)),
-              ]),
-            ),
+            title: l.govPhoneOf(p.owner),
+            subtitle: l.govPhoneCheck,
+            icon: Icons.phonelink_lock_rounded,
+            tone: JiraniTone.warning,
+            children: [
+              FilledButton(onPressed: _busy ? null : () => _vouch(p),
+                  child: Text(l.govVouch)),
+            ],
           ),
-
         // Disputes
-        Text(l.dspTitle, style: text.titleMedium),
-        for (final d in disputes)
-          ListTile(
-            key: ValueKey('dispute-${d.id}'),
-            contentPadding: EdgeInsets.zero,
-            title: Text(d.text, maxLines: 2, overflow: TextOverflow.ellipsis),
-            subtitle: Text('${d.raisedBy} · ${disputeStateLabel(l, d.state)}'),
-            trailing: const Icon(Icons.chevron_right),
-            onTap: () => Navigator.of(context).push(MaterialPageRoute(
-                builder: (_) => DisputeScreen(chamaId: _id, disputeId: d.id))),
-          ),
-        OutlinedButton.icon(
-          key: const ValueKey('raise-dispute'),
-          icon: const Icon(Icons.report_problem_outlined),
-          label: Text(l.dspRaise),
-          onPressed: () => Navigator.of(context).push(MaterialPageRoute(
-              builder: (_) => RaiseDisputeScreen(chamaId: _id))),
+        TitledCard(
+          title: l.dspTitle,
+          icon: Icons.report_problem_outlined,
+          tone: JiraniTone.critical,
+          children: [
+            for (final d in disputes)
+              ListTile(
+                key: ValueKey('dispute-${d.id}'),
+                contentPadding: EdgeInsets.zero,
+                title: Text(d.text, maxLines: 2, overflow: TextOverflow.ellipsis),
+                subtitle: Text('${d.raisedBy} · ${disputeStateLabel(l, d.state)}'),
+                trailing: const Icon(Icons.chevron_right_rounded),
+                onTap: () => Navigator.of(context).push(MaterialPageRoute(
+                    builder: (_) => DisputeScreen(chamaId: _id, disputeId: d.id))),
+              ),
+            if (disputes.isNotEmpty) const SizedBox(height: JiraniSpace.s),
+            OutlinedButton.icon(
+              key: const ValueKey('raise-dispute'),
+              icon: const Icon(Icons.add_rounded),
+              label: Text(l.dspRaise),
+              onPressed: () => Navigator.of(context).push(MaterialPageRoute(
+                  builder: (_) => RaiseDisputeScreen(chamaId: _id))),
+            ),
+          ],
         ),
-        const SizedBox(height: JiraniSpace.m),
-
         // Elections
-        Text(l.elTitle, style: text.titleMedium),
+        TitledCard(
+          title: l.elTitle,
+          icon: Icons.how_to_vote_outlined,
+          tone: JiraniTone.info,
+          children: [
         for (final e in elections?.elections ?? const <ElectionInfo>[])
           ListTile(
             key: ValueKey('election-${e.id}'),
             contentPadding: EdgeInsets.zero,
+            leading: Avatar(e.candidate, size: 38),
             title: Text('${e.candidate} · ${roleLabel(l, e.role)}'),
             subtitle: Text([
               electionStateLabel(l, e.state),
@@ -292,50 +302,60 @@ class _GovernanceScreenState extends ConsumerState<GovernanceScreen> {
                     child: Text(l.elMandateDone))
                 : null,
           ),
-        if (official)
+        if (official) ...[
+          if ((elections?.elections ?? const []).isNotEmpty)
+            const SizedBox(height: JiraniSpace.s),
           OutlinedButton.icon(
             key: const ValueKey('hold-election'),
-            icon: const Icon(Icons.how_to_vote_outlined),
+            icon: const Icon(Icons.add_rounded),
             label: Text(l.elHold),
             onPressed: () => Navigator.of(context).push(MaterialPageRoute(
                 builder: (_) => ElectionScreen(chamaId: _id))),
           ),
-        const SizedBox(height: JiraniSpace.m),
-
-        // Leaving and deaths
-        Text(l.exitTitle, style: text.titleMedium),
-        for (final e in exits)
-          ListTile(
-            key: ValueKey('exit-${e.id}'),
-            contentPadding: EdgeInsets.zero,
-            title: Text(e.kind == 'death' ? l.exitDied(e.member) : l.exitLeaving(e.member)),
-            subtitle: Text(l.exitLine(e.exitOn, _kes(e.settlementCents), e.state)),
-          ),
-        if (myExit != null)
-          OutlinedButton(key: const ValueKey('exit-stay'),
-              onPressed: _busy ? null : () => _run(() => repo.cancelExit(myExit.id)),
-              child: Text(l.exitStay))
-        else if (!official && !exits.any((e) => e.mine))
-          OutlinedButton(key: const ValueKey('exit-leave'),
-              onPressed: _busy ? null : _leave, child: Text(l.exitLeave)),
-        if (official) ...[
-          const SizedBox(height: JiraniSpace.m),
-          Text(l.supportTitle, style: text.titleMedium),
-          OutlinedButton.icon(
-            key: const ValueKey('get-help'),
-            icon: const Icon(Icons.support_agent_outlined),
-            label: Text(l.supportGetHelp),
-            onPressed: () => Navigator.of(context).push(MaterialPageRoute(
-                builder: (_) => SupportScreen(chama: widget.chama))),
-          ),
         ],
+          ],
+        ),
+        // Leaving and deaths
+        TitledCard(
+          title: l.exitTitle,
+          icon: Icons.logout_rounded,
+          tone: JiraniTone.neutral,
+          children: [
+            for (final e in exits)
+              ListTile(
+                key: ValueKey('exit-${e.id}'),
+                contentPadding: EdgeInsets.zero,
+                leading: Avatar(e.member, size: 38),
+                title: Text(e.kind == 'death' ? l.exitDied(e.member)
+                    : l.exitLeaving(e.member)),
+                subtitle: Text(l.exitLine(e.exitOn, _kes(e.settlementCents), e.state)),
+              ),
+            if (myExit != null)
+              OutlinedButton(key: const ValueKey('exit-stay'),
+                  onPressed: _busy ? null : () => _run(() => repo.cancelExit(myExit.id)),
+                  child: Text(l.exitStay))
+            else if (!official && !exits.any((e) => e.mine))
+              OutlinedButton(key: const ValueKey('exit-leave'),
+                  onPressed: _busy ? null : _leave, child: Text(l.exitLeave)),
+            if (official)
+              TextButton.icon(
+                key: const ValueKey('record-death'),
+                icon: const Icon(Icons.local_florist_outlined),
+                label: Text(l.deathRecord),
+                onPressed: () => Navigator.of(context).push(MaterialPageRoute(
+                    builder: (_) => DeathScreen(chamaId: _id))),
+              ),
+          ],
+        ),
         if (official)
-          TextButton.icon(
-            key: const ValueKey('record-death'),
-            icon: const Icon(Icons.local_florist_outlined),
-            label: Text(l.deathRecord),
-            onPressed: () => Navigator.of(context).push(MaterialPageRoute(
-                builder: (_) => DeathScreen(chamaId: _id))),
+          NavTile(
+            key: const ValueKey('get-help'),
+            icon: Icons.support_agent_outlined,
+            tone: JiraniTone.info,
+            title: l.supportTitle,
+            subtitle: l.supportGetHelp,
+            onTap: () => Navigator.of(context).push(MaterialPageRoute(
+                builder: (_) => SupportScreen(chama: widget.chama))),
           ),
       ]),
     );
@@ -403,7 +423,11 @@ class _RaiseDisputeScreenState extends ConsumerState<RaiseDisputeScreen> {
           child: PrimaryButton(label: l.dspSend, busy: _busy, onPressed: _send)),
       body: ListView(padding: const EdgeInsets.all(JiraniSpace.m), children: [
         Notice(l.dspIntro),
-        if (_error != null) Notice(_error!, tone: NoticeTone.critical),
+        if (_error != null) ...[
+          const SizedBox(height: JiraniSpace.s),
+          Notice(_error!, tone: NoticeTone.critical),
+        ],
+        SectionHeader(l.dspWhatsWrong),
         RadioGroup<String>(
           groupValue: _reason,
           onChanged: (v) => setState(() => _reason = v ?? _reason),
@@ -413,6 +437,7 @@ class _RaiseDisputeScreenState extends ConsumerState<RaiseDisputeScreen> {
                   contentPadding: EdgeInsets.zero, title: Text(e.value)),
           ]),
         ),
+        const SizedBox(height: JiraniSpace.s),
         TextField(key: const ValueKey('dispute-text'), controller: _text, maxLines: 4,
             decoration: InputDecoration(labelText: l.dspWhatsWrong)),
         SwitchListTile(contentPadding: EdgeInsets.zero, value: _private,

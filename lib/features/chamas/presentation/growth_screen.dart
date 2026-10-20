@@ -101,31 +101,74 @@ class _Numbers extends ConsumerWidget {
       error: (e, _) => Padding(padding: const EdgeInsets.all(JiraniSpace.m),
           child: Notice(problemText(l, e), tone: NoticeTone.critical)),
       data: (a) => ListView(padding: const EdgeInsets.all(JiraniSpace.m), children: [
-        Text(l.numMoney, style: text.titleMedium),
-        Text(l.numMoneyLine(_kes(a.contributedCents), _kes(a.bankCents),
-            _kes(a.investmentsCents), _kes(a.netWorthCents))),
-        const SizedBox(height: JiraniSpace.m),
-        Text(l.numMonths, style: text.titleMedium),
-        for (final m in a.months)
-          ListTile(
-            key: ValueKey('month-${m.period}'),
-            dense: true,
-            contentPadding: EdgeInsets.zero,
-            title: Text('${m.period} · ${m.paidPct == null ? '-' : '${m.paidPct}%'}'),
-            subtitle: Text(l.numMonthLine(_kes(m.paidCents), _kes(m.dueCents),
-                _kes(m.lateCents), _kes(m.finesRaisedCents))),
+        // Net worth needs the bank balance; until a statement is in, lead with what
+        // members have put in.
+        HeroCard(
+          label: a.netWorthCents == null ? l.contributed : l.numMoney,
+          value: Text(_kes(a.netWorthCents ?? a.contributedCents)),
+          children: [
+            if (a.netWorthCents != null)
+              HeroFigure(l.contributed, Text(_kes(a.contributedCents))),
+            if (a.bankCents != null) HeroFigure(l.bankHeading, Text(_kes(a.bankCents))),
+            HeroFigure(l.growthInvestments, Text(_kes(a.investmentsCents))),
+          ],
+        ),
+        SectionHeader(l.numMonths),
+        SurfaceCard(
+          padding: EdgeInsets.zero,
+          child: Column(children: [
+            for (final (i, m) in a.months.indexed) ...[
+              if (i > 0) const Divider(),
+              Padding(
+                key: ValueKey('month-${m.period}'),
+                padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
+                child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+                  Text('${m.period} · ${m.paidPct == null ? '-' : '${m.paidPct}%'}',
+                      style: text.titleSmall),
+                  const SizedBox(height: 8),
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(4),
+                    child: LinearProgressIndicator(
+                      minHeight: 8,
+                      value: (m.paidPct ?? 0) / 100,
+                      color: (m.paidPct ?? 0) >= 90 ? JiraniStatus.of(context).good
+                          : (m.paidPct ?? 0) >= 60 ? JiraniStatus.of(context).warning
+                          : Theme.of(context).colorScheme.error,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(l.numMonthLine(_kes(m.paidCents), _kes(m.dueCents),
+                      _kes(m.lateCents), _kes(m.finesRaisedCents)), style: text.bodySmall),
+                ]),
+              ),
+            ],
+          ]),
+        ),
+        SectionHeader(l.numBehind(a.behindCount)),
+        if (a.behind.isNotEmpty)
+          SurfaceCard(
+            padding: const EdgeInsets.symmetric(vertical: 4),
+            child: Column(children: [
+              for (final b in a.behind)
+                ListTile(leading: Avatar(b.name, size: 38), title: Text(b.name),
+                    subtitle: Text(l.numBehindLine(_kes(b.arrearsCents),
+                        _kes(b.finesCents)))),
+            ]),
           ),
-        const SizedBox(height: JiraniSpace.m),
-        Text(l.numBehind(a.behindCount), style: text.titleMedium),
-        for (final b in a.behind)
-          ListTile(dense: true, contentPadding: EdgeInsets.zero, title: Text(b.name),
-              subtitle: Text(l.numBehindLine(_kes(b.arrearsCents), _kes(b.finesCents)))),
         if (a.meetings.isNotEmpty) ...[
-          const SizedBox(height: JiraniSpace.m),
-          Text(l.numMeetings, style: text.titleMedium),
-          for (final m in a.meetings)
-            ListTile(dense: true, contentPadding: EdgeInsets.zero, title: Text(m.title),
-                subtitle: Text(l.numAttendance(m.attended, m.expected))),
+          SectionHeader(l.numMeetings),
+          SurfaceCard(
+            padding: const EdgeInsets.symmetric(vertical: 4),
+            child: Column(children: [
+              for (final m in a.meetings)
+                ListTile(
+                  leading: const ToneIcon(Icons.event_available_outlined,
+                      tone: JiraniTone.warning, size: 38),
+                  title: Text(m.title),
+                  subtitle: Text(l.numAttendance(m.attended, m.expected)),
+                ),
+            ]),
+          ),
         ],
       ]),
     );
@@ -182,8 +225,15 @@ class _InvestmentsState extends ConsumerState<_Investments> {
           child: Notice(problemText(l, e), tone: NoticeTone.critical)),
       data: (f) => ListView(padding: const EdgeInsets.all(JiraniSpace.m), children: [
         if (_error != null) Notice(_error!, tone: NoticeTone.critical),
-        Text(l.invTotals(f.held, _kes(f.costCents), _kes(f.valueCents)),
-            style: text.titleMedium),
+        SurfaceCard(
+          margin: const EdgeInsets.only(bottom: JiraniSpace.s),
+          child: Row(children: [
+            const ToneIcon(Icons.landscape_outlined, tone: JiraniTone.good),
+            const SizedBox(width: 12),
+            Expanded(child: Text(l.invTotals(f.held, _kes(f.costCents), _kes(f.valueCents)),
+                style: text.titleSmall)),
+          ]),
+        ),
         for (final i in f.investments)
           Card(
             key: ValueKey('inv-${i.id}'),
@@ -361,6 +411,7 @@ class _ReferralsState extends ConsumerState<_Referrals> {
         ListTile(
           key: ValueKey('referral-${r.id}'),
           contentPadding: EdgeInsets.zero,
+          leading: const ToneIcon(Icons.handshake_outlined, size: 38),
           title: Text(r.partnerName),
           subtitle: Text(_state(l, r.state)),
           trailing: official && (r.state == 'voting' || r.state == 'consented')
@@ -368,9 +419,9 @@ class _ReferralsState extends ConsumerState<_Referrals> {
                   child: Text(l.refWithdraw))
               : null,
         ),
-      const SizedBox(height: JiraniSpace.m),
-      Text(l.refPartners, style: text.titleMedium),
-      if (partners.isEmpty) Text(l.refNoPartners, style: text.bodySmall),
+      SectionHeader(l.refPartners),
+      if (partners.isEmpty)
+        SurfaceCard(child: EmptyState(icon: Icons.handshake_outlined, title: l.refNoPartners)),
       for (final p in partners)
         Card(
           key: ValueKey('partner-${p.id}'),

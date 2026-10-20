@@ -118,7 +118,8 @@ class _OpeningScreenState extends ConsumerState<OpeningScreen> {
           return ListView(
             padding: const EdgeInsets.all(JiraniSpace.m),
             children: [
-              Notice(switch (ob.state) {
+              Notice(tone: ob.state == 'confirmed' ? NoticeTone.good : NoticeTone.info,
+                  switch (ob.state) {
                 'confirmed' => l.openingConfirmed(ob.confirmedBy ?? '',
                     ob.objectionUntil?.toLocal().toString().substring(0, 10) ?? ''),
                 'draft' => l.openingDraftBy(ob.proposedBy ?? ''),
@@ -132,58 +133,98 @@ class _OpeningScreenState extends ConsumerState<OpeningScreen> {
                 const SizedBox(height: JiraniSpace.s),
                 Notice(_info!),
               ],
-              const SizedBox(height: JiraniSpace.s),
-              for (final m in bundle.members)
-                Card(
-                  child: Padding(
-                    padding: const EdgeInsets.all(JiraniSpace.m),
+              SectionHeader(l.tabMembers),
+              if (editing)
+                // Entering: one card per member, savings and fines side by side.
+                for (final m in bundle.members)
+                  SurfaceCard(
+                    margin: const EdgeInsets.only(bottom: 10),
                     child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-                      Text('${m.name} · ${m.memberCode}',
-                          style: Theme.of(context).textTheme.titleSmall),
-                      const SizedBox(height: JiraniSpace.s),
-                      if (editing) ...[
-                        TextField(
-                          key: ValueKey('savings-${m.memberCode}'),
-                          controller: _field(_savings, m.id,
-                              byMember[m.id]?.savings ?? Kes.zero),
-                          keyboardType: TextInputType.number,
-                          decoration: InputDecoration(labelText: l.savingsLabel),
-                        ),
-                        const SizedBox(height: JiraniSpace.s),
-                        TextField(
-                          key: ValueKey('fines-${m.memberCode}'),
-                          controller: _field(_fines, m.id, byMember[m.id]?.fines ?? Kes.zero),
-                          keyboardType: TextInputType.number,
-                          decoration: InputDecoration(labelText: l.finesLabel),
-                        ),
-                      ] else ...[
-                        Row(children: [
-                          Expanded(child: Text(l.savingsLabel)),
-                          MoneyText(byMember[m.id]?.savings ?? Kes.zero),
-                        ]),
-                        Row(children: [
-                          Expanded(child: Text(l.finesLabel)),
-                          MoneyText(byMember[m.id]?.fines ?? Kes.zero),
-                        ]),
-                        if ((byMember[m.id]?.objections ?? const []).isNotEmpty) ...[
-                          const SizedBox(height: JiraniSpace.xs),
-                          Notice(
-                            '${l.objectionsCount(byMember[m.id]!.objections.length)}: '
-                            '${byMember[m.id]!.objections.join(' · ')}',
-                            tone: NoticeTone.warning,
+                      Row(children: [
+                        Avatar(m.name, size: 36),
+                        const SizedBox(width: 12),
+                        Expanded(child: Text('${m.name} · ${m.memberCode}',
+                            style: Theme.of(context).textTheme.titleSmall)),
+                      ]),
+                      const SizedBox(height: 12),
+                      Row(children: [
+                        Expanded(
+                          child: TextField(
+                            key: ValueKey('savings-${m.memberCode}'),
+                            controller: _field(_savings, m.id,
+                                byMember[m.id]?.savings ?? Kes.zero),
+                            keyboardType: TextInputType.number,
+                            decoration: InputDecoration(labelText: l.savingsLabel),
                           ),
-                        ],
-                      ],
+                        ),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: TextField(
+                            key: ValueKey('fines-${m.memberCode}'),
+                            controller: _field(_fines, m.id,
+                                byMember[m.id]?.fines ?? Kes.zero),
+                            keyboardType: TextInputType.number,
+                            decoration: InputDecoration(labelText: l.finesLabel),
+                          ),
+                        ),
+                      ]),
                     ]),
-                  ),
+                  )
+              else
+                // Reading: one row per member with what they brought in.
+                SurfaceCard(
+                  padding: EdgeInsets.zero,
+                  child: Column(children: [
+                    for (final (i, m) in bundle.members.indexed) ...[
+                      if (i > 0) const Divider(indent: 66),
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(14, 12, 16, 12),
+                        child: Column(crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                          Row(children: [
+                            Avatar(m.name, size: 38),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Column(crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                Text('${m.name} · ${m.memberCode}',
+                                    style: Theme.of(context).textTheme.titleSmall),
+                                const SizedBox(height: 6),
+                                Wrap(spacing: 6, runSpacing: 6, children: [
+                                  FigureChip(l.savingsLabel,
+                                      (byMember[m.id]?.savings ?? Kes.zero).format()),
+                                  FigureChip(l.finesLabel,
+                                      (byMember[m.id]?.fines ?? Kes.zero).format(),
+                                      tone: (byMember[m.id]?.fines ?? Kes.zero).cents > 0
+                                          ? JiraniTone.critical : JiraniTone.neutral),
+                                ]),
+                              ]),
+                            ),
+                          ]),
+                          if ((byMember[m.id]?.objections ?? const []).isNotEmpty) ...[
+                            const SizedBox(height: JiraniSpace.s),
+                            Notice(
+                              '${l.objectionsCount(byMember[m.id]!.objections.length)}: '
+                              '${byMember[m.id]!.objections.join(' · ')}',
+                              tone: NoticeTone.warning,
+                            ),
+                          ],
+                        ]),
+                      ),
+                    ],
+                  ]),
                 ),
               if (myLine != null && ob.canObject) ...[
                 const SizedBox(height: JiraniSpace.m),
-                TextField(controller: _reason,
-                    decoration: InputDecoration(labelText: l.objectLabel)),
-                const SizedBox(height: JiraniSpace.s),
-                OutlinedButton(onPressed: _busy ? null : () => _object(myLine),
-                    child: Text(l.objectButton)),
+                SurfaceCard(
+                  child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+                    TextField(controller: _reason,
+                        decoration: InputDecoration(labelText: l.objectLabel)),
+                    const SizedBox(height: JiraniSpace.s),
+                    OutlinedButton(onPressed: _busy ? null : () => _object(myLine),
+                        child: Text(l.objectButton)),
+                  ]),
+                ),
               ],
             ],
           );

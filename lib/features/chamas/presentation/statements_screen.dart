@@ -87,23 +87,28 @@ class _StatementsScreenState extends ConsumerState<StatementsScreen> {
     final list = ref.watch(statementsProvider(widget.chamaId));
     return Scaffold(
       appBar: AppBar(title: Text(l.statements)),
+      bottomNavigationBar: ActionBar(
+          child: PrimaryButton(label: l.uploadStatement, busy: _busy, onPressed: _upload)),
       body: ListView(
         padding: const EdgeInsets.all(JiraniSpace.m),
         children: [
-          PrimaryButton(label: l.uploadStatement, busy: _busy, onPressed: _upload),
           if (_error != null) ...[
-            const SizedBox(height: JiraniSpace.m),
             Notice(_error!, tone: NoticeTone.critical),
+            const SizedBox(height: JiraniSpace.m),
           ],
           if (_info != null) ...[
-            const SizedBox(height: JiraniSpace.m),
             Notice(_info!),
+            const SizedBox(height: JiraniSpace.m),
           ],
-          const SizedBox(height: JiraniSpace.m),
           ...list.when(
             loading: () => [const Center(child: CircularProgressIndicator())],
             error: (e, _) => [Notice(problemText(l, e), tone: NoticeTone.critical)],
-            data: (items) => [for (final s in items) _tile(context, l, s)],
+            data: (items) => [
+              if (items.isEmpty)
+                SurfaceCard(child: EmptyState(icon: Icons.description_outlined,
+                    title: l.statementsNoneTitle, message: l.statementsNoneBody)),
+              for (final s in items) _tile(context, l, s),
+            ],
           ),
         ],
       ),
@@ -117,14 +122,22 @@ class _StatementsScreenState extends ConsumerState<StatementsScreen> {
             if (s.uploadedBy != null) l.uploadedBy(s.uploadedBy!),
             if (s.confirmedBy != null) l.confirmedBy(s.confirmedBy!),
           ].join(', ');
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(JiraniSpace.m),
-        child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-          Text(statementStateLabel(l, s.state), style: Theme.of(context).textTheme.titleSmall),
+    final (IconData icon, JiraniTone tone) = switch (s.state) {
+      'accepted' => (Icons.verified_outlined, JiraniTone.good),
+      'awaiting_confirmation' => (Icons.hourglass_top_rounded, JiraniTone.warning),
+      'needs_typing' || 'needs_parser' => (Icons.edit_note_rounded, JiraniTone.warning),
+      'held_mail_check' => (Icons.mark_email_unread_outlined, JiraniTone.warning),
+      _ => (Icons.block_rounded, JiraniTone.critical),
+    };
+    return TitledCard(
+      title: statementStateLabel(l, s.state),
+      icon: icon,
+      tone: tone,
+      subtitle: who,
+      children: [
           if (s.periodFrom != null && s.closing != null)
-            Text(l.statementSummary(s.periodFrom!, s.periodTo!, s.lines, s.closing!.format())),
-          if (who.isNotEmpty) Text(who, style: Theme.of(context).textTheme.bodySmall),
+            Text(l.statementSummary(s.periodFrom!, s.periodTo!, s.lines, s.closing!.format()),
+                style: Theme.of(context).textTheme.bodyMedium),
           for (final p in s.problems) ...[
             const SizedBox(height: JiraniSpace.xs),
             Notice(p, tone: NoticeTone.critical),
@@ -147,11 +160,10 @@ class _StatementsScreenState extends ConsumerState<StatementsScreen> {
           ],
           if (s.state == 'awaiting_confirmation') ...[
             const SizedBox(height: JiraniSpace.s),
-            OutlinedButton(onPressed: _busy ? null : () => _confirm(s),
+            FilledButton(onPressed: _busy ? null : () => _confirm(s),
                 child: Text(l.confirmStatement)),
           ],
-        ]),
-      ),
+      ],
     );
   }
 }

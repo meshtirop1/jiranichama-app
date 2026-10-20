@@ -52,7 +52,7 @@ void main() {
       (tester) async {
     final repo = FakeChamaRepository();
     await _growth(tester, repo);
-    await tester.tap(find.text('Investments'));
+    await tester.tap(find.widgetWithText(Tab, 'Investments'));
     await tester.pumpAndSettle();
     await tester.tap(find.byKey(const ValueKey('record-investment')));
     await tester.pumpAndSettle();

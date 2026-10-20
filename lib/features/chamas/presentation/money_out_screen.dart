@@ -131,32 +131,55 @@ class _MoneyOutScreenState extends ConsumerState<MoneyOutScreen> {
               error: (e, _) => [Notice(problemText(l, e), tone: NoticeTone.critical)],
               data: (s) => s.on
                   ? [
-                      Notice(s.available == null
-                          ? l.balanceUnknown
-                          : l.availableToPromise(s.available!.format())),
+                      TitledCard(
+                        title: l.moneyOutOn,
+                        icon: Icons.lock_open_rounded,
+                        tone: JiraniTone.good,
+                        children: [
+                          Text(s.available == null
+                              ? l.balanceUnknown
+                              : l.availableToPromise(s.available!.format()),
+                              style: Theme.of(context).textTheme.bodyMedium),
+                        ],
+                      ),
                     ]
                   : [
-                      Notice(l.moneyOutOffIntro),
-                      const SizedBox(height: JiraniSpace.s),
-                      Text(l.consentsSoFar('${s.consents}', '${s.needed}')),
-                      if (official) ...[
-                        const SizedBox(height: JiraniSpace.s),
-                        OutlinedButton(onPressed: _busy ? null : _switchOn,
-                            child: Text(l.switchOnMoneyOut)),
-                      ],
+                      TitledCard(
+                        title: l.moneyOutOffTitle,
+                        icon: Icons.lock_outline_rounded,
+                        tone: JiraniTone.warning,
+                        children: [
+                          Text(l.moneyOutOffIntro,
+                              style: Theme.of(context).textTheme.bodyMedium),
+                          const SizedBox(height: JiraniSpace.m),
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(4),
+                            child: LinearProgressIndicator(
+                                minHeight: 8,
+                                value: s.needed == 0 ? 0 : s.consents / s.needed),
+                          ),
+                          const SizedBox(height: JiraniSpace.s),
+                          Text(l.consentsSoFar('${s.consents}', '${s.needed}'),
+                              style: Theme.of(context).textTheme.titleSmall),
+                          if (official) ...[
+                            const SizedBox(height: JiraniSpace.m),
+                            FilledButton(onPressed: _busy ? null : _switchOn,
+                                child: Text(l.switchOnMoneyOut)),
+                          ],
+                        ],
+                      ),
                     ],
             ),
             if (official) const _PhoneKeyCard(),
             _Unapproved(chamaId: widget.chamaId, official: official),
             if (on) ...[
-              const SizedBox(height: JiraniSpace.m),
-              Text(l.proposalsHeading, style: Theme.of(context).textTheme.titleMedium),
+              SectionHeader(l.proposalsHeading),
               ...ref.watch(proposalsProvider(widget.chamaId)).when(
                     loading: () => [const LinearProgressIndicator()],
                     error: (e, _) => [Notice(problemText(l, e), tone: NoticeTone.critical)],
                     data: (items) => items.isEmpty
-                        ? [Padding(padding: const EdgeInsets.all(JiraniSpace.m),
-                            child: Text(l.noProposals))]
+                        ? [SurfaceCard(child: EmptyState(icon: Icons.outbox_outlined,
+                            title: l.noProposals))]
                         : [for (final p in items) _ProposalTile(p, onTap: () async {
                             await Navigator.of(context).push(MaterialPageRoute(
                                 builder: (_) => ProposalScreen(chamaId: widget.chamaId,
@@ -182,22 +205,35 @@ class _ProposalTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
     final waiting = p.canAnswer;
-    return Card(
-      child: ListTile(
-        onTap: onTap,
-        title: Text('${p.payeeName} · ${p.purpose}'),
-        subtitle: Text([
-          proposalStateLabel(l, p.state),
-          if (p.state == 'collecting_approvals') l.approvalsCount('${p.approved}',
-              '${p.needsOfficials}'),
-        ].join(' · ')),
-        trailing: Column(mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.end, children: [
-          MoneyText(p.amount),
-          if (waiting) Icon(Icons.how_to_vote_outlined,
-              color: Theme.of(context).colorScheme.primary, size: 18),
+    final text = Theme.of(context).textTheme;
+    return SurfaceCard(
+      margin: const EdgeInsets.only(bottom: 10),
+      onTap: onTap,
+      padding: const EdgeInsets.all(14),
+      child: Row(children: [
+        Avatar(p.payeeName, size: 42),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            Text('${p.payeeName} · ${p.purpose}', style: text.titleSmall),
+            const SizedBox(height: 2),
+            Text([
+              proposalStateLabel(l, p.state),
+              if (p.state == 'collecting_approvals') l.approvalsCount('${p.approved}',
+                  '${p.needsOfficials}'),
+            ].join(' · '), style: text.bodySmall),
+          ]),
+        ),
+        const SizedBox(width: 8),
+        Column(crossAxisAlignment: CrossAxisAlignment.end, children: [
+          MoneyText(p.amount, style: text.titleSmall),
+          if (waiting) ...[
+            const SizedBox(height: 4),
+            StatusPill(l.approveButton, tone: JiraniTone.warning,
+                icon: Icons.how_to_vote_outlined),
+          ],
         ]),
-      ),
+      ]),
     );
   }
 }
@@ -266,7 +302,7 @@ class _Unapproved extends ConsumerWidget {
     return Padding(
       padding: const EdgeInsets.only(top: JiraniSpace.m),
       child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-        Text(l.unapprovedHeading, style: Theme.of(context).textTheme.titleMedium),
+        SectionHeader(l.unapprovedHeading, padding: const EdgeInsets.only(left: 4)),
         for (final d in items)
           Padding(
             padding: const EdgeInsets.only(top: JiraniSpace.s),
@@ -578,13 +614,26 @@ class _ProposalScreenState extends ConsumerState<ProposalScreen> {
       body: ListView(
         padding: const EdgeInsets.all(JiraniSpace.m),
         children: [
-          Text(p.payeeName + (p.payeeAccount.isEmpty ? '' : ' · ${p.payeeAccount}'),
-              style: text.titleMedium),
-          MoneyText(p.amount, style: text.headlineSmall),
-          Text(p.purpose),
-          const SizedBox(height: JiraniSpace.xs),
-          Text(l.proposedByLine(p.proposedBy), style: text.bodySmall),
-          const SizedBox(height: JiraniSpace.m),
+          SurfaceCard(
+            margin: const EdgeInsets.only(bottom: JiraniSpace.m),
+            child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+              Row(children: [
+                Avatar(p.payeeName, size: 44),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(p.payeeName +
+                      (p.payeeAccount.isEmpty ? '' : ' · ${p.payeeAccount}'),
+                      style: text.titleMedium),
+                ),
+              ]),
+              const SizedBox(height: JiraniSpace.m),
+              MoneyText(p.amount, style: text.displaySmall),
+              const SizedBox(height: 4),
+              Text(p.purpose, style: text.bodyLarge),
+              const SizedBox(height: JiraniSpace.s),
+              Text(l.proposedByLine(p.proposedBy), style: text.bodySmall),
+            ]),
+          ),
           if (_error != null) ...[
             Notice(_error!, tone: NoticeTone.critical),
             const SizedBox(height: JiraniSpace.s),
@@ -594,10 +643,21 @@ class _ProposalScreenState extends ConsumerState<ProposalScreen> {
           else if (p.stateReason.isNotEmpty)
             Notice(p.stateReason),
           if (p.state == 'collecting_approvals') ...[
+            const SizedBox(height: JiraniSpace.s),
             Text(l.approvalsCount('${p.approved}', '${p.needsOfficials}'),
                 style: text.titleSmall),
-            if (iAmPayee) Text(l.payeeNeverApproves),
+            const SizedBox(height: JiraniSpace.s),
+            ClipRRect(
+              borderRadius: BorderRadius.circular(4),
+              child: LinearProgressIndicator(minHeight: 8,
+                  value: p.needsOfficials == 0 ? 0 : p.approved / p.needsOfficials),
+            ),
+            if (iAmPayee) ...[
+              const SizedBox(height: JiraniSpace.s),
+              Notice(l.payeeNeverApproves),
+            ],
           ],
+          if (p.answers.isNotEmpty) const SizedBox(height: JiraniSpace.s),
           for (final a in p.answers)
             ListTile(
               contentPadding: EdgeInsets.zero,
@@ -709,28 +769,24 @@ class _PhoneKeyCardState extends ConsumerState<_PhoneKeyCard> {
     if (_available != true) return const SizedBox.shrink();
     return Padding(
       padding: const EdgeInsets.only(top: JiraniSpace.s),
-      child: Card(
-        child: Padding(
-          padding: const EdgeInsets.all(JiraniSpace.m),
-          child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-            Row(children: [
-              const Icon(Icons.fingerprint),
-              const SizedBox(width: JiraniSpace.s),
-              Expanded(child: Text(_ready ? l.phoneReady : l.fingerprintCardTitle,
-                  style: Theme.of(context).textTheme.titleSmall)),
-            ]),
-            if (!_ready) ...[
-              const SizedBox(height: JiraniSpace.xs),
-              Text(l.fingerprintCardBody),
-              if (_error != null) ...[
-                const SizedBox(height: JiraniSpace.s),
-                Notice(_error!, tone: NoticeTone.critical),
-              ],
+      child: TitledCard(
+        title: _ready ? l.phoneReady : l.fingerprintCardTitle,
+        icon: Icons.fingerprint_rounded,
+        tone: _ready ? JiraniTone.good : JiraniTone.info,
+        margin: EdgeInsets.zero,
+        children: [
+          if (!_ready) ...[
+            Text(l.fingerprintCardBody, style: Theme.of(context).textTheme.bodyMedium),
+            if (_error != null) ...[
               const SizedBox(height: JiraniSpace.s),
-              OutlinedButton(onPressed: _busy ? null : _setUp, child: Text(l.setUpThisPhone)),
+              Notice(_error!, tone: NoticeTone.critical),
             ],
-          ]),
-        ),
+            const SizedBox(height: JiraniSpace.m),
+            OutlinedButton.icon(onPressed: _busy ? null : _setUp,
+                icon: const Icon(Icons.fingerprint_rounded),
+                label: Text(l.setUpThisPhone)),
+          ],
+        ],
       ),
     );
   }

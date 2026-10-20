@@ -105,15 +105,35 @@ class LoansScreen extends ConsumerWidget {
         error: (e, _) => Padding(padding: const EdgeInsets.all(JiraniSpace.m),
             child: Notice(problemText(l, e), tone: NoticeTone.critical)),
         data: (list) => list.isEmpty
-            ? Padding(padding: const EdgeInsets.all(JiraniSpace.m), child: Notice(l.loansNone))
-            : ListView(children: [
+            ? ListView(padding: const EdgeInsets.all(JiraniSpace.m), children: [
+                SurfaceCard(child: EmptyState(icon: Icons.account_balance_wallet_outlined,
+                    title: l.loansNone)),
+              ])
+            : ListView(padding: const EdgeInsets.fromLTRB(JiraniSpace.m, JiraniSpace.s,
+                JiraniSpace.m, 96), children: [
                 for (final x in list)
-                  ListTile(
-                    title: Text('${x.borrower} · ${_kes(x.amountCents)}'),
-                    subtitle: Text('${loanStateLabel(l, x.state)} · ${x.purpose}'),
-                    trailing: const Icon(Icons.chevron_right),
+                  SurfaceCard(
+                    margin: const EdgeInsets.only(bottom: 10),
+                    padding: const EdgeInsets.all(14),
                     onTap: () => Navigator.of(context).push(MaterialPageRoute(
                         builder: (_) => LoanScreen(chamaId: chamaId, loanId: x.id))),
+                    child: Row(children: [
+                      Avatar(x.borrower, size: 42),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                          Text(x.borrower, style: Theme.of(context).textTheme.titleSmall),
+                          const SizedBox(height: 2),
+                          Text(x.purpose, style: Theme.of(context).textTheme.bodySmall,
+                              maxLines: 1, overflow: TextOverflow.ellipsis),
+                          const SizedBox(height: 6),
+                          StatusPill(loanStateLabel(l, x.state), tone: _loanTone(x.state)),
+                        ]),
+                      ),
+                      const SizedBox(width: 8),
+                      Text(_kes(x.amountCents), style: Theme.of(context).textTheme.titleSmall),
+                    ]),
                   ),
               ]),
       ),
@@ -122,24 +142,52 @@ class LoansScreen extends ConsumerWidget {
 }
 
 Widget _scheduleTable(BuildContext context, AppLocalizations l, List<Json> rows) {
-  final style = Theme.of(context).textTheme.bodySmall;
-  return Table(
-    columnWidths: const {0: IntrinsicColumnWidth()},
-    children: [
-      TableRow(children: [
-        for (final h in [l.loanColDue, l.loanColPrincipal, l.loanColInterest, l.loanColTotal])
-          Padding(padding: const EdgeInsets.all(4),
-              child: Text(h, style: style?.copyWith(fontWeight: FontWeight.bold))),
-      ]),
-      for (final r in rows)
-        TableRow(children: [
-          for (final v in [r['due'] as String, _kes(r['principal_cents'] as int),
-            _kes(r['interest_cents'] as int), _kes(r['total_cents'] as int)])
-            Padding(padding: const EdgeInsets.all(4), child: Text(v, style: style)),
-        ]),
-    ],
+  final text = Theme.of(context).textTheme;
+  final scheme = Theme.of(context).colorScheme;
+  Widget cell(String v, {bool head = false, bool first = false}) => Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),
+        child: Text(v,
+            textAlign: first ? TextAlign.start : TextAlign.end,
+            style: head
+                ? text.labelSmall
+                : text.bodySmall?.copyWith(color: scheme.onSurface,
+                    fontFeatures: const [FontFeature.tabularFigures()])),
+      );
+  return ClipRRect(
+    borderRadius: BorderRadius.circular(12),
+    child: Table(
+      columnWidths: const {0: IntrinsicColumnWidth()},
+      defaultVerticalAlignment: TableCellVerticalAlignment.middle,
+      children: [
+        TableRow(
+          decoration: BoxDecoration(color: scheme.surfaceContainerLow),
+          children: [
+            for (final (i, h) in [l.loanColDue, l.loanColPrincipal, l.loanColInterest,
+                l.loanColTotal].indexed)
+              cell(h.toUpperCase(), head: true, first: i == 0),
+          ],
+        ),
+        for (final r in rows)
+          TableRow(
+            decoration: BoxDecoration(
+                border: Border(top: BorderSide(color: scheme.outlineVariant))),
+            children: [
+              for (final (i, v) in [r['due'] as String, _kes(r['principal_cents'] as int),
+                _kes(r['interest_cents'] as int), _kes(r['total_cents'] as int)].indexed)
+                cell(v, first: i == 0),
+            ],
+          ),
+      ],
+    ),
   );
 }
+
+JiraniTone _loanTone(String state) => switch (state) {
+      'active' || 'repaid' => JiraniTone.good,
+      'in_arrears' || 'awaiting_guarantors' => JiraniTone.warning,
+      'defaulted' || 'refused' || 'cancelled' => JiraniTone.critical,
+      _ => JiraniTone.info,
+    };
 
 class LoanRequestScreen extends ConsumerStatefulWidget {
   const LoanRequestScreen({super.key, required this.chamaId});
@@ -241,29 +289,45 @@ class _LoanRequestScreenState extends ConsumerState<LoanRequestScreen> {
           const SizedBox(height: JiraniSpace.s),
           Notice(_error!, tone: NoticeTone.critical),
         ],
-        TextField(key: const ValueKey('loan-amount'), controller: _amount,
-            keyboardType: TextInputType.number,
-            onChanged: (_) => setState(() => _quote = null),
-            decoration: InputDecoration(labelText: l.loanAmountLabel)),
-        TextField(key: const ValueKey('loan-term'), controller: _term,
-            keyboardType: TextInputType.number,
-            onChanged: (_) => setState(() => _quote = null),
-            decoration: InputDecoration(labelText: l.loanTermLabel)),
+        const SizedBox(height: JiraniSpace.m),
+        Row(children: [
+          Expanded(
+            flex: 3,
+            child: TextField(key: const ValueKey('loan-amount'), controller: _amount,
+                keyboardType: TextInputType.number,
+                onChanged: (_) => setState(() => _quote = null),
+                decoration: InputDecoration(labelText: l.loanAmountLabel)),
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            flex: 2,
+            child: TextField(key: const ValueKey('loan-term'), controller: _term,
+                keyboardType: TextInputType.number,
+                onChanged: (_) => setState(() => _quote = null),
+                decoration: InputDecoration(labelText: l.loanTermLabel)),
+          ),
+        ]),
         if (q != null) ...[
           const SizedBox(height: JiraniSpace.m),
-          Text(l.loanLimit(_kes(q.limitCents), _kes(q.savingsCents)), style: text.bodyMedium),
-          Text(l.loanTerms(q.ratePct, q.flat ? l.loanFlat : l.loanReducing),
-              style: text.bodySmall),
-          for (final r in q.reasons)
-            Padding(padding: const EdgeInsets.only(top: JiraniSpace.xs),
-                child: Notice(l.loanReason(r.rule, loanReasonText(l, r.code)),
-                    tone: NoticeTone.critical)),
-          if (q.schedule.isNotEmpty) ...[
-            const SizedBox(height: JiraniSpace.s),
-            _scheduleTable(context, l, q.schedule),
-            Text(l.loanTotals(_kes(q.totalInterestCents), _kes(q.totalCents)),
-                style: text.titleSmall),
-          ],
+          TitledCard(
+            title: l.loanLimit(_kes(q.limitCents), _kes(q.savingsCents)),
+            subtitle: l.loanTerms(q.ratePct, q.flat ? l.loanFlat : l.loanReducing),
+            icon: q.eligible ? Icons.check_circle_outline_rounded : Icons.block_rounded,
+            tone: q.eligible ? JiraniTone.good : JiraniTone.critical,
+            margin: EdgeInsets.zero,
+            children: [
+              for (final r in q.reasons)
+                Padding(padding: const EdgeInsets.only(bottom: JiraniSpace.xs),
+                    child: Notice(l.loanReason(r.rule, loanReasonText(l, r.code)),
+                        tone: NoticeTone.critical)),
+              if (q.schedule.isNotEmpty) ...[
+                _scheduleTable(context, l, q.schedule),
+                const SizedBox(height: JiraniSpace.s),
+                Text(l.loanTotals(_kes(q.totalInterestCents), _kes(q.totalCents)),
+                    style: text.titleSmall),
+              ],
+            ],
+          ),
           if (q.eligible) ...[
             const SizedBox(height: JiraniSpace.m),
             TextField(key: const ValueKey('loan-purpose'), controller: _purpose,
@@ -276,6 +340,7 @@ class _LoanRequestScreenState extends ConsumerState<LoanRequestScreen> {
                 CheckboxListTile(
                   key: ValueKey('guarantor-${m.memberCode}'),
                   contentPadding: EdgeInsets.zero,
+                  secondary: Avatar(m.name, size: 36),
                   title: Text(m.name),
                   value: _guarantors.contains(m.id),
                   onChanged: !_guarantors.contains(m.id) && _guarantors.length >= needed
@@ -368,31 +433,58 @@ class _LoanScreenState extends ConsumerState<LoanScreen> {
     return Scaffold(
       appBar: AppBar(title: Text('${loan.borrower} · ${_kes(loan.amountCents)}')),
       body: ListView(padding: const EdgeInsets.all(JiraniSpace.m), children: [
-        Text(loan.purpose, style: text.titleMedium),
-        const SizedBox(height: JiraniSpace.s),
-        Notice(loan.stateReason.isEmpty ? loanStateLabel(l, loan.state)
-            : '${loanStateLabel(l, loan.state)}: ${loan.stateReason}',
-            tone: loan.state == 'in_arrears' || loan.state == 'defaulted'
-                ? NoticeTone.warning : NoticeTone.info),
+        SurfaceCard(
+          child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            Row(children: [
+              Avatar(loan.borrower, size: 44),
+              const SizedBox(width: 12),
+              Expanded(child: Text(loan.purpose, style: text.titleMedium)),
+            ]),
+            const SizedBox(height: JiraniSpace.m),
+            Text(_kes(loan.amountCents), style: text.displaySmall),
+            const SizedBox(height: JiraniSpace.s),
+            StatusPill(loanStateLabel(l, loan.state), tone: _loanTone(loan.state)),
+          ]),
+        ),
+        if (loan.stateReason.isNotEmpty) ...[
+          const SizedBox(height: JiraniSpace.s),
+          Notice(loan.stateReason,
+              tone: loan.state == 'in_arrears' || loan.state == 'defaulted'
+                  ? NoticeTone.warning : NoticeTone.info),
+        ],
         if (_error != null) ...[
           const SizedBox(height: JiraniSpace.s),
           Notice(_error!, tone: NoticeTone.critical),
         ],
         if (b.principalCents > 0) ...[
           const SizedBox(height: JiraniSpace.s),
-          Text(l.loanBalance(_kes(b.outstandingCents), _kes(b.repaidCents),
-              _kes(b.interestChargedCents)), style: text.bodyMedium),
-          if (b.dueNowCents > 0)
-            Text(l.loanDueNow(_kes(b.dueNowCents)), style: text.titleSmall),
+          Notice(l.loanBalance(_kes(b.outstandingCents), _kes(b.repaidCents),
+              _kes(b.interestChargedCents))),
+          if (b.dueNowCents > 0) ...[
+            const SizedBox(height: JiraniSpace.s),
+            Notice(l.loanDueNow(_kes(b.dueNowCents)), tone: NoticeTone.warning),
+          ],
         ],
-        const SizedBox(height: JiraniSpace.m),
-        Text(l.loanGuarantors, style: text.titleSmall),
+        SectionHeader(l.loanGuarantors),
+        SurfaceCard(
+          padding: const EdgeInsets.symmetric(vertical: 4),
+          child: Column(children: [
         for (final g in loan.guarantees)
           ListTile(
             key: ValueKey('guarantee-${g.id}'),
-            contentPadding: EdgeInsets.zero,
+            leading: Avatar(g.guarantor, size: 38),
             title: Text('${g.guarantor} · ${_kes(g.shareCents)}'),
-            subtitle: Text(guaranteeStateLabel(l, g.state)),
+            subtitle: Padding(
+              padding: const EdgeInsets.only(top: 4),
+              child: Align(
+                alignment: Alignment.centerLeft,
+                child: StatusPill(guaranteeStateLabel(l, g.state), tone: switch (g.state) {
+                  'accepted' => JiraniTone.good,
+                  'requested' => JiraniTone.warning,
+                  _ => JiraniTone.critical,
+                }),
+              ),
+            ),
             // Replace only while a place is open: fewer guarantors asked or accepted than
             // the rules need.
             trailing: loan.mine && loan.state == 'awaiting_guarantors'
@@ -404,12 +496,15 @@ class _LoanScreenState extends ConsumerState<LoanScreen> {
                     child: Text(l.loanReplace))
                 : null,
           ),
+          ]),
+        ),
         for (final g in loan.guarantees.where((g) => g.mine && g.state == 'requested'))
           Padding(
             padding: const EdgeInsets.only(top: JiraniSpace.s),
             child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
               Notice(l.guaranteeExplain(loan.borrower, _kes(loan.amountCents),
-                  _kes(g.shareCents))),
+                  _kes(g.shareCents)), tone: NoticeTone.warning),
+              const SizedBox(height: JiraniSpace.s),
               FilledButton(key: const ValueKey('guarantee-accept'),
                   onPressed: _busy ? null : () => _accept(g),
                   child: Text(l.guaranteeAccept)),
@@ -422,9 +517,8 @@ class _LoanScreenState extends ConsumerState<LoanScreen> {
           TextButton(key: const ValueKey('loan-cancel'),
               onPressed: _busy ? null : () => _run(() => repo.cancelLoan(loan.id)),
               child: Text(l.loanCancel)),
-        const SizedBox(height: JiraniSpace.m),
-        Text(l.loanSchedule, style: text.titleSmall),
-        _scheduleTable(context, l, loan.schedule),
+        SectionHeader(l.loanSchedule),
+        SurfaceCard(padding: EdgeInsets.zero, child: _scheduleTable(context, l, loan.schedule)),
       ]),
     );
   }
