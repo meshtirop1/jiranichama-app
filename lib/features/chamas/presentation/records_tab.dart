@@ -390,6 +390,8 @@ class _EntryTileState extends ConsumerState<_EntryTile> {
       'reversal' || 'correction' => (Icons.undo_rounded, JiraniTone.warning),
       'membership' => (Icons.person_add_alt_1_outlined, JiraniTone.brand),
       'rule_version_adopted' => (Icons.menu_book_outlined, JiraniTone.brand),
+      'statement_accepted' => (Icons.verified_outlined, JiraniTone.info),
+      'bank_mandate' => (Icons.draw_outlined, JiraniTone.brand),
       _ => (Icons.receipt_long_outlined, JiraniTone.neutral),
     };
     final (strong, _, _) = status.colors(scheme, FlowArrow.toneOf(flow));

@@ -19,6 +19,7 @@ import 'fines_screen.dart';
 import 'governance_screen.dart';
 import 'growth_screen.dart';
 import 'loans_screen.dart';
+import 'mandate_screen.dart';
 import 'meetings_screen.dart';
 import 'money_out_screen.dart';
 import 'vote_screen.dart';
@@ -328,6 +329,14 @@ class _Overview extends ConsumerWidget {
               )),
         _DeathReported(chamaId: chama.id),
         _RegistrationNudge(chama: chama),
+        if (chama.state == ChamaState.active && !chama.mandateSafe)
+          Padding(
+            padding: const EdgeInsets.only(top: JiraniSpace.m),
+            child: Notice(key: const ValueKey('mandate-warning'), l.mandateOverview,
+                tone: NoticeTone.warning,
+                onTap: () => Navigator.of(context).push(MaterialPageRoute(
+                    builder: (_) => MandateScreen(chama: chama)))),
+          ),
         _BankCheck(chamaId: chama.id, myRole: chama.myRole),
         _OpenVotes(chamaId: chama.id),
         _CashToConfirm(chamaId: chama.id, myId: me?.id),

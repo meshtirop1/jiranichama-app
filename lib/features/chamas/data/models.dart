@@ -59,6 +59,9 @@ class Chama {
 
   /// The chama has told JiraniChama its government registration certificate.
   bool get registered => json['registered'] == true;
+
+  /// The bank's confirmed mandate needs at least two signatures (protection plan).
+  bool get mandateSafe => json['mandate_safe'] == true;
   String? get myMemberCode => json['my_member_code'] as String?;
   bool get iAmFounder => json['i_am_founder'] == true;
   String? get statementInbox => json['statement_inbox'] as String?;

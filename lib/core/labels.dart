@@ -39,6 +39,8 @@ String entryLabel(AppLocalizations l, String type) => switch (type) {
       'reversal' || 'correction' => l.entryReversal,
       'membership' => l.entryMembership,
       'rule_version_adopted' => l.entryRulesAdopted,
+      'statement_accepted' => l.entryStatementSealed,
+      'bank_mandate' => l.entryBankMandate,
       _ => l.entryOther,
     };
 
