@@ -170,4 +170,15 @@ void main() {
     expect(repo.calls, contains('confirmBankMandate:mand-1:$smsCode'));
     expect(find.text('What the bank has on file'), findsOneWidget);
   });
+
+  testWidgets('every member sees what the chama pays JiraniChama', (tester) async {
+    final repo = FakeChamaRepository(myRole: 'member', founder: false);
+    await _gov(tester, repo);
+    await tester.tap(find.byKey(const ValueKey('bills-tile')));
+    await tester.pumpAndSettle();
+    expect(find.text('KES 180'), findsOneWidget);
+    expect(find.text('12 active members × KES 15'), findsOneWidget);
+    expect(find.textContaining('first 3 months are free'), findsOneWidget);
+    expect(find.text('Due 2026-03-15'), findsOneWidget);
+  });
 }

@@ -2071,5 +2071,20 @@
   "kycSubmit": "Check my ID",
   "kycTypeNational": "National ID",
   "kycTypePassport": "Passport",
-  "kycTypeAlien": "Alien ID card"
+  "kycTypeAlien": "Alien ID card",
+  "billTitle": "JiraniChama bill",
+  "billTileSub": "What the chama pays JiraniChama each month",
+  "billThisMonth": "This month so far ({period})",
+  "billLine": "{count} active members × {price}",
+  "billFreeTrial": "Free: your first three months",
+  "billFreeSmall": "Free: five active members or fewer",
+  "billHow": "About USD 0.10 per active member a month, in your money. A member counts only if they had a record that month. The first {months} months are free, and months with {members} active members or fewer are free.",
+  "billPayLater": "How to pay will appear here. Until then nothing is due.",
+  "billPayTo": "Pay by M-Pesa to paybill {paybill}, account {account}. The treasurer proposes it like any payment, so every member sees it.",
+  "billPast": "Past bills",
+  "billNone": "No bills yet.",
+  "billPaid": "Paid",
+  "billFree": "Free",
+  "billWaived": "Waived",
+  "billDue": "Due {date}"
 }

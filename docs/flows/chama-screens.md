@@ -400,3 +400,15 @@ refresh on every list.
   warning, and money out cannot be switched on.
 - Records show "Bank statement sealed" for every accepted statement and "Bank signatories
   confirmed" for the mandate.
+
+## JiraniChama bill (2026-10-21)
+
+**Running the chama → JiraniChama bill** shows every member what the chama pays JiraniChama:
+
+- this month so far (active members × the price per member);
+- why it is free when it is (the first three months, or five active members or fewer);
+- how the price works;
+- where to pay, once the paybill is set;
+- past bills, marked paid, free, or due by a date.
+
+See `docs/flows/billing.md` in the API repository.

@@ -1158,5 +1158,20 @@
   "kycSubmit": "Kagua kitambulisho changu",
   "kycTypeNational": "Kitambulisho cha taifa",
   "kycTypePassport": "Pasipoti",
-  "kycTypeAlien": "Kitambulisho cha mgeni"
+  "kycTypeAlien": "Kitambulisho cha mgeni",
+  "billTitle": "Bili ya JiraniChama",
+  "billTileSub": "Kile chama kinalipa JiraniChama kila mwezi",
+  "billThisMonth": "Mwezi huu hadi sasa ({period})",
+  "billLine": "Wanachama hai {count} × {price}",
+  "billFreeTrial": "Bure: miezi yenu mitatu ya kwanza",
+  "billFreeSmall": "Bure: wanachama hai watano au wachache",
+  "billHow": "Takriban USD 0.10 kwa kila mwanachama hai kwa mwezi, kwa pesa yenu. Mwanachama anahesabiwa tu akiwa na kumbukumbu mwezi huo. Miezi {months} ya kwanza ni bure, na miezi yenye wanachama hai {members} au wachache ni bure.",
+  "billPayLater": "Jinsi ya kulipa itaonekana hapa. Hadi hapo hakuna kinachodaiwa.",
+  "billPayTo": "Lipa kwa M-Pesa paybill {paybill}, akaunti {account}. Mweka hazina anapendekeza kama malipo yoyote, hivyo kila mwanachama anaona.",
+  "billPast": "Bili zilizopita",
+  "billNone": "Hakuna bili bado.",
+  "billPaid": "Imelipwa",
+  "billFree": "Bure",
+  "billWaived": "Imesamehewa",
+  "billDue": "Inadaiwa {date}"
 }
