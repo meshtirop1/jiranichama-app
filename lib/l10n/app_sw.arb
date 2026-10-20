@@ -39,6 +39,7 @@
   "savePin": "Hifadhi PIN",
   "homeTitle": "Chama zako",
   "homeEmpty": "Bado hujajiunga na chama. Unda chama, au jiunge kwa nambari ya mwaliko.",
+  "homeEmptyTitle": "Bado huna chama",
   "signOut": "Toka",
   "language": "Lugha / Language",
   "networkError": "Hatukuweza kufikia JiraniChama. Angalia mtandao wako kisha ujaribu tena.",
@@ -944,5 +945,9 @@
   "areaMembers": "wanachama",
   "areaDisputes": "migogoro",
   "hoursN": "saa {n}",
-  "daysN": "siku {n}"
+  "daysN": "siku {n}",
+  "sectionShortcuts": "Njia za haraka",
+  "sectionMore": "Zaidi kwa chama hiki",
+  "sectionNeedsYou": "Inahitaji umakini wako",
+  "membersCount": "Wanachama {count}"
 }

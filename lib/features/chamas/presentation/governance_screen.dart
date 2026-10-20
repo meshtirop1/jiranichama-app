@@ -127,16 +127,15 @@ class GovernanceCard extends ConsumerWidget {
         for (final n in notes)
           Padding(padding: const EdgeInsets.only(bottom: JiraniSpace.xs),
               child: Notice(n, tone: NoticeTone.warning)),
-        Card(
-          child: ListTile(
-            key: const ValueKey('governance-card'),
-            leading: const Icon(Icons.account_balance_outlined),
-            title: Text(l.govTitle),
-            subtitle: Text(l.govSubtitle(disputes.where((d) => d.open).length)),
-            trailing: const Icon(Icons.chevron_right),
-            onTap: () => Navigator.of(context).push(MaterialPageRoute(
+        NavTile(
+          key: const ValueKey('governance-card'),
+          icon: Icons.how_to_vote_outlined,
+          tone: JiraniTone.info,
+          margin: EdgeInsets.zero,
+          title: l.govTitle,
+          subtitle: l.govSubtitle(disputes.where((d) => d.open).length),
+          onTap: () => Navigator.of(context).push(MaterialPageRoute(
                 builder: (_) => GovernanceScreen(chama: chama))),
-          ),
         ),
       ]),
     );

@@ -43,17 +43,16 @@ class GrowthCard extends ConsumerWidget {
     final folio = ref.watch(portfolioProvider(chama.id)).value;
     return Padding(
       padding: const EdgeInsets.only(top: JiraniSpace.s),
-      child: Card(
-        child: ListTile(
-          key: const ValueKey('growth-card'),
-          leading: const Icon(Icons.insights_outlined),
-          title: Text(l.growthTitle),
-          subtitle: Text(folio?.netWorthCents == null ? l.growthSubtitle
-              : l.growthNetWorth(_kes(folio!.netWorthCents))),
-          trailing: const Icon(Icons.chevron_right),
-          onTap: () => Navigator.of(context).push(MaterialPageRoute(
+      child: NavTile(
+        key: const ValueKey('growth-card'),
+        icon: Icons.trending_up_rounded,
+        tone: JiraniTone.good,
+        margin: EdgeInsets.zero,
+        title: l.growthTitle,
+        subtitle: folio?.netWorthCents == null ? l.growthSubtitle
+              : l.growthNetWorth(_kes(folio!.netWorthCents)),
+        onTap: () => Navigator.of(context).push(MaterialPageRoute(
               builder: (_) => GrowthScreen(chama: chama))),
-        ),
       ),
     );
   }

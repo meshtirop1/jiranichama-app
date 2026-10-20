@@ -5,8 +5,9 @@ in the API repo: `docs/flows/chama-setup.md`, `statements.md` and `payments.md`.
 
 ## Home
 
-The member's chamas, with type, state and their role; buttons to create one or join with
-an invite code.
+The member's chamas, one card each: initials, name, type, their role, and the state as a
+coloured pill (green when active). Under them, two cards side by side: **Create a chama**
+(green) and **Join with a code**.
 
 ## Create and set up (founder)
 
@@ -52,9 +53,17 @@ The rule book, how many founding members have confirmed and how many are needed,
 
 ## Active chama
 
-- **Overview**: my contributions, unpaid months, fines and next amount due; how to pay
-  (the bank account, the paybill, and my member code as the reference); a note that the
-  chama records money only until Phase 2. Officials also get **Bank statements** and
+Four sections behind a bottom navigation bar: Overview, Records, Members and Rules. The
+app bar shows the chama's initials, name, type and my role. (It used to be four tabs at
+the top; the bar keeps them in thumb reach.)
+
+- **Overview**: a green headline card with what I have contributed, then my arrears,
+  fines (each with an amber dot when not zero) and next amount due, and **See my
+  statement**. Under it, anything that needs me (as coloured notes that open the right
+  screen), then how to pay (the bank account, the paybill, and my member code as the
+  reference) and a note that the chama records money only until Phase 2. Then a
+  **Shortcuts** grid: Money out, Chama statement, Cash at meetings, Opening balances (and
+  the merry-go-round where the rules have one). Officials also get **Bank statements** and
   **Unmatched payments**.
 - **Records**: every record, newest first, after the phone has checked the whole chain
   itself (see [chain check](chain-check.md)). A green note when it holds, a red warning
@@ -243,7 +252,7 @@ tabs (API: `docs/flows/analytics.md`, `investments.md`, `referrals.md`):
   request waits. While access is open, every member sees "JiraniChama support can read …
   until …" on the overview, and any official can end it.
 
-The overview ends with the places to go: Fines, **Running the chama**, Meetings and
+The overview ends with **More for this chama**, the places to go: Fines, **Running the chama**, Meetings and
 (where switched on) Loans. Anything that needs me shows as a warning above the Running
 the chama card: an election is needed, a new phone waits for my vouching, or a dispute
 waits for my answer.

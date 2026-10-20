@@ -39,6 +39,7 @@
   "savePin": "Save PIN",
   "homeTitle": "Your chamas",
   "homeEmpty": "You are not in a chama yet. Create one, or join with an invite code.",
+  "homeEmptyTitle": "No chamas yet",
   "signOut": "Sign out",
   "language": "Lugha / Language",
   "networkError": "We could not reach JiraniChama. Check your connection and try again.",
@@ -1840,5 +1841,10 @@
         "type": "int"
       }
     }
-  }
+  },
+  "sectionShortcuts": "Shortcuts",
+  "sectionMore": "More for this chama",
+  "sectionNeedsYou": "Needs your attention",
+  "membersCount": "{count} members",
+  "@membersCount": {"placeholders": {"count": {"type": "int"}}}
 }

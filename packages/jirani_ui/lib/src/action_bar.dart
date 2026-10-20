@@ -11,14 +11,16 @@ class ActionBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Material(
-      elevation: 3,
-      color: Theme.of(context).colorScheme.surfaceContainer,
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: JiraniStatus.of(context).card,
+        border: Border(top: BorderSide(color: Theme.of(context).colorScheme.outlineVariant)),
+      ),
       child: SafeArea(
         top: false,
         child: Padding(
-          padding: const EdgeInsets.fromLTRB(JiraniSpace.l, JiraniSpace.s, JiraniSpace.l,
-              JiraniSpace.s),
+          padding: const EdgeInsets.fromLTRB(JiraniSpace.m, JiraniSpace.s + 4, JiraniSpace.m,
+              JiraniSpace.s + 4),
           child: child,
         ),
       ),

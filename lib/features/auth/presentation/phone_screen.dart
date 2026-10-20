@@ -7,6 +7,7 @@ import 'package:jirani_ui/jirani_ui.dart';
 import '../../../core/locale.dart';
 import '../../../core/providers.dart';
 import '../../../l10n/app_localizations.dart';
+import 'auth_layout.dart';
 import 'problem_text.dart';
 
 class PhoneScreen extends ConsumerStatefulWidget {
@@ -56,38 +57,31 @@ class _PhoneScreenState extends ConsumerState<PhoneScreen> {
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
     final text = Theme.of(context).textTheme;
-    return Scaffold(
-      appBar: AppBar(actions: const [_LanguageButton()]),
-      body: SafeArea(
-        child: ListView(
-          padding: const EdgeInsets.all(JiraniSpace.l),
-          children: [
-            Text(l.appName, style: text.headlineMedium),
-            const SizedBox(height: JiraniSpace.s),
-            Text(l.tagline, style: text.bodyLarge),
-            const SizedBox(height: JiraniSpace.xl),
-            Text(l.phoneTitle, style: text.titleLarge),
-            const SizedBox(height: JiraniSpace.m),
-            TextField(
-              controller: _phone,
-              keyboardType: TextInputType.phone,
-              autofillHints: const [AutofillHints.telephoneNumber],
-              decoration: InputDecoration(
-                labelText: l.phoneLabel,
-                hintText: l.phoneHint,
-                errorText: _fieldError,
-              ),
-              onSubmitted: (_) => _send(),
-            ),
-            if (_error != null) ...[
-              const SizedBox(height: JiraniSpace.m),
-              Notice(_error!, tone: NoticeTone.critical),
-            ],
-            const SizedBox(height: JiraniSpace.l),
-            PrimaryButton(label: l.sendCode, busy: _busy, onPressed: _send),
-          ],
+    return AuthLayout(
+      actions: const [_LanguageButton()],
+      hero: AuthHero(appName: l.appName, tagline: l.tagline),
+      title: l.phoneTitle,
+      children: [
+        TextField(
+          controller: _phone,
+          keyboardType: TextInputType.phone,
+          autofillHints: const [AutofillHints.telephoneNumber],
+          style: text.titleMedium,
+          decoration: InputDecoration(
+            labelText: l.phoneLabel,
+            hintText: l.phoneHint,
+            errorText: _fieldError,
+            prefixIcon: const Icon(Icons.phone_iphone_rounded),
+          ),
+          onSubmitted: (_) => _send(),
         ),
-      ),
+        if (_error != null) ...[
+          const SizedBox(height: JiraniSpace.m),
+          Notice(_error!, tone: NoticeTone.critical),
+        ],
+        const SizedBox(height: JiraniSpace.l),
+        PrimaryButton(label: l.sendCode, busy: _busy, onPressed: _send),
+      ],
     );
   }
 }

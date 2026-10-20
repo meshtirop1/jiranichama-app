@@ -96,17 +96,16 @@ class MeetingsCard extends ConsumerWidget {
       ..sort((a, b) => a.startsAt.compareTo(b.startsAt));
     return Padding(
       padding: const EdgeInsets.only(top: JiraniSpace.s),
-      child: Card(
-        child: ListTile(
-          key: const ValueKey('meetings-card'),
-          leading: const Icon(Icons.groups_outlined),
-          title: Text(l.meetingsTitle),
-          subtitle: Text(next.isEmpty ? l.meetNoneComing
-              : l.meetNext(next.first.title, _when(context, next.first.startsAt))),
-          trailing: const Icon(Icons.chevron_right),
-          onTap: () => Navigator.of(context).push(MaterialPageRoute(
+      child: NavTile(
+        key: const ValueKey('meetings-card'),
+        icon: Icons.event_available_outlined,
+        tone: JiraniTone.warning,
+        margin: EdgeInsets.zero,
+        title: l.meetingsTitle,
+        subtitle: next.isEmpty ? l.meetNoneComing
+              : l.meetNext(next.first.title, _when(context, next.first.startsAt)),
+        onTap: () => Navigator.of(context).push(MaterialPageRoute(
               builder: (_) => MeetingsScreen(chamaId: chamaId))),
-        ),
       ),
     );
   }

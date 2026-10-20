@@ -148,15 +148,15 @@ class _SetupViewState extends ConsumerState<SetupView> {
     final account = chama.bankAccount;
     final founder = chama.iAmFounder;
 
-    Widget section(String title, List<Widget> children) => Card(
-          child: Padding(
-            padding: const EdgeInsets.all(JiraniSpace.m),
-            child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-              Text(title, style: text.titleMedium),
-              const SizedBox(height: JiraniSpace.m),
-              ...children,
-            ]),
-          ),
+    Widget section(String title, List<Widget> children) => Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            SectionHeader(title),
+            SurfaceCard(
+              child: Column(crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: children),
+            ),
+          ],
         );
 
     return Scaffold(
@@ -240,7 +240,7 @@ class _SetupViewState extends ConsumerState<SetupView> {
               OutlinedButton.icon(icon: const Icon(Icons.tune), label: Text(l.editAllRules),
                   onPressed: _busy ? null : _editAll),
             ]),
-          section(l.tabRules, [RuleBookList(widget.bundle.rules.clauses(lang))]),
+          ...[SectionHeader(l.tabRules), RuleBookList(widget.bundle.rules.clauses(lang))],
           if (founder)
             section(l.inviteSection, [
               DropdownButtonFormField<String>(
@@ -267,7 +267,8 @@ class _SetupViewState extends ConsumerState<SetupView> {
             ]),
           section(l.tabMembers, [
             for (final m in widget.bundle.members)
-              ListTile(contentPadding: EdgeInsets.zero, title: Text(m.name),
+              ListTile(contentPadding: EdgeInsets.zero, leading: Avatar(m.name),
+                  title: Text(m.name),
                   subtitle: Text('${roleLabel(l, m.role)} · ${m.memberCode}')),
           ]),
           if (founder && chama.state == ChamaState.setup) ...[

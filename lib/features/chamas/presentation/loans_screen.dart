@@ -56,23 +56,22 @@ class LoansCard extends ConsumerWidget {
       padding: const EdgeInsets.only(top: JiraniSpace.s),
       child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
         for (final x in asks)
-          InkWell(
-            onTap: () => _open(context, x.id),
+          Padding(
+            padding: const EdgeInsets.only(bottom: JiraniSpace.s),
             child: Notice(l.guaranteeAsked(x.borrower, _kes(x.amountCents)),
-                tone: NoticeTone.warning),
+                tone: NoticeTone.warning, onTap: () => _open(context, x.id)),
           ),
-        Card(
-          child: ListTile(
-            key: const ValueKey('loans-card'),
-            leading: const Icon(Icons.account_balance_wallet_outlined),
-            title: Text(l.loansTitle),
-            subtitle: Text(mine == null ? l.loansNone
+        NavTile(
+          key: const ValueKey('loans-card'),
+          icon: Icons.account_balance_wallet_outlined,
+          tone: JiraniTone.brand,
+          margin: EdgeInsets.zero,
+          title: l.loansTitle,
+          subtitle: mine == null ? l.loansNone
                 : '${loanStateLabel(l, mine.state)} · '
-                  '${l.loanOwed(_kes(mine.balance.outstandingCents))}'),
-            trailing: const Icon(Icons.chevron_right),
-            onTap: () => Navigator.of(context).push(MaterialPageRoute(
+                  '${l.loanOwed(_kes(mine.balance.outstandingCents))}',
+          onTap: () => Navigator.of(context).push(MaterialPageRoute(
                 builder: (_) => LoansScreen(chamaId: chamaId))),
-          ),
         ),
       ]),
     );
