@@ -110,6 +110,7 @@ class _PhoneScreenState extends ConsumerState<PhoneScreen> {
             labelText: l.phoneLabel,
             hintText: country.example,
             errorText: _fieldError,
+            errorMaxLines: 3,
             prefixIcon: Padding(
               padding: const EdgeInsets.only(left: 16, right: 8),
               child: Text(country.dial, style: text.titleMedium?.copyWith(
