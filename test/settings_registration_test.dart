@@ -100,6 +100,25 @@ class FakeAccountRepository implements AccountRepository {
     return ChamaRegistration(_reg);
   }
 
+  var kycAvailable = false;
+  var kycStatus = 'not_started';
+
+  @override
+  Future<IdentityStatus> identity() async => IdentityStatus({
+        'available': kycAvailable, 'status': kycStatus,
+        'id_types': {'KE': ['NATIONAL_ID', 'PASSPORT']},
+        'last4': kycStatus == 'verified' ? '5678' : null,
+      });
+
+  @override
+  Future<IdentityStatus> startIdentity({required String country, required String idType,
+      required String idNumber, required String firstName, required String lastName,
+      String? paidBy}) async {
+    calls.add('kyc:$country:$idType:$idNumber:$firstName:$lastName:$paidBy');
+    kycStatus = 'verified';
+    return identity();
+  }
+
   @override
   Future<List<int>> paper(String chamaId, String paper, String language) async {
     calls.add('paper:$paper:$language');
@@ -238,5 +257,22 @@ void main() {
     await tester.tap(find.byKey(const ValueKey('flow-fine')));
     await tester.pumpAndSettle();
     expect(find.text('Showing only: Fines'), findsNothing);
+  });
+
+  testWidgets('a member checks their ID, paid by their chama', (tester) async {
+    final (account, _, _) = await _pump(tester);
+    account.kycAvailable = true;
+    await tester.tap(find.text('Settings'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('kyc-start')));
+    await tester.pumpAndSettle();
+    await tester.enterText(find.byKey(const ValueKey('kyc-number')), '12345678');
+    await tester.ensureVisible(find.byKey(const ValueKey('kyc-submit')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('kyc-submit')));
+    await tester.pumpAndSettle();
+    expect(account.calls.last, 'kyc:KE:NATIONAL_ID:12345678:Jane:Wanjiku:c1');
+    expect(find.text('Checked'), findsOneWidget);
+    expect(find.text('ID ending 5678 checked.'), findsOneWidget);
   });
 }

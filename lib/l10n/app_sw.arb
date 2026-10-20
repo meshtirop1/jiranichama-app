@@ -1146,5 +1146,17 @@
   "mandateTileMissing": "Bado haijaonyeshwa: bonyeza kuongeza idhini ya benki",
   "mandateOverview": "Nani anaweza kutoa pesa benki bado haijaonyeshwa. Bonyeza kuona watia sahihi.",
   "entryStatementSealed": "Taarifa ya benki imefungwa",
-  "entryBankMandate": "Watia sahihi wa benki wamethibitishwa"
+  "entryBankMandate": "Watia sahihi wa benki wamethibitishwa",
+  "kycStart": "Kagua kitambulisho changu",
+  "kycLast4": "Kitambulisho kinachoishia {last4} kimekaguliwa.",
+  "kycPrivacyForm": "Nambari yako ya kitambulisho inaenda Smile ID mara moja, kukaguliwa na daftari la serikali. JiraniChama huweka tarakimu nne za mwisho tu; wanachama wengine wanaona alama tu.",
+  "kycIdType": "Aina ya kitambulisho",
+  "kycIdNumber": "Nambari ya kitambulisho",
+  "kycFirst": "Jina la kwanza, kama kwenye kitambulisho",
+  "kycLast": "Majina mengine, kama kwenye kitambulisho",
+  "kycPaidBy": "Chama gani kinalipia ukaguzi",
+  "kycSubmit": "Kagua kitambulisho changu",
+  "kycTypeNational": "Kitambulisho cha taifa",
+  "kycTypePassport": "Pasipoti",
+  "kycTypeAlien": "Kitambulisho cha mgeni"
 }

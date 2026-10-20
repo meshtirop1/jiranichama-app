@@ -104,3 +104,17 @@ On an active chama's overview, until the chama is registered (`chama.registered`
 says "Register your chama with the government". It has **Prepare the papers** and
 **Later**. "Later" hides it on this phone for 14 days, so it comes back now and then
 without nagging.
+
+## The ID check, switched on (2026-10-20)
+
+Once the server has Smile ID set up, the Settings card's button reads **Check my ID**. It
+opens a short form:
+
+- the kind of ID (the country's options);
+- the ID number;
+- the names as written on the ID;
+- which of the member's chamas pays.
+
+The card then shows "Checked" and "ID ending 1234 checked". Members' lists show a green
+tick next to everyone who passed. Only the tick is shared, never the ID. See
+`docs/flows/identity.md` in the API repository.
