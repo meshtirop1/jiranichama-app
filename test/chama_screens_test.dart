@@ -13,14 +13,14 @@ class _SignedIn implements AuthRepository {
   @override
   Future<bool> hasSession() async => true;
   @override
-  Future<CodeSent> requestCode(String phone, {required String language}) =>
+  Future<CodeSent> requestCode(String phone, {required String language, String country = 'KE'}) =>
       throw UnimplementedError();
   @override
   Future<SignedIn> verifyCode(String phone, String code) => throw UnimplementedError();
   @override
   Future<void> setPin(String pin) async {}
   @override
-  Future<void> setProfile({required String name, required String language}) async {}
+  Future<void> setProfile({required String name, required String language, String? country}) async {}
   @override
   Future<void> signOut() async {}
 }
@@ -75,7 +75,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(repo.calls, contains('bank:equity:0123456789012'));
 
-    final amount = find.widgetWithText(TextField, 'Contribution each month (KES)');
+    final amount = find.widgetWithText(TextField, 'Contribution each month');
     await tester.ensureVisible(amount);
     await tester.pumpAndSettle();
     await tester.enterText(amount, '1500');
@@ -146,7 +146,7 @@ void main() {
     expect(find.text('KES 2,000'), findsOneWidget);
     expect(find.text('KES 200'), findsOneWidget);
     expect(find.textContaining('member code JC-4821-001'), findsOneWidget);
-    expect(find.text('M-Pesa: paybill 247247, account JC-4821-001.'), findsOneWidget);
+    expect(find.text('Mobile money: pay to 247247, account JC-4821-001.'), findsOneWidget);
     expect(find.textContaining('records money only'), findsOneWidget);
   });
 

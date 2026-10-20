@@ -16,10 +16,12 @@ class SignedIn {
 /// Phone sign-in against the API (docs/flows/phone-sign-in.md in jiranichama-api).
 abstract class AuthRepository {
   Future<bool> hasSession();
-  Future<CodeSent> requestCode(String phone, {required String language});
+  Future<CodeSent> requestCode(String phone,
+      {required String language, String country = 'KE'});
   Future<SignedIn> verifyCode(String phone, String code);
   Future<void> setPin(String pin);
-  Future<void> setProfile({required String name, required String language});
+  Future<void> setProfile(
+      {required String name, required String language, String? country});
   Future<void> signOut();
 }
 
@@ -33,8 +35,10 @@ class HttpAuthRepository implements AuthRepository {
   Future<bool> hasSession() async => await _tokens.read() != null;
 
   @override
-  Future<CodeSent> requestCode(String phone, {required String language}) async {
-    final r = await _api.post('/auth/otp/', body: {'phone': phone, 'language': language});
+  Future<CodeSent> requestCode(String phone,
+      {required String language, String country = 'KE'}) async {
+    final r = await _api.post('/auth/otp/',
+        body: {'phone': phone, 'language': language, 'country': country});
     return CodeSent(
       phoneHint: r['phone_hint'] as String? ?? phone,
       expiresIn: r['expires_in'] as int? ?? 300,
@@ -55,8 +59,10 @@ class HttpAuthRepository implements AuthRepository {
   }
 
   @override
-  Future<void> setProfile({required String name, required String language}) async {
-    await _api.patch('/auth/me/', {'display_name': name, 'language': language});
+  Future<void> setProfile(
+      {required String name, required String language, String? country}) async {
+    await _api.patch('/auth/me/',
+        {'display_name': name, 'language': language, 'country': ?country});
   }
 
   @override

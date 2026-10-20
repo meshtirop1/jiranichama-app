@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:jirani_ui/jirani_ui.dart';
 
+import '../../../core/locale.dart';
 import '../../../core/providers.dart';
 import '../../../l10n/app_localizations.dart';
 import '../application/session.dart';
@@ -47,7 +48,7 @@ class _PinScreenState extends ConsumerState<PinScreen> {
     });
     try {
       final repo = ref.read(authRepositoryProvider);
-      await repo.setProfile(name: _name.text.trim(),
+      await repo.setProfile(name: _name.text.trim(), country: ref.read(countryProvider),
           language: Localizations.localeOf(context).languageCode);
       await repo.setPin(_pin.text);
       ref.read(sessionProvider.notifier).pinSet();

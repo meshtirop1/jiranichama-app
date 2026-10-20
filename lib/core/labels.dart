@@ -57,8 +57,23 @@ const bankNames = {
   'kcb': 'KCB Bank',
   'coop': 'Co-operative Bank',
   'ncba': 'NCBA',
-  'absa': 'Absa Bank Kenya',
+  'absa': 'Absa Bank',
   'stanbic': 'Stanbic Bank',
   'family': 'Family Bank',
+  'centenary': 'Centenary Bank',
+  'dfcu': 'dfcu Bank',
+  'crdb': 'CRDB Bank',
+  'nmb': 'NMB Bank',
+  'nbc': 'NBC Bank',
   'other': 'Other bank',
 };
+
+/// The banks offered in each open country, most used first (same as the server's
+/// `apps/core/countries.py` BANKS).
+const banksByCountry = {
+  'KE': ['equity', 'kcb', 'coop', 'ncba', 'absa', 'stanbic', 'family', 'other'],
+  'UG': ['stanbic', 'centenary', 'dfcu', 'equity', 'absa', 'kcb', 'ncba', 'other'],
+  'TZ': ['crdb', 'nmb', 'nbc', 'equity', 'absa', 'stanbic', 'kcb', 'other'],
+};
+
+List<String> banksFor(String country) => banksByCountry[country] ?? banksByCountry['KE']!;

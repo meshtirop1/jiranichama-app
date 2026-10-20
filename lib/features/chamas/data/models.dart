@@ -50,6 +50,11 @@ class Chama {
   String get type => json['type'] as String;
   ChamaState get state => _state(json['state'] as String);
   String get mode => json['mode'] as String;
+  String get country => json['country'] as String? ?? 'KE';
+
+  /// The currency the chama keeps its records in. Every amount on its screens is shown
+  /// in it (see Kes.currency).
+  String get currency => json['currency'] as String? ?? 'KES';
   String? get myRole => json['my_role'] as String?;
   String? get myMemberCode => json['my_member_code'] as String?;
   bool get iAmFounder => json['i_am_founder'] == true;
@@ -140,6 +145,9 @@ class Position {
   Kes get pendingCash => Kes(json['pending_cash_cents'] as int? ?? 0);
   String? get nextDuePeriod => json['next_due_period'] as String?;
   Kes get nextDue => Kes(json['next_due_cents'] as int);
+
+  /// No more fines are added: the member has missed as many months as the rules allow.
+  bool get finesStopped => json['fines_stopped'] == true;
 }
 
 class LedgerItem {

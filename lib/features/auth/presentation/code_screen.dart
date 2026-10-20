@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:jirani_ui/jirani_ui.dart';
 
+import '../../../core/locale.dart';
 import '../../../core/providers.dart';
 import '../../../l10n/app_localizations.dart';
 import '../application/session.dart';
@@ -51,7 +52,8 @@ class _CodeScreenState extends ConsumerState<CodeScreen> {
     final language = Localizations.localeOf(context).languageCode;
     setState(() => _error = null);
     try {
-      await ref.read(authRepositoryProvider).requestCode(widget.phone, language: language);
+      await ref.read(authRepositoryProvider).requestCode(widget.phone, language: language,
+          country: ref.read(countryProvider));
       _code.clear();
     } catch (e) {
       if (mounted) setState(() => _error = problemText(l, e));

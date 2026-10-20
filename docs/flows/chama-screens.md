@@ -51,6 +51,19 @@ An SMS code that names the chama confirms it.
 The rule book, how many founding members have confirmed and how many are needed, and a
 **Confirm these rules** button that sends an SMS code.
 
+## Money in the chama's own currency
+
+A chama keeps its records in the currency of its country: KES, UGX or TZS for now. When a
+chama is opened, the app sets that currency (`Kes.currency`) and every amount on its
+screens shows in it ("UGX 28,000"; Uganda and Tanzania without cents). Screen readers say
+"Uganda shillings". Field labels no longer say "(KES)". The bank list in setup shows the
+chama's country's banks, and "how to pay" says "Mobile money", not "M-Pesa", because
+Uganda and Tanzania pay with MTN MoMo, Airtel Money, Mixx and others too.
+
+If a member has missed as many months as the rules allow fines for, fines stop. The
+headline card then says so, and tells the member to talk to their officials about a
+payment plan. Officials set the number of months in the rules editor (default 3).
+
 ## Active chama
 
 Four sections behind a bottom navigation bar: Overview, Records, Members and Rules. The
