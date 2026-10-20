@@ -86,17 +86,24 @@ class _TourState extends State<_Tour> with TickerProviderStateMixin {
     super.dispose();
   }
 
-  /// Where the step's target is on screen, scrolled into view first.
+  /// Where the step's target is on screen right now, or null when it is not built.
+  Rect? _measure(TourStep step) {
+    final ctx = step.target?.currentContext;
+    if (ctx == null || !ctx.mounted) return null;
+    final box = ctx.findRenderObject();
+    if (box is! RenderBox || !box.hasSize || !box.attached) return null;
+    final topLeft = box.localToGlobal(Offset.zero);
+    return (topLeft & box.size).inflate(6);
+  }
+
+  /// Scrolls the step's target into view, then waits for the list to settle.
   Future<Rect?> _rectOf(TourStep step) async {
     final ctx = step.target?.currentContext;
     if (ctx == null || !ctx.mounted) return null;
-    await Scrollable.ensureVisible(ctx, alignment: .35,
+    await Scrollable.ensureVisible(ctx, alignment: .3,
         duration: const Duration(milliseconds: 300), curve: Curves.easeOutCubic);
-    if (!ctx.mounted) return null;
-    final box = ctx.findRenderObject();
-    if (box is! RenderBox || !box.hasSize) return null;
-    final topLeft = box.localToGlobal(Offset.zero);
-    return (topLeft & box.size).inflate(6);
+    await WidgetsBinding.instance.endOfFrame;
+    return _measure(step);
   }
 
   Future<void> _go(int i) async {
@@ -114,10 +121,12 @@ class _TourState extends State<_Tour> with TickerProviderStateMixin {
   }
 
   Rect? get _current {
+    // Measured every frame: a part that loads late, or a list still settling, is followed.
+    final live = _measure(widget.steps[_i]) ?? _to;
     final t = Curves.easeInOutCubic.transform(_move.value);
-    if (_from == null) return _to;
-    if (_to == null) return _from;
-    return Rect.lerp(_from, _to, t);
+    if (_from == null) return live;
+    if (live == null) return _from;
+    return Rect.lerp(_from, live, t);
   }
 
   void _close(bool finished) {
@@ -139,7 +148,10 @@ class _TourState extends State<_Tour> with TickerProviderStateMixin {
           return AnimatedBuilder(
             animation: Listenable.merge([_move, _pulse, _card]),
             builder: (context, _) {
-              final hole = _to == null && _from == null ? null : _current;
+              final screen = Offset.zero & box.biggest;
+              final raw = _current;
+              final hole = raw == null || !raw.overlaps(screen) ? null
+                  : raw.intersect(screen.deflate(4));
               return Stack(children: [
                 // The dimmed screen with the spotlight; a tap moves on.
                 Positioned.fill(
@@ -148,7 +160,7 @@ class _TourState extends State<_Tour> with TickerProviderStateMixin {
                     onTap: () => _go(_i + 1),
                     child: CustomPaint(
                       painter: _SpotlightPainter(
-                        hole: _to == null ? null : hole,
+                        hole: hole,
                         pulse: _pulse.value,
                         scrim: Colors.black.withValues(alpha: .72),
                         ring: Theme.of(context).colorScheme.primary,
@@ -156,7 +168,7 @@ class _TourState extends State<_Tour> with TickerProviderStateMixin {
                     ),
                   ),
                 ),
-                _placeCard(context, box.biggest, _to == null ? null : hole, step, last),
+                _placeCard(context, box.biggest, hole, step, last),
               ]);
             },
           );
@@ -192,15 +204,21 @@ class _TourState extends State<_Tour> with TickerProviderStateMixin {
       return Positioned(left: left, width: width, top: 0, bottom: 0,
           child: Center(child: card));
     }
-    // Below the spotlight if it fits, otherwise above it.
+    // Below the spotlight if it fits, else above it, else at the foot of the screen.
+    const room = 250.0;
     final below = hole.bottom + 16;
     final spaceBelow = screen.height - safe.bottom - below;
+    final spaceAbove = hole.top - 16 - safe.top;
     final rise = (1 - fade) * 18;
-    if (spaceBelow > 230 || hole.center.dy < screen.height / 2) {
+    if (spaceBelow >= room) {
       return Positioned(left: left, width: width, top: below + rise, child: card);
     }
-    return Positioned(left: left, width: width,
-        bottom: screen.height - hole.top + 16 + rise, child: card);
+    if (spaceAbove >= room) {
+      return Positioned(left: left, width: width,
+          bottom: screen.height - hole.top + 16 + rise, child: card);
+    }
+    return Positioned(left: left, width: width, bottom: safe.bottom + 16 + rise,
+        child: card);
   }
 }
 

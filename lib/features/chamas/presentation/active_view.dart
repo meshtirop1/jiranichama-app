@@ -6,6 +6,7 @@ import 'package:jirani_ui/jirani_ui.dart';
 
 import '../../../core/labels.dart';
 import '../../../core/providers.dart';
+import '../../../core/tours.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../auth/presentation/problem_text.dart';
 import '../data/models.dart';
@@ -36,18 +37,79 @@ final positionProvider = FutureProvider.autoDispose.family<Position, String>(
 
 /// An active chama: overview, records (checked on the phone), members and rules, one
 /// at a time behind a bottom navigation bar.
-class ActiveView extends StatefulWidget {
+class ActiveView extends ConsumerStatefulWidget {
   const ActiveView({super.key, required this.bundle, required this.onChanged});
 
   final ChamaBundle bundle;
   final VoidCallback onChanged;
 
   @override
-  State<ActiveView> createState() => _ActiveViewState();
+  ConsumerState<ActiveView> createState() => _ActiveViewState();
 }
 
-class _ActiveViewState extends State<ActiveView> {
+/// The parts of the chama screens a guided tour points at.
+class ChamaTourKeys {
+  final position = GlobalKey();
+  final pay = GlobalKey();
+  final shortcuts = GlobalKey();
+  final more = GlobalKey();
+  final nav = GlobalKey();
+  final chain = GlobalKey();
+  final records = GlobalKey();
+  final members = GlobalKey();
+  final invite = GlobalKey();
+  final rules = GlobalKey();
+  final ruleChange = GlobalKey();
+}
+
+class _ActiveViewState extends ConsumerState<ActiveView> {
   int _tab = 0;
+  final _keys = ChamaTourKeys();
+
+  static const _tours = ['chama-overview', 'chama-records', 'chama-members', 'chama-rules'];
+
+  /// What the tour says on each tab, pointing at its parts.
+  List<TourStep> _steps(int tab) {
+    final l = AppLocalizations.of(context);
+    final k = _keys;
+    final official = widget.bundle.chama.iAmOfficial;
+    return switch (tab) {
+      0 => [
+          TourStep(icon: Icons.waving_hand_outlined, title: l.tourWelcomeTitle,
+              body: l.tourWelcomeBody),
+          TourStep(target: k.position, icon: Icons.account_balance_wallet_outlined,
+              title: l.tourPositionTitle, body: l.tourPositionBody),
+          TourStep(target: k.pay, icon: Icons.account_balance_rounded, tone: JiraniTone.info,
+              title: l.tourPayTitle, body: l.tourPayBody),
+          TourStep(target: k.shortcuts, icon: Icons.apps_rounded, title: l.tourShortcutsTitle,
+              body: l.tourShortcutsBody),
+          TourStep(target: k.more, icon: Icons.event_available_outlined,
+              tone: JiraniTone.warning, title: l.tourMoreTitle, body: l.tourMoreBody),
+          TourStep(target: k.nav, icon: Icons.swipe_rounded, title: l.tourNavTitle,
+              body: l.tourNavBody),
+        ],
+      1 => [
+          TourStep(target: k.chain, icon: Icons.verified_outlined, tone: JiraniTone.good,
+              title: l.tourRecordsCheckTitle, body: l.tourRecordsCheckBody),
+          TourStep(target: k.records, icon: Icons.receipt_long_outlined,
+              title: l.tourRecordsListTitle, body: l.tourRecordsListBody),
+        ],
+      2 => [
+          TourStep(target: k.members, icon: Icons.groups_2_outlined,
+              title: l.tourMembersTitle, body: l.tourMembersBody),
+          if (official)
+            TourStep(target: k.invite, icon: Icons.person_add_alt_1_rounded,
+                tone: JiraniTone.warning, title: l.tourInviteTitle, body: l.tourInviteBody),
+        ],
+      _ => [
+          TourStep(target: k.rules, icon: Icons.menu_book_outlined, title: l.tourRulesTitle,
+              body: l.tourRulesBody),
+          TourStep(target: k.ruleChange, icon: Icons.how_to_vote_outlined,
+              tone: JiraniTone.info, title: l.tourRuleChangeTitle,
+              body: l.tourRuleChangeBody),
+        ],
+    };
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -56,8 +118,13 @@ class _ActiveViewState extends State<ActiveView> {
     final bundle = widget.bundle;
     final chama = bundle.chama;
     final text = Theme.of(context).textTheme;
+    final tab = _tab;
+    // Records load and are checked first, so their tour waits a little longer.
+    showTourOnce(context, ref, _tours[tab], () => _steps(tab),
+        settle: Duration(milliseconds: tab == 1 ? 1800 : 700));
     return Scaffold(
       appBar: AppBar(
+        actions: [TourButton(steps: () => _steps(_tab)), const SizedBox(width: 4)],
         titleSpacing: 0,
         title: Row(children: [
           Avatar(chama.name, size: 36),
@@ -72,15 +139,17 @@ class _ActiveViewState extends State<ActiveView> {
         ]),
       ),
       body: switch (_tab) {
-        0 => _Overview(bundle: bundle),
-        1 => RecordsTab(bundle: bundle),
-        2 => _MembersTab(bundle: bundle),
+        0 => _Overview(bundle: bundle, tourKeys: _keys),
+        1 => RecordsTab(bundle: bundle, chainKey: _keys.chain, listKey: _keys.records),
+        2 => _MembersTab(bundle: bundle, tourKeys: _keys),
         _ => ListView(padding: const EdgeInsets.all(JiraniSpace.m), children: [
-            RuleChangesSection(chamaId: chama.id, official: chama.iAmOfficial),
-            RuleBookList(bundle.rules.clauses(lang)),
+            KeyedSubtree(key: _keys.ruleChange,
+                child: RuleChangesSection(chamaId: chama.id, official: chama.iAmOfficial)),
+            KeyedSubtree(key: _keys.rules, child: RuleBookList(bundle.rules.clauses(lang))),
           ]),
       },
       bottomNavigationBar: DecoratedBox(
+        key: _keys.nav,
         decoration: BoxDecoration(border: Border(
             top: BorderSide(color: Theme.of(context).colorScheme.outlineVariant))),
         child: NavigationBar(
@@ -107,9 +176,10 @@ class _ActiveViewState extends State<ActiveView> {
 }
 
 class _MembersTab extends StatelessWidget {
-  const _MembersTab({required this.bundle});
+  const _MembersTab({required this.bundle, required this.tourKeys});
 
   final ChamaBundle bundle;
+  final ChamaTourKeys tourKeys;
 
   @override
   Widget build(BuildContext context) {
@@ -124,6 +194,7 @@ class _MembersTab extends StatelessWidget {
         )),
         if (bundle.chama.iAmOfficial)
           FilledButton.tonalIcon(
+            key: tourKeys.invite,
             style: FilledButton.styleFrom(minimumSize: const Size(0, 44)),
             icon: const Icon(Icons.person_add_alt_1_rounded, size: 20),
             label: Text(l.inviteMember),
@@ -139,6 +210,7 @@ class _MembersTab extends StatelessWidget {
           for (final (i, m) in members.indexed) ...[
             if (i > 0) const Divider(indent: 72),
             ListTile(
+              key: i == 0 ? tourKeys.members : null,
               leading: Avatar(m.name),
               title: Text(m.name),
               subtitle: Text(m.memberCode),
@@ -160,9 +232,10 @@ class _MembersTab extends StatelessWidget {
 }
 
 class _Overview extends ConsumerWidget {
-  const _Overview({required this.bundle});
+  const _Overview({required this.bundle, required this.tourKeys});
 
   final ChamaBundle bundle;
+  final ChamaTourKeys tourKeys;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -179,7 +252,7 @@ class _Overview extends ConsumerWidget {
           JiraniSpace.xl),
       children: [
         if (me != null)
-          ref.watch(positionProvider(me.id)).when(
+          KeyedSubtree(key: tourKeys.position, child: ref.watch(positionProvider(me.id)).when(
                 loading: () => const SizedBox(
                     height: 180, child: Center(child: CircularProgressIndicator())),
                 error: (e, _) => Notice(problemText(l, e), tone: NoticeTone.critical),
@@ -248,7 +321,7 @@ class _Overview extends ConsumerWidget {
                     ),
                   ],
                 ),
-              ),
+              )),
         _BankCheck(chamaId: chama.id, myRole: chama.myRole),
         _OpenVotes(chamaId: chama.id),
         _CashToConfirm(chamaId: chama.id, myId: me?.id),
@@ -260,6 +333,7 @@ class _Overview extends ConsumerWidget {
         if (account != null && chama.myMemberCode != null) ...[
           const SizedBox(height: JiraniSpace.m),
           SurfaceCard(
+            key: tourKeys.pay,
             child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
               Row(children: [
                 const ToneIcon(Icons.account_balance_rounded, tone: JiraniTone.info, size: 38),
@@ -289,7 +363,7 @@ class _Overview extends ConsumerWidget {
           ),
         ],
         SectionHeader(l.sectionShortcuts),
-        QuickActions([
+        QuickActions(key: tourKeys.shortcuts, [
           if (bundle.rules.rules['rotation'] != null)
             QuickAction(icon: Icons.autorenew_rounded, label: l.merryGoRound,
                 tone: JiraniTone.warning,
@@ -316,7 +390,7 @@ class _Overview extends ConsumerWidget {
         ]),
         // Where to go for the rest: fines, running the chama, meetings, loans.
         SectionHeader(l.sectionMore),
-        FinesCard(chamaId: chama.id),
+        KeyedSubtree(key: tourKeys.more, child: FinesCard(chamaId: chama.id)),
         GovernanceCard(chama: chama),
         GrowthCard(chama: chama),
         MeetingsCard(chamaId: chama.id),

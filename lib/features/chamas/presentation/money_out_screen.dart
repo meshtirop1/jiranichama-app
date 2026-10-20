@@ -10,6 +10,7 @@ import '../../../core/api/api_client.dart';
 import '../../../core/api/problem.dart';
 import '../../../core/labels.dart';
 import '../../../core/providers.dart';
+import '../../../core/tours.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../auth/presentation/problem_text.dart';
 import '../data/models.dart';
@@ -68,6 +69,18 @@ class MoneyOutScreen extends ConsumerStatefulWidget {
 class _MoneyOutScreenState extends ConsumerState<MoneyOutScreen> {
   String? _error;
   bool _busy = false;
+  final _statusKey = GlobalKey();
+  final _phoneKeyCard = GlobalKey();
+
+  List<TourStep> _steps() {
+    final l = AppLocalizations.of(context);
+    return [
+      TourStep(target: _statusKey, icon: Icons.verified_user_outlined,
+          title: l.tourMoneyOutTitle, body: l.tourMoneyOutBody),
+      TourStep(target: _phoneKeyCard, icon: Icons.fingerprint_rounded, tone: JiraniTone.info,
+          title: l.tourFingerprintTitle, body: l.tourFingerprintBody),
+    ];
+  }
 
   void _refresh() {
     ref.invalidate(moneyOutProvider(widget.chamaId));
@@ -111,8 +124,10 @@ class _MoneyOutScreenState extends ConsumerState<MoneyOutScreen> {
     final status = ref.watch(moneyOutProvider(widget.chamaId));
     final official = bundle?.chama.iAmOfficial ?? false;
     final on = status.value?.on ?? false;
+    showTourOnce(context, ref, 'money-out', _steps);
     return Scaffold(
-      appBar: AppBar(title: Text(l.moneyOut)),
+      appBar: AppBar(title: Text(l.moneyOut),
+          actions: [TourButton(steps: _steps), const SizedBox(width: 4)]),
       bottomNavigationBar: official && on && bundle != null
           ? ActionBar(child: PrimaryButton(label: l.proposePayment, busy: _busy,
               onPressed: () => _propose(bundle)))
@@ -132,6 +147,7 @@ class _MoneyOutScreenState extends ConsumerState<MoneyOutScreen> {
               data: (s) => s.on
                   ? [
                       TitledCard(
+                        key: _statusKey,
                         title: l.moneyOutOn,
                         icon: Icons.lock_open_rounded,
                         tone: JiraniTone.good,
@@ -145,6 +161,7 @@ class _MoneyOutScreenState extends ConsumerState<MoneyOutScreen> {
                     ]
                   : [
                       TitledCard(
+                        key: _statusKey,
                         title: l.moneyOutOffTitle,
                         icon: Icons.lock_outline_rounded,
                         tone: JiraniTone.warning,
@@ -170,7 +187,7 @@ class _MoneyOutScreenState extends ConsumerState<MoneyOutScreen> {
                       ),
                     ],
             ),
-            if (official) const _PhoneKeyCard(),
+            if (official) _PhoneKeyCard(key: _phoneKeyCard),
             _Unapproved(chamaId: widget.chamaId, official: official),
             if (on) ...[
               SectionHeader(l.proposalsHeading),
@@ -699,7 +716,7 @@ class _ProposalScreenState extends ConsumerState<ProposalScreen> {
 
 /// For officials: set this phone up to approve with a fingerprint (6.7), once.
 class _PhoneKeyCard extends ConsumerStatefulWidget {
-  const _PhoneKeyCard();
+  const _PhoneKeyCard({super.key});
 
   @override
   ConsumerState<_PhoneKeyCard> createState() => _PhoneKeyCardState();

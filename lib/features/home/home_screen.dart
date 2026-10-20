@@ -5,6 +5,7 @@ import 'package:jirani_ui/jirani_ui.dart';
 
 import '../../core/labels.dart';
 import '../../core/providers.dart';
+import '../../core/tours.dart';
 import '../../l10n/app_localizations.dart';
 import '../auth/application/session.dart';
 import '../auth/presentation/problem_text.dart';
@@ -17,13 +18,35 @@ final chamaListProvider = FutureProvider.autoDispose<List<Chama>>(
 });
 
 /// The member's chamas, and the way into creating or joining one.
-class HomeScreen extends ConsumerWidget {
+class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends ConsumerState<HomeScreen> {
+  final _chamaKey = GlobalKey();
+  final _createKey = GlobalKey();
+  final _joinKey = GlobalKey();
+
+  List<TourStep> _steps() {
+    final l = AppLocalizations.of(context);
+    return [
+      TourStep(target: _chamaKey, icon: Icons.groups_2_outlined, title: l.tourHomeChamaTitle,
+          body: l.tourHomeChamaBody),
+      TourStep(target: _createKey, icon: Icons.add_rounded, title: l.tourHomeCreateTitle,
+          body: l.tourHomeCreateBody),
+      TourStep(target: _joinKey, icon: Icons.group_add_outlined, tone: JiraniTone.info,
+          title: l.tourHomeJoinTitle, body: l.tourHomeJoinBody),
+    ];
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
     final chamas = ref.watch(chamaListProvider);
+    if (chamas.hasValue) showTourOnce(context, ref, 'home', _steps);
     final text = Theme.of(context).textTheme;
     Future<void> go(String path) async {
       await context.push(path);
@@ -39,6 +62,7 @@ class HomeScreen extends ConsumerWidget {
           Text(l.appName),
         ]),
         actions: [
+          TourButton(steps: _steps),
           IconButton(
             tooltip: l.signOut,
             icon: const Icon(Icons.logout_rounded),
@@ -64,13 +88,16 @@ class HomeScreen extends ConsumerWidget {
                 child: Text(l.homeTitle, style: text.headlineMedium),
               ),
               if (list.isEmpty)
-                SurfaceCard(child: EmptyState(icon: Icons.groups_2_outlined,
+                SurfaceCard(key: _chamaKey, child: EmptyState(icon: Icons.groups_2_outlined,
                     title: l.homeEmptyTitle, message: l.homeEmpty)),
-              for (final c in list) _ChamaTile(chama: c, onTap: () => go('/chamas/${c.id}')),
+              for (final (i, c) in list.indexed)
+                KeyedSubtree(key: i == 0 ? _chamaKey : null,
+                    child: _ChamaTile(chama: c, onTap: () => go('/chamas/${c.id}'))),
               const SizedBox(height: JiraniSpace.l),
               Row(children: [
                 Expanded(
                   child: _StartCard(
+                    key: _createKey,
                     icon: Icons.add_rounded,
                     label: l.createChama,
                     primary: true,
@@ -80,6 +107,7 @@ class HomeScreen extends ConsumerWidget {
                 const SizedBox(width: 12),
                 Expanded(
                   child: _StartCard(
+                    key: _joinKey,
                     icon: Icons.group_add_outlined,
                     label: l.joinChama,
                     onTap: () => go('/join'),
@@ -136,6 +164,7 @@ class _ChamaTile extends StatelessWidget {
 
 class _StartCard extends StatelessWidget {
   const _StartCard({
+    super.key,
     required this.icon,
     required this.label,
     required this.onTap,

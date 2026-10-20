@@ -8,6 +8,7 @@ it touches.
 - [Sign-in](flows/sign-in.md): phone, SMS code, PIN.
 - [Checking the chain on the phone](flows/chain-check.md): how a phone catches changed history.
 - [Chama screens](flows/chama-screens.md): home, create and set up, join, confirm the rules, the active chama, statements, unmatched payments.
+- [Guided tours](flows/tours.md): the pop-up walkthroughs that explain each screen, shown once and replayed with ?.
 
 ## Operations
 

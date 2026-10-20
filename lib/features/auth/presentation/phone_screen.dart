@@ -6,6 +6,7 @@ import 'package:jirani_ui/jirani_ui.dart';
 
 import '../../../core/locale.dart';
 import '../../../core/providers.dart';
+import '../../../core/tours.dart';
 import '../../../l10n/app_localizations.dart';
 import 'auth_layout.dart';
 import 'problem_text.dart';
@@ -21,6 +22,9 @@ class PhoneScreen extends ConsumerStatefulWidget {
 
 class _PhoneScreenState extends ConsumerState<PhoneScreen> {
   final _phone = TextEditingController();
+  final _countryKey = GlobalKey();
+  final _languageKey = GlobalKey();
+  final _phoneKey = GlobalKey();
   String? _fieldError;
   String? _error;
   bool _busy = false;
@@ -69,18 +73,33 @@ class _PhoneScreenState extends ConsumerState<PhoneScreen> {
     setState(() => _fieldError = null);
   }
 
+  List<TourStep> _steps() {
+    final l = AppLocalizations.of(context);
+    return [
+      TourStep(target: _countryKey, icon: Icons.public_rounded, title: l.tourSignCountryTitle,
+          body: l.tourSignCountryBody),
+      TourStep(target: _languageKey, icon: Icons.translate_rounded, tone: JiraniTone.info,
+          title: l.tourSignLanguageTitle, body: l.tourSignLanguageBody),
+      TourStep(target: _phoneKey, icon: Icons.sms_outlined, tone: JiraniTone.good,
+          title: l.tourSignPhoneTitle, body: l.tourSignPhoneBody),
+    ];
+  }
+
   @override
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
     final text = Theme.of(context).textTheme;
     final country = countryByCode(ref.watch(countryProvider));
+    showTourOnce(context, ref, 'sign-in', _steps);
     final language = Localizations.localeOf(context).languageCode;
     return AuthLayout(
+      actions: [TourButton(steps: _steps)],
       hero: AuthHero(appName: l.appName, tagline: l.tagline),
       title: l.phoneTitle,
       children: [
         Row(children: [
           Expanded(
+            key: _countryKey,
             child: _Choice(
               key: const ValueKey('pick-country'),
               label: l.countryLabel,
@@ -90,6 +109,7 @@ class _PhoneScreenState extends ConsumerState<PhoneScreen> {
           ),
           const SizedBox(width: 10),
           Expanded(
+            key: _languageKey,
             child: _Choice(
               key: const ValueKey('pick-language'),
               label: l.language,
@@ -102,6 +122,7 @@ class _PhoneScreenState extends ConsumerState<PhoneScreen> {
         ]),
         const SizedBox(height: JiraniSpace.m),
         TextField(
+          key: _phoneKey,
           controller: _phone,
           keyboardType: TextInputType.phone,
           autofillHints: const [AutofillHints.telephoneNumber],
