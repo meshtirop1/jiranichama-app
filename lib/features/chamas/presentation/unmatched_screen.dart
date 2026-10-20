@@ -32,7 +32,7 @@ class UnmatchedScreen extends ConsumerWidget {
     return Scaffold(
       appBar: AppBar(title: Text(l.unmatched)),
       body: lines.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
+        loading: () => const LoadingView(),
         error: (e, _) => Padding(padding: const EdgeInsets.all(JiraniSpace.m),
             child: Notice(problemText(l, e), tone: NoticeTone.critical)),
         data: (items) => ListView(

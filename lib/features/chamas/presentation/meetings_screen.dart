@@ -133,7 +133,7 @@ class MeetingsScreen extends ConsumerWidget {
             )
           : null,
       body: async.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
+        loading: () => const LoadingView(),
         error: (e, _) => Padding(padding: const EdgeInsets.all(JiraniSpace.m),
             child: Notice(problemText(l, e), tone: NoticeTone.critical)),
         data: (list) => list.isEmpty
@@ -375,7 +375,7 @@ class _MeetingScreenState extends ConsumerState<MeetingScreen> {
       return Scaffold(appBar: AppBar(), body: list.hasError
           ? Padding(padding: const EdgeInsets.all(JiraniSpace.m),
               child: Notice(problemText(l, list.error!), tone: NoticeTone.critical))
-          : const Center(child: CircularProgressIndicator()));
+          : const LoadingView());
     }
     final repo = ref.read(chamaRepositoryProvider);
     final minutes = m.minutes.isEmpty ? null : m.minutes.first;
@@ -680,7 +680,7 @@ class _CodeScreenState extends ConsumerState<_CodeScreen> {
         child: Padding(
           padding: const EdgeInsets.all(JiraniSpace.m),
           child: _error != null ? Notice(_error!, tone: NoticeTone.critical)
-              : c == null ? const CircularProgressIndicator()
+              : c == null ? const BrandLoader(size: 48)
               : Column(mainAxisSize: MainAxisSize.min, children: [
                   Container(color: Colors.white, padding: const EdgeInsets.all(12),
                       child: QrImageView(data: c.qr, size: 240)),

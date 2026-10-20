@@ -101,7 +101,7 @@ class _StatementsScreenState extends ConsumerState<StatementsScreen> {
             const SizedBox(height: JiraniSpace.m),
           ],
           ...list.when(
-            loading: () => [const Center(child: CircularProgressIndicator())],
+            loading: () => [const LoadingView()],
             error: (e, _) => [Notice(problemText(l, e), tone: NoticeTone.critical)],
             data: (items) => [
               if (items.isEmpty)

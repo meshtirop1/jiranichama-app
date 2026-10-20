@@ -105,11 +105,11 @@ class _OpeningScreenState extends ConsumerState<OpeningScreen> {
     return Scaffold(
       appBar: AppBar(title: Text(l.openingBalances)),
       body: opening.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
+        loading: () => const LoadingView(),
         error: (e, _) => Padding(padding: const EdgeInsets.all(JiraniSpace.m),
             child: Notice(problemText(l, e), tone: NoticeTone.critical)),
         data: (ob) {
-          if (bundle == null) return const Center(child: CircularProgressIndicator());
+          if (bundle == null) return const LoadingView();
           final chama = bundle.chama;
           final editing = chama.iAmTreasurer && ob.state != 'confirmed';
           final byMember = {for (final x in ob.lines) x.membershipId: x};

@@ -118,7 +118,12 @@ class JiraniStatus extends ThemeExtension<JiraniStatus> {
       };
 
   @override
-  JiraniStatus copyWith() => this;
+  JiraniStatus copyWith({Color? card}) => JiraniStatus(
+        good: good, goodContainer: goodContainer, onGoodContainer: onGoodContainer,
+        info: info, infoContainer: infoContainer, onInfoContainer: onInfoContainer,
+        warning: warning, warningContainer: warningContainer,
+        onWarningContainer: onWarningContainer, card: card ?? this.card,
+        heroStart: heroStart, heroEnd: heroEnd);
 
   @override
   JiraniStatus lerp(JiraniStatus? other, double t) {

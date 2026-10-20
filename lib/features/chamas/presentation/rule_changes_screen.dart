@@ -108,7 +108,7 @@ class _RuleProposalScreenState extends ConsumerState<RuleProposalScreen> {
         body: list.hasError
             ? Padding(padding: const EdgeInsets.all(JiraniSpace.m),
                 child: Notice(problemText(l, list.error!), tone: NoticeTone.critical))
-            : const Center(child: CircularProgressIndicator()),
+            : const LoadingView(),
       );
     }
     final status = switch (p.state) {

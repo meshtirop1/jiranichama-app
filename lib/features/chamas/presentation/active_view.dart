@@ -8,7 +8,10 @@ import '../../../core/labels.dart';
 import '../../../core/providers.dart';
 import '../../../core/tours.dart';
 import '../../../l10n/app_localizations.dart';
+import '../../../core/prefs.dart';
 import '../../auth/presentation/problem_text.dart';
+import '../../registration/registration_screen.dart';
+import '../../settings/accessibility_sheet.dart';
 import '../data/models.dart';
 import 'chama_screen.dart';
 import 'cash_screen.dart';
@@ -124,7 +127,8 @@ class _ActiveViewState extends ConsumerState<ActiveView> {
         settle: Duration(milliseconds: tab == 1 ? 1800 : 700));
     return Scaffold(
       appBar: AppBar(
-        actions: [TourButton(steps: () => _steps(_tab)), const SizedBox(width: 4)],
+        actions: [const AccessibilityButton(), TourButton(steps: () => _steps(_tab)),
+          const SizedBox(width: 4)],
         titleSpacing: 0,
         title: Row(children: [
           Avatar(chama.name, size: 36),
@@ -254,7 +258,7 @@ class _Overview extends ConsumerWidget {
         if (me != null)
           KeyedSubtree(key: tourKeys.position, child: ref.watch(positionProvider(me.id)).when(
                 loading: () => const SizedBox(
-                    height: 180, child: Center(child: CircularProgressIndicator())),
+                    height: 180, child: LoadingView()),
                 error: (e, _) => Notice(problemText(l, e), tone: NoticeTone.critical),
                 data: (p) => HeroCard(
                   label: l.myPosition,
@@ -323,6 +327,7 @@ class _Overview extends ConsumerWidget {
                 ),
               )),
         _DeathReported(chamaId: chama.id),
+        _RegistrationNudge(chama: chama),
         _BankCheck(chamaId: chama.id, myRole: chama.myRole),
         _OpenVotes(chamaId: chama.id),
         _CashToConfirm(chamaId: chama.id, myId: me?.id),
@@ -397,6 +402,63 @@ class _Overview extends ConsumerWidget {
         MeetingsCard(chamaId: chama.id),
         if (chama.loansOn) LoansCard(chamaId: chama.id),
       ],
+    );
+  }
+}
+
+final _nudgeSnoozedProvider = FutureProvider.autoDispose.family<bool, String>((ref, id) async {
+  final raw = await ref.watch(prefsStoreProvider).read('reg_snooze_$id');
+  final until = raw == null ? null : DateTime.tryParse(raw);
+  return until != null && DateTime.now().isBefore(until);
+});
+
+/// Now and then (every two weeks, until the chama has its certificate) the overview
+/// reminds the members to register the chama, and offers the papers ready-made.
+class _RegistrationNudge extends ConsumerWidget {
+  const _RegistrationNudge({required this.chama});
+
+  final Chama chama;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    if (chama.registered || chama.state != ChamaState.active) return const SizedBox.shrink();
+    final snoozed = ref.watch(_nudgeSnoozedProvider(chama.id));
+    if (snoozed.value != false) return const SizedBox.shrink();
+    final l = AppLocalizations.of(context);
+    final text = Theme.of(context).textTheme;
+    return Padding(
+      padding: const EdgeInsets.only(top: JiraniSpace.m),
+      child: SurfaceCard(
+        key: const ValueKey('reg-nudge'),
+        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          Row(children: [
+            const ToneIcon(Icons.workspace_premium_outlined, tone: JiraniTone.info, size: 40),
+            const SizedBox(width: 12),
+            Expanded(child: Text(l.regNudgeTitle, style: text.titleSmall)),
+          ]),
+          const SizedBox(height: 8),
+          Text(l.regNudgeBody, style: text.bodySmall),
+          const SizedBox(height: 10),
+          Wrap(spacing: 8, runSpacing: 4, children: [
+            FilledButton.tonal(
+              key: const ValueKey('reg-nudge-open'),
+              style: FilledButton.styleFrom(minimumSize: const Size(0, 44)),
+              onPressed: () => Navigator.of(context).push(MaterialPageRoute(
+                  builder: (_) => RegistrationScreen(chamaId: chama.id))),
+              child: Text(l.regNudgeOpen),
+            ),
+            TextButton(
+              key: const ValueKey('reg-nudge-later'),
+              onPressed: () async {
+                await ref.read(prefsStoreProvider).write('reg_snooze_${chama.id}',
+                    DateTime.now().add(const Duration(days: 14)).toIso8601String());
+                ref.invalidate(_nudgeSnoozedProvider(chama.id));
+              },
+              child: Text(l.regNudgeLater),
+            ),
+          ]),
+        ]),
+      ),
     );
   }
 }

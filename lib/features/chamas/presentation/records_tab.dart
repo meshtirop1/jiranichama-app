@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:jirani_domain/jirani_domain.dart';
 import 'package:jirani_ui/jirani_ui.dart';
 
 import '../../../core/api/api_client.dart';
@@ -34,10 +35,20 @@ final anchorCheckProvider = FutureProvider.autoDispose.family<AnchorCheck?, Stri
   return checkAnchor(ref.watch(chamaRepositoryProvider), chamaId, chain);
 });
 
+/// Which way a record moved money, as members read it (the arrows on each record).
+MoneyFlow flowOf(String type) => switch (type) {
+      'contribution' || 'contribution_pending_cash' || 'loan_repayment' || 'loan_interest' ||
+      'investment_income' || 'opening_balance' => MoneyFlow.incoming,
+      'payment' || 'loan_disbursed' || 'bank_charge' || 'unapproved_debit_detected' ||
+      'investment_recorded' => MoneyFlow.outgoing,
+      'fine_raised' || 'fine_paid' || 'fine_waived' => MoneyFlow.fine,
+      _ => MoneyFlow.other,
+    };
+
 /// Every record in the chama, newest first. They show as soon as they arrive; the notice
 /// at the top says when the phone has finished checking them itself. A record the
 /// treasurer assigned to me can be sent back.
-class RecordsTab extends ConsumerWidget {
+class RecordsTab extends ConsumerStatefulWidget {
   const RecordsTab({super.key, required this.bundle, this.chainKey, this.listKey});
 
   final ChamaBundle bundle;
@@ -47,8 +58,20 @@ class RecordsTab extends ConsumerWidget {
   final GlobalKey? listKey;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<RecordsTab> createState() => _RecordsTabState();
+}
+
+class _RecordsTabState extends ConsumerState<RecordsTab> {
+  /// Show only money in, only money out or only fines; null shows everything.
+  MoneyFlow? _only;
+
+  ChamaBundle get bundle => widget.bundle;
+
+  @override
+  Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
+    final chainKey = widget.chainKey;
+    final listKey = widget.listKey;
     final id = bundle.chama.id;
     final ledger = ref.watch(ledgerItemsProvider(id));
     return ledger.when(
@@ -62,7 +85,29 @@ class RecordsTab extends ConsumerWidget {
         final reversed = {for (final i in items) i.reverses}..remove(null);
         final receiptOf = {for (final i in items) i.id: i.receiptCode};
         final myCode = bundle.chama.myMemberCode;
-        final newestFirst = items.reversed.toList();
+        // Totals over every record that still counts (reversals and reversed ones out).
+        var inC = 0, outC = 0, fineC = 0;
+        for (final i in items) {
+          if (reversed.contains(i.id) || i.reverses != null) continue;
+          switch (flowOf(i.type)) {
+            case MoneyFlow.incoming: inC += i.amount.cents.abs();
+            case MoneyFlow.outgoing: outC += i.amount.cents.abs();
+            case MoneyFlow.fine when i.type == 'fine_raised': fineC += i.amount.cents.abs();
+            default: break;
+          }
+        }
+        final newestFirst = items.reversed
+            .where((i) => _only == null || flowOf(i.type) == _only).toList();
+        Widget total(MoneyFlow f, String label, int cents) => Expanded(
+              child: FlowTotal(
+                key: ValueKey('flow-${f.name}'),
+                flow: f,
+                label: label,
+                value: Kes(cents).format(),
+                selected: _only == f,
+                onTap: () => setState(() => _only = _only == f ? null : f),
+              ),
+            );
         final header = <Widget>[
           AnimatedSwitcher(
             key: chainKey,
@@ -90,6 +135,31 @@ class RecordsTab extends ConsumerWidget {
           if (check.value case final c? when c.ok && c.unsigned > 0) ...[
             const SizedBox(height: JiraniSpace.s),
             Notice(l.chainUnsigned(c.unsigned), tone: NoticeTone.warning),
+          ],
+          const SizedBox(height: JiraniSpace.m),
+          // Money in, out and fines at a glance; tapping one shows only those records.
+          Row(children: [
+            total(MoneyFlow.incoming, l.flowIn, inC),
+            const SizedBox(width: JiraniSpace.s),
+            total(MoneyFlow.outgoing, l.flowOut, outC),
+            const SizedBox(width: JiraniSpace.s),
+            total(MoneyFlow.fine, l.flowFines, fineC),
+          ]),
+          if (_only != null) ...[
+            const SizedBox(height: JiraniSpace.s),
+            Align(
+              alignment: Alignment.centerLeft,
+              child: InputChip(
+                key: const ValueKey('flow-clear'),
+                avatar: FlowArrow(_only!, size: 22),
+                label: Text(l.flowShowing(switch (_only!) {
+                  MoneyFlow.incoming => l.flowIn,
+                  MoneyFlow.outgoing => l.flowOut,
+                  _ => l.flowFines,
+                })),
+                onDeleted: () => setState(() => _only = null),
+              ),
+            ),
           ],
           const SizedBox(height: JiraniSpace.s),
         ];
@@ -196,24 +266,22 @@ class _EntryTileState extends ConsumerState<_EntryTile> {
     final text = Theme.of(context).textTheme;
     final status = JiraniStatus.of(context);
     final muted = scheme.onSurfaceVariant;
+    final flow = flowOf(i.type);
+    // Records that move no money keep their own small sign.
     final (IconData icon, JiraniTone tone) = switch (i.type) {
-      'contribution' || 'contribution_pending_cash' => (Icons.south_west_rounded,
-          JiraniTone.good),
-      'opening_balance' => (Icons.history_edu_outlined, JiraniTone.info),
-      'fine_raised' => (Icons.gavel_rounded, JiraniTone.critical),
-      'fine_waived' => (Icons.do_not_disturb_on_outlined, JiraniTone.neutral),
-      'fine_paid' => (Icons.task_alt_rounded, JiraniTone.good),
       'reversal' || 'correction' => (Icons.undo_rounded, JiraniTone.warning),
       'membership' => (Icons.person_add_alt_1_outlined, JiraniTone.brand),
       'rule_version_adopted' => (Icons.menu_book_outlined, JiraniTone.brand),
       _ => (Icons.receipt_long_outlined, JiraniTone.neutral),
     };
-    final incoming = tone == JiraniTone.good;
+    final (strong, _, _) = status.colors(scheme, FlowArrow.toneOf(flow));
     return SurfaceCard(
       margin: const EdgeInsets.only(bottom: JiraniSpace.s),
       padding: const EdgeInsets.fromLTRB(12, 12, 14, 12),
       child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        ToneIcon(icon, tone: widget.isReversed ? JiraniTone.neutral : tone, size: 42),
+        flow == MoneyFlow.other
+            ? ToneIcon(icon, tone: widget.isReversed ? JiraniTone.neutral : tone, size: 42)
+            : FlowArrow(flow, size: 42, muted: widget.isReversed),
         const SizedBox(width: 12),
         Expanded(
           child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
@@ -243,9 +311,19 @@ class _EntryTileState extends ConsumerState<_EntryTile> {
         ),
         if (i.amount.cents != 0) ...[
           const SizedBox(width: 8),
-          MoneyText(i.amount, style: text.titleSmall?.copyWith(
-              color: widget.isReversed ? muted : incoming ? status.good : scheme.onSurface,
-              decoration: widget.isReversed ? TextDecoration.lineThrough : null)),
+          Text.rich(TextSpan(children: [
+            if (FlowArrow.signOf(flow).isNotEmpty)
+              TextSpan(text: '${FlowArrow.signOf(flow)} '),
+            WidgetSpan(alignment: PlaceholderAlignment.baseline,
+                baseline: TextBaseline.alphabetic,
+                child: MoneyText(i.amount.cents < 0 ? -i.amount : i.amount,
+                    style: text.titleSmall?.copyWith(
+                        color: widget.isReversed ? muted
+                            : flow == MoneyFlow.other ? scheme.onSurface : strong,
+                        decoration: widget.isReversed ? TextDecoration.lineThrough : null))),
+          ]), style: text.titleSmall?.copyWith(
+              color: widget.isReversed ? muted : flow == MoneyFlow.other ? scheme.onSurface
+                  : strong)),
         ],
       ]),
     );

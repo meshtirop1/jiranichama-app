@@ -10,6 +10,9 @@ import '../../l10n/app_localizations.dart';
 import '../auth/application/session.dart';
 import '../auth/presentation/problem_text.dart';
 import '../chamas/data/models.dart';
+import '../registration/registration_screen.dart';
+import '../settings/accessibility_sheet.dart';
+import '../settings/settings_screen.dart';
 
 final chamaListProvider = FutureProvider.autoDispose<List<Chama>>(
     (ref) {
@@ -17,15 +20,60 @@ final chamaListProvider = FutureProvider.autoDispose<List<Chama>>(
   return ref.watch(chamaRepositoryProvider).list();
 });
 
-/// The member's chamas, and the way into creating or joining one.
-class HomeScreen extends ConsumerStatefulWidget {
+/// The app's home: three tabs at the bottom. My chamas; registering a chama with the
+/// government; and settings (profile, ID check, "Easy to read").
+class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
   @override
-  ConsumerState<HomeScreen> createState() => _HomeScreenState();
+  State<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends ConsumerState<HomeScreen> {
+class _HomeScreenState extends State<HomeScreen> {
+  int _tab = 0;
+
+  /// A tab is built the first time it is opened, then kept (its scroll and loads stay).
+  final _opened = <int>{0};
+
+  @override
+  Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
+    const tabs = [ChamasTab(), RegistrationScreen(inTab: true), SettingsScreen()];
+    return Scaffold(
+      body: IndexedStack(index: _tab, children: [
+        for (var i = 0; i < tabs.length; i++)
+          _opened.contains(i) ? tabs[i] : const SizedBox.shrink(),
+      ]),
+      bottomNavigationBar: NavigationBar(
+        key: const ValueKey('home-nav'),
+        selectedIndex: _tab,
+        onDestinationSelected: (i) => setState(() {
+          _tab = i;
+          _opened.add(i);
+        }),
+        destinations: [
+          NavigationDestination(icon: const Icon(Icons.groups_2_outlined),
+              selectedIcon: const Icon(Icons.groups_2_rounded), label: l.tabChamas),
+          NavigationDestination(icon: const Icon(Icons.workspace_premium_outlined),
+              selectedIcon: const Icon(Icons.workspace_premium_rounded),
+              label: l.tabRegister),
+          NavigationDestination(icon: const Icon(Icons.settings_outlined),
+              selectedIcon: const Icon(Icons.settings_rounded), label: l.tabSettings),
+        ],
+      ),
+    );
+  }
+}
+
+/// The member's chamas, and the way into creating or joining one.
+class ChamasTab extends ConsumerStatefulWidget {
+  const ChamasTab({super.key});
+
+  @override
+  ConsumerState<ChamasTab> createState() => _ChamasTabState();
+}
+
+class _ChamasTabState extends ConsumerState<ChamasTab> {
   final _chamaKey = GlobalKey();
   final _createKey = GlobalKey();
   final _joinKey = GlobalKey();
@@ -59,9 +107,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         title: Row(children: [
           const BrandMark(size: 34),
           const SizedBox(width: 10),
-          Text(l.appName),
+          Flexible(child: Text(l.appName, overflow: TextOverflow.ellipsis)),
         ]),
         actions: [
+          const AccessibilityButton(),
           TourButton(steps: _steps),
           IconButton(
             tooltip: l.signOut,
@@ -74,7 +123,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       body: RefreshIndicator(
         onRefresh: () => ref.refresh(chamaListProvider.future),
         child: chamas.when(
-          loading: () => const Center(child: CircularProgressIndicator()),
+          loading: () => const LoadingView(),
           error: (e, _) => ListView(padding: const EdgeInsets.all(JiraniSpace.l), children: [
             Notice(problemText(l, e), tone: NoticeTone.critical),
             TextButton(onPressed: () => ref.invalidate(chamaListProvider), child: Text(l.retry)),

@@ -116,7 +116,7 @@ class _FinesScreenState extends ConsumerState<FinesScreen> {
     return Scaffold(
       appBar: AppBar(title: Text(l.finesTitle)),
       body: async.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
+        loading: () => const LoadingView(),
         error: (e, _) => Padding(padding: const EdgeInsets.all(JiraniSpace.m),
             child: Notice(problemText(l, e), tone: NoticeTone.critical)),
         data: (list) => ListView(padding: const EdgeInsets.all(JiraniSpace.m), children: [

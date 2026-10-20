@@ -6,8 +6,27 @@ import 'tokens.dart';
 /// The JiraniChama theme: a hand-set palette (light and dark), Plus Jakarta Sans, flat
 /// cards with a hairline border, soft filled fields, and pill-shaped navigation.
 abstract final class JiraniTheme {
-  static ThemeData light() => _build(Brightness.light);
-  static ThemeData dark() => _build(Brightness.dark);
+  /// [highContrast]: stronger text, borders and edges for people who do not see well.
+  /// [largeTargets]: taller buttons and rows, for unsteady hands.
+  static ThemeData light({bool highContrast = false, bool largeTargets = false}) =>
+      _build(Brightness.light, highContrast: highContrast, largeTargets: largeTargets);
+  static ThemeData dark({bool highContrast = false, bool largeTargets = false}) =>
+      _build(Brightness.dark, highContrast: highContrast, largeTargets: largeTargets);
+
+  /// The same palette pushed to full contrast: grey text becomes full text, hairlines
+  /// become real borders, the page is pure white (or black).
+  static ColorScheme _contrast(ColorScheme s) {
+    final dark = s.brightness == Brightness.dark;
+    return s.copyWith(
+      primary: dark ? const Color(0xFFA6F5CD) : const Color(0xFF0A4A30),
+      onSurfaceVariant: s.onSurface,
+      outline: s.onSurface.withValues(alpha: .8),
+      outlineVariant: s.onSurface.withValues(alpha: .55),
+      surface: dark ? const Color(0xFF000000) : const Color(0xFFFFFFFF),
+      onSurface: dark ? const Color(0xFFFFFFFF) : const Color(0xFF000000),
+      error: dark ? const Color(0xFFFFC4BD) : const Color(0xFF8C1D18),
+    );
+  }
 
   static const _lightScheme = ColorScheme(
     brightness: Brightness.light,
@@ -111,10 +130,16 @@ abstract final class JiraniTheme {
     );
   }
 
-  static ThemeData _build(Brightness brightness) {
+  static ThemeData _build(Brightness brightness,
+      {bool highContrast = false, bool largeTargets = false}) {
     final dark = brightness == Brightness.dark;
-    final s = dark ? _darkScheme : _lightScheme;
-    final status = dark ? JiraniStatus.dark : JiraniStatus.light;
+    final base = dark ? _darkScheme : _lightScheme;
+    final s = highContrast ? _contrast(base) : base;
+    final baseStatus = dark ? JiraniStatus.dark : JiraniStatus.light;
+    final status = highContrast
+        ? baseStatus.copyWith(card: dark ? const Color(0xFF0B0F0D) : const Color(0xFFFFFFFF))
+        : baseStatus;
+    final tap = jiraniMinTapTarget + (largeTargets ? 12 : 0);
     final text = _text(s);
     final fieldRadius = BorderRadius.circular(JiraniRadius.field);
     final buttonShape = RoundedRectangleBorder(
@@ -160,7 +185,7 @@ abstract final class JiraniTheme {
       ),
       listTileTheme: ListTileThemeData(
         contentPadding: const EdgeInsets.symmetric(horizontal: JiraniSpace.m),
-        minVerticalPadding: 12,
+        minVerticalPadding: largeTargets ? 18 : 12,
         horizontalTitleGap: 14,
         iconColor: s.onSurfaceVariant,
         titleTextStyle: text.titleSmall?.copyWith(fontSize: 15),
@@ -192,7 +217,7 @@ abstract final class JiraniTheme {
       ),
       filledButtonTheme: FilledButtonThemeData(
         style: FilledButton.styleFrom(
-          minimumSize: const Size.fromHeight(jiraniMinTapTarget + 6),
+          minimumSize: Size.fromHeight(tap + 6),
           shape: buttonShape,
           textStyle: text.labelLarge,
           elevation: 0,
@@ -200,7 +225,7 @@ abstract final class JiraniTheme {
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
-          minimumSize: const Size(64, jiraniMinTapTarget + 4),
+          minimumSize: Size(64, tap + 4),
           shape: buttonShape,
           textStyle: text.labelLarge,
           elevation: 0,
@@ -210,7 +235,7 @@ abstract final class JiraniTheme {
       ),
       outlinedButtonTheme: OutlinedButtonThemeData(
         style: OutlinedButton.styleFrom(
-          minimumSize: const Size(64, jiraniMinTapTarget + 4),
+          minimumSize: Size(64, tap + 4),
           shape: buttonShape,
           textStyle: text.labelLarge,
           foregroundColor: dark ? s.primary : s.onSurface,
@@ -221,14 +246,14 @@ abstract final class JiraniTheme {
       ),
       textButtonTheme: TextButtonThemeData(
         style: TextButton.styleFrom(
-          minimumSize: const Size(48, jiraniMinTapTarget),
+          minimumSize: Size(48, tap),
           textStyle: text.labelLarge,
           foregroundColor: s.primary,
           shape: buttonShape,
         ),
       ),
       iconButtonTheme: IconButtonThemeData(
-        style: IconButton.styleFrom(minimumSize: const Size.square(jiraniMinTapTarget)),
+        style: IconButton.styleFrom(minimumSize: Size.square(tap)),
       ),
       floatingActionButtonTheme: FloatingActionButtonThemeData(
         backgroundColor: s.primary,
@@ -239,7 +264,7 @@ abstract final class JiraniTheme {
       ),
       segmentedButtonTheme: SegmentedButtonThemeData(
         style: SegmentedButton.styleFrom(
-          minimumSize: const Size(0, jiraniMinTapTarget),
+          minimumSize: Size(0, tap),
           textStyle: text.labelMedium?.copyWith(fontSize: 13.5),
           selectedBackgroundColor: s.primaryContainer,
           selectedForegroundColor: s.onPrimaryContainer,

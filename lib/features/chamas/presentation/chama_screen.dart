@@ -41,7 +41,7 @@ class ChamaScreen extends ConsumerWidget {
     final bundle = ref.watch(chamaBundleProvider(id));
     void refresh() => ref.invalidate(chamaBundleProvider(id));
     return bundle.when(
-      loading: () => const Scaffold(body: Center(child: CircularProgressIndicator())),
+      loading: () => const Scaffold(body: LoadingView()),
       error: (e, _) => Scaffold(
         appBar: AppBar(),
         body: ListView(padding: const EdgeInsets.all(JiraniSpace.l), children: [

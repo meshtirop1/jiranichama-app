@@ -9,6 +9,7 @@ it touches.
 - [Checking the chain on the phone](flows/chain-check.md): how a phone catches changed history.
 - [Chama screens](flows/chama-screens.md): home, create and set up, join, confirm the rules, the active chama, statements, unmatched payments.
 - [Guided tours](flows/tours.md): the pop-up walkthroughs that explain each screen, shown once and replayed with ?.
+- [Home tabs, Settings, Register, Easy to read](flows/settings-registration-a11y.md): the spinning loader, money in/out/fine arrows, the Settings tab with the ID check, registering a chama with the government, and the accessibility sheet.
 
 ## Operations
 
