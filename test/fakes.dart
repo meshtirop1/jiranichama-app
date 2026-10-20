@@ -829,6 +829,12 @@ class FakeChamaRepository implements ChamaRepository {
   }
 
   @override
+  Future<void> confirmDeath(String exitId) async {
+    calls.add('confirmDeath:$exitId');
+    exitsList.firstWhere((e) => e['id'] == exitId)['confirmed'] = true;
+  }
+
+  @override
   Future<void> cancelExit(String exitId) async {
     calls.add('cancelExit:$exitId');
     exitsList.firstWhere((e) => e['id'] == exitId)['state'] = 'cancelled';

@@ -328,12 +328,23 @@ class _GovernanceScreenState extends ConsumerState<GovernanceScreen> {
                 leading: Avatar(e.member, size: 38),
                 title: Text(e.kind == 'death' ? l.exitDied(e.member)
                     : l.exitLeaving(e.member)),
-                subtitle: Text(l.exitLine(e.exitOn, _kes(e.settlementCents), e.state)),
+                subtitle: Text(!e.isDeathReport
+                    ? l.exitLine(e.exitOn, _kes(e.settlementCents), e.state)
+                    : e.confirmed ? l.deathConfirmedSettles(e.exitOn)
+                        : l.deathWaitingSecond(e.reportedBy)),
+                // A second official confirms a death report: never the one who made it.
+                trailing: official && e.isDeathReport && !e.confirmed && !e.mine
+                        && e.reportedBy != widget.chama.myMemberCode
+                    ? TextButton(key: ValueKey('confirm-death-${e.id}'),
+                        onPressed: _busy ? null
+                            : () => _run(() => repo.confirmDeath(e.id)),
+                        child: Text(l.deathConfirm))
+                    : null,
               ),
             if (myExit != null)
               OutlinedButton(key: const ValueKey('exit-stay'),
                   onPressed: _busy ? null : () => _run(() => repo.cancelExit(myExit.id)),
-                  child: Text(l.exitStay))
+                  child: Text(myExit.kind == 'death' ? l.deathIAmAlive : l.exitStay))
             else if (!official && !exits.any((e) => e.mine))
               OutlinedButton(key: const ValueKey('exit-leave'),
                   onPressed: _busy ? null : _leave, child: Text(l.exitLeave)),

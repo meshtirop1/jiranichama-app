@@ -377,3 +377,14 @@ For chamas whose rules have a rotation, a **Merry-go-round** button on the overv
 
 Monthly statements made and sent automatically, the encrypted offline copy of the ledger, and pull to
 refresh on every list.
+
+## Protections (2026-10-20)
+
+- **Reported as dead.** The member sees a red notice first on their home screen, with
+  "I am alive". Tapping it cancels the report, and every member is told who made it.
+- **Confirming a death.** In the exits list, an official who did not make the report sees
+  "Confirm this death". The reporter never does. The row shows who reported it and
+  whether a second official has confirmed.
+- **Withdrawals with no approval.** Once an official has explained one, the row says the
+  members are voting on it and that nothing can be paid until they accept it. The explain
+  button is hidden while that vote runs.

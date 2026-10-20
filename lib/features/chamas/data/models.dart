@@ -776,6 +776,11 @@ class ExitInfo {
   String get exitOn => json['exit_on'] as String;
   String get state => json['state'] as String;
   int get settlementCents => ((json['quote'] as Map)['settlement_cents'] as int?) ?? 0;
+  String get reportedBy => json['reported_by'] as String? ?? '';
+
+  /// A death report a second official has confirmed (it still waits out the objection days).
+  bool get confirmed => json['confirmed'] == true;
+  bool get isDeathReport => kind == 'death' && state == 'notice';
 }
 
 class ExitQuote {

@@ -1905,5 +1905,12 @@
   "tourMoneyOutTitle": "Money out needs approval",
   "tourMoneyOutBody": "Every payment out of the chama needs officials to approve it, and big ones need a members' vote. Money leaving without approval alerts every member.",
   "tourFingerprintTitle": "Approve with your fingerprint",
-  "tourFingerprintBody": "Officials set up their phone once. Then nobody can approve in their name, even with their SMS codes."
+  "tourFingerprintBody": "Officials set up their phone once. Then nobody can approve in their name, even with their SMS codes.",
+  "deathIAmAlive": "I am alive",
+  "deathReportedMe": "{who} has reported that you have died. If this is not true, tap I am alive. Nothing happens to your money until then.",
+  "deathWaitingSecond": "Reported by {who}. Waiting for a second official to confirm.",
+  "deathConfirmedSettles": "Confirmed. Nothing is paid before {date}, and the member can still say it is not true.",
+  "deathConfirm": "Confirm this death",
+  "unapprovedVoting": "Explained: {text}. The members are voting on it; until they accept it, no money can be paid.",
+  "breachFrozen": "Money left the bank without approval. Nothing can be paid until the members accept an explanation."
 }
