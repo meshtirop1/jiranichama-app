@@ -12,3 +12,4 @@ export 'src/money_text.dart';
 export 'src/notice.dart';
 export 'src/theme.dart';
 export 'src/tokens.dart';
+export 'src/tour.dart';
