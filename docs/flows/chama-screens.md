@@ -388,3 +388,15 @@ refresh on every list.
 - **Withdrawals with no approval.** Once an official has explained one, the row says the
   members are voting on it and that nothing can be paid until they accept it. The explain
   button is hidden while that vote runs.
+
+## Bank signatories (2026-10-20)
+
+- **Running the chama → Bank signatories** shows what the bank has on file: who signs,
+  how many must sign, whether each signatory approves in the bank's own app, and who
+  uploaded and confirmed it.
+- An official ticks the signatories, sets how many must sign (two at least), attaches a
+  photo of the bank's form and sends it. A different official confirms it with an SMS code.
+- Until a mandate needing two signatures is confirmed, every member's overview shows a
+  warning, and money out cannot be switched on.
+- Records show "Bank statement sealed" for every accepted statement and "Bank signatories
+  confirmed" for the mandate.

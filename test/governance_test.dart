@@ -133,4 +133,41 @@ void main() {
     await tester.pumpAndSettle();
     expect(repo.calls, contains('cancelExit:x1'));
   });
+
+  testWidgets('an official shows the bank mandate and another official confirms it',
+      (tester) async {
+    final repo = FakeChamaRepository();
+    await _gov(tester, repo);
+    await tester.tap(find.byKey(const ValueKey('mandate-tile')));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('mandate-missing')), findsOneWidget);
+
+    // Submit stays off until two signatories and the bank's form are given.
+    await tester.tap(find.byKey(const ValueKey('mandate-signer-m1')));
+    await tester.tap(find.byKey(const ValueKey('mandate-signer-m2')));
+    await tester.pumpAndSettle();
+    await tester.ensureVisible(find.byKey(const ValueKey('mandate-attach')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('mandate-attach')));
+    await tester.pumpAndSettle();
+    await tester.ensureVisible(find.byKey(const ValueKey('mandate-submit')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('mandate-submit')));
+    await tester.pumpAndSettle();
+    expect(repo.calls.last, 'proposeMandate:m1,m2:2:false');
+    // I uploaded it: I cannot confirm it myself.
+    expect(find.byKey(const ValueKey('mandate-confirm')), findsNothing);
+
+    // Another official sees it and confirms with an SMS code.
+    repo.mandatePending!['uploaded_by'] = 'JC-4821-002';
+    await tester.pageBack();
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('mandate-tile')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('mandate-confirm')));
+    await tester.pumpAndSettle();
+    await _sms(tester);
+    expect(repo.calls, contains('confirmBankMandate:mand-1:$smsCode'));
+    expect(find.text('What the bank has on file'), findsOneWidget);
+  });
 }

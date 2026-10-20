@@ -32,6 +32,14 @@ abstract class ChamaRepository {
   Future<List<Json>> countersign(String chamaId, {required int seq, required String hash,
       required String signature});
   Future<List<int>> anchorProofFile(String anchorId);
+  Future<Json> bankMandate(String chamaId);
+  Future<Json> proposeMandate(String chamaId, {required List<String> signatoryIds,
+      required int minSigners, required bool bankAppApprovals, required String filename,
+      required List<int> bytes});
+  Future<ChallengeSent> startMandateConfirm(String mandateId);
+  Future<Json> confirmBankMandate(String mandateId,
+      {required String challengeId, required String code});
+  Future<Json> rejectMandate(String mandateId);
   Future<List<Statement>> statements(String id);
   Future<Statement> uploadStatement(String id, {required String filename,
       required List<int> bytes, required String idempotencyKey});
@@ -283,6 +291,34 @@ class HttpChamaRepository implements ChamaRepository {
   @override
   Future<List<int>> anchorProofFile(String anchorId) =>
       _api.getBytes('/anchors/$anchorId/ots/');
+
+  @override
+  Future<Json> bankMandate(String chamaId) async =>
+      await _api.get('/chamas/$chamaId/bank-mandate/') as Json;
+
+  @override
+  Future<Json> proposeMandate(String chamaId, {required List<String> signatoryIds,
+          required int minSigners, required bool bankAppApprovals, required String filename,
+          required List<int> bytes}) =>
+      _api.postForm('/chamas/$chamaId/bank-mandate/', {
+        'signatory_ids': signatoryIds.join(','),
+        'min_signers': '$minSigners',
+        'bank_app_approvals': '$bankAppApprovals',
+      }, fileField: 'file', filename: filename, bytes: bytes);
+
+  @override
+  Future<ChallengeSent> startMandateConfirm(String mandateId) async => ChallengeSent(
+      await _api.post('/bank-mandates/$mandateId/confirm/', auth: true, body: {}));
+
+  @override
+  Future<Json> confirmBankMandate(String mandateId,
+          {required String challengeId, required String code}) =>
+      _api.post('/bank-mandates/$mandateId/confirm/', auth: true,
+          body: {'challenge_id': challengeId, 'code': code});
+
+  @override
+  Future<Json> rejectMandate(String mandateId) =>
+      _api.post('/bank-mandates/$mandateId/reject/', auth: true, body: {});
 
   @override
   Future<List<Statement>> statements(String id) async =>

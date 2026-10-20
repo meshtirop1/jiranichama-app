@@ -548,6 +548,59 @@ class FakeChamaRepository implements ChamaRepository {
     return [0, 79, 84, 83];
   }
 
+  // Bank mandate (protection plan 2026-10-20)
+  Json? mandateCurrent;
+  Json? mandatePending;
+
+  Json get _mandateState => {
+        'current': mandateCurrent, 'pending': mandatePending, 'min_signers_required': 2,
+        'multi_approval_options': ['Equity Bank: Equitel Multiple Approval'],
+        'safe': mandateCurrent != null,
+      };
+
+  @override
+  Future<Json> bankMandate(String chamaId) async => _mandateState;
+
+  @override
+  Future<Json> proposeMandate(String chamaId, {required List<String> signatoryIds,
+      required int minSigners, required bool bankAppApprovals, required String filename,
+      required List<int> bytes}) async {
+    calls.add('proposeMandate:${signatoryIds.join(',')}:$minSigners:$bankAppApprovals');
+    mandatePending = {
+      'id': 'mand-1', 'state': 'proposed', 'min_signers': minSigners,
+      'bank_app_approvals': bankAppApprovals, 'document_sha256': 'ab',
+      'signatories': [
+        for (final id in signatoryIds)
+          {'id': id, 'member_code': 'JC-$id', 'name': 'Member $id', 'role': 'member'},
+      ],
+      'uploaded_by': 'JC-4821-001', 'confirmed_by': null, 'receipt': null,
+    };
+    return _mandateState;
+  }
+
+  @override
+  Future<ChallengeSent> startMandateConfirm(String mandateId) async {
+    calls.add('startMandateConfirm:$mandateId');
+    return ChallengeSent({'challenge_id': 'ch-m', 'sent_to': '+254 7•• ••• 001',
+        'expires_in': 300});
+  }
+
+  @override
+  Future<Json> confirmBankMandate(String mandateId,
+      {required String challengeId, required String code}) async {
+    calls.add('confirmBankMandate:$mandateId:$code');
+    mandateCurrent = {...?mandatePending, 'state': 'confirmed',
+        'confirmed_by': 'JC-4821-002', 'receipt': 'MAND1234'};
+    mandatePending = null;
+    return _mandateState;
+  }
+
+  @override
+  Future<Json> rejectMandate(String mandateId) async {
+    mandatePending = null;
+    return _mandateState;
+  }
+
   // Public anchors
   List<Json> anchorsList = [];
 

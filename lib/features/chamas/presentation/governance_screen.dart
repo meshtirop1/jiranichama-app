@@ -8,6 +8,7 @@ import '../../../core/providers.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../auth/presentation/problem_text.dart';
 import '../data/models.dart';
+import 'mandate_screen.dart';
 import 'support_screen.dart';
 import 'widgets/sms_code_sheet.dart';
 
@@ -233,6 +234,16 @@ class _GovernanceScreenState extends ConsumerState<GovernanceScreen> {
       appBar: AppBar(title: Text(l.govTitle)),
       body: ListView(padding: const EdgeInsets.all(JiraniSpace.m), children: [
         SupportNotice(chamaId: _id),
+        NavTile(
+          key: const ValueKey('mandate-tile'),
+          icon: Icons.draw_outlined,
+          tone: widget.chama.mandateSafe ? JiraniTone.good : JiraniTone.warning,
+          title: l.mandateTitle,
+          subtitle: widget.chama.mandateSafe ? l.mandateTileSafe : l.mandateTileMissing,
+          onTap: () => Navigator.of(context).push(MaterialPageRoute(
+              builder: (_) => MandateScreen(chama: widget.chama))),
+        ),
+        const SizedBox(height: JiraniSpace.s),
         if (_error != null) ...[
           Notice(_error!, tone: NoticeTone.critical),
           const SizedBox(height: JiraniSpace.s),
