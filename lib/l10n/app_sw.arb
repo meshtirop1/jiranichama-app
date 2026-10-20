@@ -1007,5 +1007,12 @@
   "tourMoneyOutTitle": "Pesa zinazotoka zinahitaji idhini",
   "tourMoneyOutBody": "Kila malipo kutoka chamani yanahitaji idhini ya viongozi, na makubwa yanahitaji kura ya wanachama. Pesa zikitoka bila idhini, kila mwanachama anaarifiwa.",
   "tourFingerprintTitle": "Idhinisha kwa alama ya kidole",
-  "tourFingerprintBody": "Viongozi wanaweka simu yao mara moja. Kisha hakuna anayeweza kuidhinisha kwa jina lao, hata akiwa na nambari zao za SMS."
+  "tourFingerprintBody": "Viongozi wanaweka simu yao mara moja. Kisha hakuna anayeweza kuidhinisha kwa jina lao, hata akiwa na nambari zao za SMS.",
+  "deathIAmAlive": "Niko hai",
+  "deathReportedMe": "{who} ameripoti kwamba umefariki. Kama si kweli, bonyeza Niko hai. Hakuna kinachofanyika kwa pesa zako hadi hapo.",
+  "deathWaitingSecond": "Imeripotiwa na {who}. Inasubiri kiongozi wa pili athibitishe.",
+  "deathConfirmedSettles": "Imethibitishwa. Hakuna kinacholipwa kabla ya {date}, na mwanachama bado anaweza kusema si kweli.",
+  "deathConfirm": "Thibitisha kifo hiki",
+  "unapprovedVoting": "Maelezo: {text}. Wanachama wanapiga kura; hadi wakubali, hakuna pesa zitakazolipwa.",
+  "breachFrozen": "Pesa zimetoka benki bila idhini. Hakuna kinacholipwa hadi wanachama wakubali maelezo."
 }

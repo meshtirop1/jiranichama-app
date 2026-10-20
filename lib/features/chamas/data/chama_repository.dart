@@ -114,6 +114,7 @@ abstract class ChamaRepository {
   Future<ChallengeSent> startLeave(String id);
   Future<void> leave(String id, {required String challengeId, required String code});
   Future<void> cancelExit(String exitId);
+  Future<void> confirmDeath(String exitId);
   Future<void> recordDeath(String membershipId, {required String diedOn,
       required String nextOfKinName, required String nextOfKinPhone, PickedFile? document});
   Future<FineInfo> requestWaiver(String fineId, String reason);
@@ -590,6 +591,11 @@ class HttpChamaRepository implements ChamaRepository {
   Future<void> leave(String id, {required String challengeId, required String code}) async {
     await _api.post('/chamas/$id/leave/', auth: true,
         body: {'challenge_id': challengeId, 'sms_code': code});
+  }
+
+  @override
+  Future<void> confirmDeath(String exitId) async {
+    await _api.post('/exits/$exitId/confirm-death/', body: {}, auth: true);
   }
 
   @override

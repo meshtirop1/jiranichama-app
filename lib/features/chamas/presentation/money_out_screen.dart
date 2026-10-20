@@ -329,10 +329,17 @@ class _Unapproved extends ConsumerWidget {
               if (d.state == 'explained')
                 Text(l.unapprovedExplained(d.resolvedBy ?? '', d.explanation)),
               if (d.state == 'linked') Text(l.unapprovedLinked(d.resolvedBy ?? '')),
+              if (d.open && d.explanation.isNotEmpty)
+                Padding(
+                  padding: const EdgeInsets.only(top: JiraniSpace.xs),
+                  child: Text(l.unapprovedVoting(d.explanation),
+                      style: Theme.of(context).textTheme.bodySmall),
+                ),
               if (d.open && official)
                 Wrap(spacing: JiraniSpace.s, children: [
-                  TextButton(onPressed: () => _explain(context, ref, d),
-                      child: Text(l.explainButton)),
+                  if (d.explanation.isEmpty)
+                    TextButton(onPressed: () => _explain(context, ref, d),
+                        child: Text(l.explainButton)),
                   TextButton(onPressed: () => _link(context, ref, d),
                       child: Text(l.linkButton)),
                 ]),

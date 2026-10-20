@@ -322,6 +322,7 @@ class _Overview extends ConsumerWidget {
                   ],
                 ),
               )),
+        _DeathReported(chamaId: chama.id),
         _BankCheck(chamaId: chama.id, myRole: chama.myRole),
         _OpenVotes(chamaId: chama.id),
         _CashToConfirm(chamaId: chama.id, myId: me?.id),
@@ -396,6 +397,40 @@ class _Overview extends ConsumerWidget {
         MeetingsCard(chamaId: chama.id),
         if (chama.loansOn) LoansCard(chamaId: chama.id),
       ],
+    );
+  }
+}
+
+/// A member someone has reported as dead sees it first, and can say it is not true. They
+/// are not locked out while the report waits (protection plan 2026-10-20).
+class _DeathReported extends ConsumerWidget {
+  const _DeathReported({required this.chamaId});
+
+  final String chamaId;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l = AppLocalizations.of(context);
+    final mine = (ref.watch(exitsProvider(chamaId)).value ?? const <ExitInfo>[])
+        .where((e) => e.mine && e.isDeathReport).firstOrNull;
+    if (mine == null) return const SizedBox.shrink();
+    return Padding(
+      padding: const EdgeInsets.only(top: JiraniSpace.m),
+      child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+        Notice(l.deathReportedMe(mine.reportedBy), tone: NoticeTone.critical),
+        const SizedBox(height: JiraniSpace.s),
+        FilledButton(
+          key: const ValueKey('i-am-alive'),
+          style: FilledButton.styleFrom(
+              backgroundColor: Theme.of(context).colorScheme.error,
+              foregroundColor: Theme.of(context).colorScheme.onError),
+          onPressed: () async {
+            await ref.read(chamaRepositoryProvider).cancelExit(mine.id);
+            ref.invalidate(exitsProvider(chamaId));
+          },
+          child: Text(l.deathIAmAlive),
+        ),
+      ]),
     );
   }
 }
