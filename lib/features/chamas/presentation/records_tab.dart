@@ -1,6 +1,9 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:jirani_domain/jirani_domain.dart';
+import 'package:jirani_secure_keys/jirani_secure_keys.dart';
 import 'package:jirani_ui/jirani_ui.dart';
 
 import '../../../core/api/api_client.dart';
@@ -33,6 +36,15 @@ final anchorCheckProvider = FutureProvider.autoDispose.family<AnchorCheck?, Stri
   ref.cacheFor(const Duration(minutes: 5));
   final chain = await ref.watch(chainCheckProvider(chamaId).future);
   return checkAnchor(ref.watch(chamaRepositoryProvider), chamaId, chain);
+});
+
+/// Members' countersignatures, each checked on this phone against its own chain.
+final countersignCheckProvider = FutureProvider.autoDispose
+    .family<CountersignCheck, (String, String?)>((ref, args) async {
+  final (chamaId, myCode) = args;
+  final chain = await ref.watch(chainCheckProvider(chamaId).future);
+  final signed = await ref.watch(chamaRepositoryProvider).countersignatures(chamaId);
+  return checkCountersignatures(chamaId, signed, chain.items, myCode);
 });
 
 /// Which way a record moved money, as members read it (the arrows on each record).
@@ -130,8 +142,22 @@ class _RecordsTabState extends ConsumerState<RecordsTab> {
                 Notice(a.ok ? l.anchorOk(a.at.substring(0, 10), '${a.seq}')
                     : l.anchorBad(a.at.substring(0, 10)),
                     tone: a.ok ? NoticeTone.good : NoticeTone.critical),
+                if (a.hasProof && a.anchorId.isNotEmpty)
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: TextButton.icon(
+                      key: const ValueKey('ots-share'),
+                      onPressed: () => _shareProof(context, ref, a),
+                      icon: const Icon(Icons.currency_bitcoin_rounded, size: 18),
+                      label: Text(l.otsShare),
+                    ),
+                  ),
               ],
           },
+          if (check.value case final c? when c.ok && items.isNotEmpty) ...[
+            const SizedBox(height: JiraniSpace.s),
+            _Countersign(chama: bundle.chama, head: items.last),
+          ],
           if (check.value case final c? when c.ok && c.unsigned > 0) ...[
             const SizedBox(height: JiraniSpace.s),
             Notice(l.chainUnsigned(c.unsigned), tone: NoticeTone.warning),
@@ -192,6 +218,98 @@ class _RecordsTabState extends ConsumerState<RecordsTab> {
         );
       },
     );
+  }
+}
+
+Future<void> _shareProof(BuildContext context, WidgetRef ref, AnchorCheck a) async {
+  final l = AppLocalizations.of(context);
+  final messenger = ScaffoldMessenger.of(context);
+  try {
+    final bytes = await ref.read(chamaRepositoryProvider).anchorProofFile(a.anchorId);
+    final saver = ref.read(documentSaverProvider);
+    final path = await saver.save('jiranichama-anchor-${a.at.substring(0, 10)}.ots', bytes);
+    await saver.share(path, text: l.otsText(a.at.substring(0, 10)));
+  } catch (e) {
+    messenger.showSnackBar(SnackBar(content: Text(problemText(l, e))));
+  }
+}
+
+/// Members vouching for the records: who has, whether their phones' signatures match this
+/// phone's chain, and a button to add mine (signed with this phone's key).
+class _Countersign extends ConsumerStatefulWidget {
+  const _Countersign({required this.chama, required this.head});
+
+  final Chama chama;
+  final LedgerItem head;
+
+  @override
+  ConsumerState<_Countersign> createState() => _CountersignState();
+}
+
+class _CountersignState extends ConsumerState<_Countersign> {
+  bool _busy = false;
+
+  Future<void> _vouch() async {
+    final l = AppLocalizations.of(context);
+    final messenger = ScaffoldMessenger.of(context);
+    final signer = ref.read(phoneSignerProvider);
+    final code = widget.chama.myMemberCode;
+    if (code == null) return;
+    setState(() => _busy = true);
+    try {
+      if (!await signer.ready()) {
+        messenger.showSnackBar(SnackBar(content: Text(l.csNeedKey)));
+        return;
+      }
+      final message = canonicalJson(countersignPayload(chamaId: widget.chama.id,
+          memberCode: code, seq: widget.head.seq, hash: widget.head.hash));
+      final String signature;
+      try {
+        signature = await signer.sign(utf8.encode(message),
+            title: l.csPromptTitle(widget.chama.name),
+            subtitle: l.csPromptBody('${widget.head.seq}'));
+      } on SecureKeysCancelled {
+        return;
+      }
+      await ref.read(chamaRepositoryProvider).countersign(widget.chama.id,
+          seq: widget.head.seq, hash: widget.head.hash, signature: signature);
+      ref.invalidate(countersignCheckProvider((widget.chama.id, code)));
+      messenger.showSnackBar(SnackBar(content: Text(l.csDone)));
+    } catch (e) {
+      messenger.showSnackBar(SnackBar(content: Text(problemText(l, e))));
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
+    final check = ref.watch(
+        countersignCheckProvider((widget.chama.id, widget.chama.myMemberCode))).value;
+    if (check == null) return const SizedBox.shrink();
+    final notice = !check.ok
+        ? Notice(key: const ValueKey('cs-disagree'), l.csDisagree(check.disagree.join(', ')),
+            tone: NoticeTone.critical)
+        : check.members.isEmpty
+            ? Notice(key: const ValueKey('cs-none'), l.csNone)
+            : Notice(key: const ValueKey('cs-vouched'),
+                l.csVouched('${check.members.length}', '${check.upToSeq}'),
+                tone: NoticeTone.good);
+    final canVouch = check.ok && check.myLatestSeq < widget.head.seq &&
+        widget.chama.myMemberCode != null;
+    return Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+      notice,
+      if (canVouch) ...[
+        const SizedBox(height: JiraniSpace.s),
+        FilledButton.tonalIcon(
+          key: const ValueKey('cs-vouch'),
+          onPressed: _busy ? null : _vouch,
+          icon: const Icon(Icons.draw_outlined),
+          label: Text(l.csButton),
+        ),
+      ],
+    ]);
   }
 }
 

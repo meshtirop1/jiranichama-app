@@ -6,6 +6,7 @@ library;
 export 'src/anchor.dart';
 export 'src/canonical_json.dart';
 export 'src/countries.dart';
+export 'src/key_chain.dart';
 export 'src/ledger_chain.dart';
 export 'src/money.dart';
 export 'src/platform_signature.dart';

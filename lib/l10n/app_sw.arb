@@ -1110,5 +1110,16 @@
   "kycWhoPays": "Chama chako kinalipia ukaguzi; wewe hulipi chochote.",
   "kycWhy": "Kila kiongozi lazima akaguliwe kabla pesa hazijatoka kwenye chama, na mtu mmoja anaweza kuwa mwanachama mmoja tu.",
   "kycPrivacy": "Wanachama wengine wanaona alama tu, kamwe si nambari ya kitambulisho wala picha yako.",
-  "kycSoon": "Kagua kitambulisho changu: inakuja hivi karibuni"
+  "kycSoon": "Kagua kitambulisho changu: inakuja hivi karibuni",
+  "elAwaitingLot": "Sare mara mbili: kura ya bahati ya leo usiku itaamua",
+  "csVouched": "Imethibitishwa na wanachama {count}, hadi kumbukumbu #{seq}. Simu zao zilitia sahihi historia hii hii.",
+  "csDisagree": "Tahadhari: historia hapa ni tofauti na ile {who} alitia sahihi. Usiamini kumbukumbu hizi hadi ielezwe.",
+  "csNone": "Hakuna mwanachama aliyethibitisha kumbukumbu hizi bado. Kuwa wa kwanza: simu yako inatia sahihi historia iliyokagua.",
+  "csButton": "Thibitisha kumbukumbu hizi",
+  "csPromptTitle": "Thibitisha kumbukumbu za {name}",
+  "csPromptBody": "Hadi kumbukumbu #{seq}, kama zilivyokaguliwa kwenye simu hii",
+  "csDone": "Asante. Simu yako imetia sahihi kumbukumbu hizi.",
+  "csNeedKey": "Weka ufunguo wa simu hii kwanza (Pesa zinazotoka zinaonyesha jinsi).",
+  "otsShare": "Shiriki uthibitisho wa muda wa Bitcoin",
+  "otsText": "Nanga ya umma ya JiraniChama ya {date}. Ikague kwa zana ya bure \"ots verify\" (opentimestamps.org)."
 }

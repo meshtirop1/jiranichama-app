@@ -1,3 +1,6 @@
+import 'dart:convert';
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -25,7 +28,12 @@ class _SignedIn implements AuthRepository {
   Future<void> signOut() async {}
 }
 
-Future<void> _pump(WidgetTester tester, FakeChamaRepository repo) async {
+Map<String, dynamic> _keyVectors() => jsonDecode(
+    File('packages/jirani_domain/test/vectors/key_chain.json').readAsStringSync())
+    as Map<String, dynamic>;
+
+Future<void> _pump(WidgetTester tester, FakeChamaRepository repo,
+    {MemoryTrustStore? trust, FakePhoneSigner? signer}) async {
   tester.view.physicalSize = const Size(1080, 2400);
   tester.view.devicePixelRatio = 2.5;
   addTearDown(tester.view.reset);
@@ -35,8 +43,9 @@ Future<void> _pump(WidgetTester tester, FakeChamaRepository repo) async {
       chamaRepositoryProvider.overrideWithValue(repo),
       // The chain check runs inline here: the test clock does not wait for isolates.
       chainRunnerProvider.overrideWithValue((work) async => work()),
-      trustStoreProvider.overrideWithValue(MemoryTrustStore()),
+      trustStoreProvider.overrideWithValue(trust ?? MemoryTrustStore()),
       fileSourceProvider.overrideWithValue(FakeFileSource()),
+      if (signer != null) phoneSignerProvider.overrideWithValue(signer),
     ],
     child: const JiraniApp(),
   ));
@@ -157,7 +166,55 @@ void main() {
     await tester.tap(find.text('Records'));
     await tester.pumpAndSettle();
     expect(find.textContaining('Checked on this phone: 4 records'), findsOneWidget);
-    expect(find.textContaining('Receipt'), findsNWidgets(4));
+    // Nobody has vouched yet; members are invited to.
+    expect(find.byKey(const ValueKey('cs-none')), findsOneWidget);
+    await tester.drag(find.byType(ListView).last, const Offset(0, -400));
+    await tester.pumpAndSettle();
+    expect(find.textContaining('Receipt'), findsWidgets);
+  });
+
+  testWidgets('a key the pinned key did not endorse is not trusted', (tester) async {
+    final repo = FakeChamaRepository();
+    final v = _keyVectors();
+    // The server now names the forger's key as its only key: not the one this phone pinned.
+    repo.keyChain = [Map<String, Object?>.from(v['forged_next'] as Map)
+      ..['prev_key_id'] = null];
+    final trust = MemoryTrustStore()..pinned = v['pinned_fingerprint'] as String;
+    await _pump(tester, repo, trust: trust);
+    await _openChama(tester);
+    await tester.tap(find.text('Records'));
+    await tester.pumpAndSettle();
+    expect(find.textContaining('Warning: these records do not match'), findsOneWidget);
+  });
+
+  testWidgets('a rotated key endorsed by the old one is still trusted', (tester) async {
+    final repo = FakeChamaRepository();
+    final v = _keyVectors();
+    repo.keyChain = [for (final k in v['chain'] as List) Map<String, Object?>.from(k as Map)];
+    final trust = MemoryTrustStore()..pinned = v['pinned_fingerprint'] as String;
+    await _pump(tester, repo, trust: trust);
+    await _openChama(tester);
+    await tester.tap(find.text('Records'));
+    await tester.pumpAndSettle();
+    expect(find.textContaining('Checked on this phone: 4 records'), findsOneWidget);
+  });
+
+  testWidgets('a member vouches for the records with their phone key', (tester) async {
+    final repo = FakeChamaRepository(myRole: 'member', founder: false);
+    final signer = FakePhoneSigner(hasKeyAndId: true);
+    await _pump(tester, repo, signer: signer);
+    await _openChama(tester);
+    await tester.tap(find.text('Records'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('cs-vouch')));
+    await tester.pumpAndSettle();
+    final last = repo.ledgerItems.last;
+    final seq = (last['document'] as Map)['seq'];
+    expect(repo.calls, contains('countersign:$seq'));
+    expect(signer.signed.single, contains('"purpose":"countersign_chain"'));
+    expect(signer.signed.single, contains('"hash":"${last['hash']}"'));
+    // The fake signer's "SIG" is not a real signature: this phone says so, loudly.
+    expect(find.byKey(const ValueKey('cs-disagree')), findsOneWidget);
   });
 
   testWidgets('a changed record is caught on the phone', (tester) async {
