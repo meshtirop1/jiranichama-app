@@ -8,6 +8,7 @@ import '../../../core/providers.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../auth/presentation/problem_text.dart';
 import '../data/models.dart';
+import 'bills_screen.dart';
 import 'mandate_screen.dart';
 import 'support_screen.dart';
 import 'widgets/sms_code_sheet.dart';
@@ -242,6 +243,16 @@ class _GovernanceScreenState extends ConsumerState<GovernanceScreen> {
           subtitle: widget.chama.mandateSafe ? l.mandateTileSafe : l.mandateTileMissing,
           onTap: () => Navigator.of(context).push(MaterialPageRoute(
               builder: (_) => MandateScreen(chama: widget.chama))),
+        ),
+        const SizedBox(height: JiraniSpace.s),
+        NavTile(
+          key: const ValueKey('bills-tile'),
+          icon: Icons.receipt_long_outlined,
+          tone: JiraniTone.info,
+          title: l.billTitle,
+          subtitle: l.billTileSub,
+          onTap: () => Navigator.of(context).push(MaterialPageRoute(
+              builder: (_) => BillsScreen(chama: widget.chama))),
         ),
         const SizedBox(height: JiraniSpace.s),
         if (_error != null) ...[

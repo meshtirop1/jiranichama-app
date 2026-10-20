@@ -548,6 +548,24 @@ class FakeChamaRepository implements ChamaRepository {
     return [0, 79, 84, 83];
   }
 
+  // JiraniChama's monthly bill
+  Json billsJson = {
+    'this_month': {'period': '2026-03', 'currency': 'KES', 'active_members': 12,
+        'price_per_member_cents': 1500, 'members_cents': 18000, 'id_checks': 0,
+        'id_checks_cents': 0, 'total_cents': 18000, 'free_reason': '', 'due_on': '2026-04-15'},
+    'bills': [
+      {'id': 'b1', 'period': '2026-02', 'currency': 'KES', 'active_members': 11,
+       'price_per_member_cents': 1500, 'members_cents': 16500, 'id_checks': 0,
+       'id_checks_cents': 0, 'total_cents': 16500, 'free_reason': '', 'state': 'open',
+       'due_on': '2026-03-15', 'paid_at': null},
+    ],
+    'pricing': {'price_usd': 0.1, 'free_months': 3, 'free_up_to_members': 5},
+    'pay_to': {'paybill': '', 'account_prefix': 'JC'},
+  };
+
+  @override
+  Future<Json> bills(String chamaId) async => billsJson;
+
   // Bank mandate (protection plan 2026-10-20)
   Json? mandateCurrent;
   Json? mandatePending;
