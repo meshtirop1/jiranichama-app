@@ -274,6 +274,7 @@ class _GuideBody extends ConsumerWidget {
               ClipRRect(
                 borderRadius: BorderRadius.circular(8),
                 child: LinearProgressIndicator(minHeight: 10,
+                    backgroundColor: Theme.of(context).colorScheme.surfaceContainerHighest,
                     value: total == 0 ? 0 : done / total),
               ),
               const SizedBox(height: 8),
