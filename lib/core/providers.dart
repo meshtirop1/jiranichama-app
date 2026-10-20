@@ -184,6 +184,22 @@ class SecureTrustStore implements TrustStore {
       // Not kept: the next check simply checks everything again.
     }
   }
+
+  @override
+  Future<String?> pinnedKey() async {
+    try {
+      return await _storage.read(key: 'platform_key_pin');
+    } catch (_) {
+      return null;
+    }
+  }
+
+  @override
+  Future<void> pinKey(String fingerprint) async {
+    try {
+      await _storage.write(key: 'platform_key_pin', value: fingerprint);
+    } catch (_) {}
+  }
 }
 
 final trustStoreProvider = Provider<TrustStore>((ref) => SecureTrustStore());

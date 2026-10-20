@@ -2023,5 +2023,16 @@
   "kycWhoPays": "Your chama pays for the check; you pay nothing.",
   "kycWhy": "Every official must be checked before money can leave the chama, and one person can only be one member.",
   "kycPrivacy": "Other members see only a tick, never your ID number or photo.",
-  "kycSoon": "Check my ID: coming soon"
+  "kycSoon": "Check my ID: coming soon",
+  "elAwaitingLot": "Tied twice: tonight's public lot decides",
+  "csVouched": "Vouched for by {count} members, up to record #{seq}. Their phones signed this exact history.",
+  "csDisagree": "Warning: the history here differs from what {who} signed. Do not trust these records until it is explained.",
+  "csNone": "No member has vouched for these records yet. Be the first: your phone signs the history it just checked.",
+  "csButton": "Vouch for these records",
+  "csPromptTitle": "Vouch for {name}'s records",
+  "csPromptBody": "Up to record #{seq}, as checked on this phone",
+  "csDone": "Thank you. Your phone has signed these records.",
+  "csNeedKey": "Set up this phone's key first (Money out shows how).",
+  "otsShare": "Share the Bitcoin timestamp proof",
+  "otsText": "JiraniChama public anchor of {date}. Check it with the free \"ots verify\" tool (opentimestamps.org)."
 }

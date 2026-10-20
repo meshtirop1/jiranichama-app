@@ -8,6 +8,7 @@
 import 'dart:convert';
 import 'dart:typed_data';
 
+import 'package:crypto/crypto.dart' show sha256;
 import 'package:pointycastle/export.dart';
 
 /// The DER prefix of a P-256 SubjectPublicKeyInfo; the 65-byte point follows it.
@@ -23,12 +24,10 @@ class PlatformKey {
 
   /// Reads the PEM from `GET /platform-key/`. Throws [FormatException] for anything that
   /// is not an uncompressed P-256 public key.
-  factory PlatformKey.fromPem(String pem) {
-    final body = pem
-        .split(RegExp(r'\r?\n'))
-        .where((l) => l.trim().isNotEmpty && !l.startsWith('-----'))
-        .join();
-    final der = base64.decode(body);
+  factory PlatformKey.fromPem(String pem) => PlatformKey.fromDer(pemToDer(pem));
+
+  /// A P-256 SubjectPublicKeyInfo (DER), as a phone key is sent (base64 of this).
+  factory PlatformKey.fromDer(List<int> der) {
     if (der.length != _p256SpkiPrefix.length + 65) {
       throw const FormatException('not a P-256 public key');
     }
@@ -36,10 +35,16 @@ class PlatformKey {
       if (der[i] != _p256SpkiPrefix[i]) throw const FormatException('not a P-256 public key');
     }
     final params = ECCurve_secp256r1();
-    final point = params.curve.decodePoint(der.sublist(_p256SpkiPrefix.length));
+    final point = params.curve.decodePoint(
+        Uint8List.fromList(der.sublist(_p256SpkiPrefix.length)));
     if (point == null) throw const FormatException('bad public key point');
     return PlatformKey._(ECPublicKey(point, params));
   }
+
+  /// True only for a valid ECDSA/SHA-256 signature over exactly these bytes (a phone key
+  /// signs this way). Never throws.
+  bool verifyMessage(List<int> message, String signatureB64) =>
+      verifyHash(sha256.convert(message).toString(), signatureB64);
 
   /// True only for a valid signature over exactly this hash. Never throws.
   bool verifyHash(String hashHex, String signatureB64) {
@@ -54,6 +59,15 @@ class PlatformKey {
     }
   }
 }
+
+/// The DER inside a PEM public key.
+List<int> pemToDer(String pem) => base64.decode(pem
+    .split(RegExp(r'\r?\n'))
+    .where((l) => l.trim().isNotEmpty && !l.startsWith('-----'))
+    .join());
+
+/// SHA-256 of a public key's DER, in hex: how keys are named on the platform key chain.
+String keyFingerprint(String pem) => sha256.convert(pemToDer(pem)).toString();
 
 Uint8List _hex(String hex) => Uint8List.fromList([
       for (var i = 0; i < hex.length; i += 2) int.parse(hex.substring(i, i + 2), radix: 16),

@@ -162,6 +162,7 @@ class LedgerItem {
   String get hash => json['hash'] as String;
   String get receiptCode => json['receipt_code'] as String;
   String? get signature => json['platform_sig'] as String?;
+  String? get keyId => json['key_id'] as String?;
 
   int get seq => document['seq'] as int;
   String get type => document['type'] as String;
@@ -516,6 +517,10 @@ class AnchorProof {
   final Json json;
 
   String get at => json['at'] as String;
+  String get anchorId => json['anchor_id'] as String? ?? '';
+
+  /// The OpenTimestamps proof was taken by a public calendar (and lands in Bitcoin).
+  bool get hasProof => json['ots_status'] == 'submitted';
   String get merkleRoot => json['merkle_root'] as String;
   int get seq => json['seq'] as int;
   String get hash => json['hash'] as String;

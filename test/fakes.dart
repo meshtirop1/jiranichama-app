@@ -515,6 +515,39 @@ class FakeChamaRepository implements ChamaRepository {
     return UnapprovedDebit(d);
   }
 
+  // Platform key chain and member countersignatures (protection plan 2026-10-20)
+  List<Json>? keyChain;
+  final countersigned = <Json>[];
+
+  @override
+  Future<List<Json>> platformKeyChain() async => keyChain ?? [
+        {'key_id': 't', 'fingerprint': keyFingerprint(keyPem), 'public_key_pem': keyPem,
+         'prev_key_id': null, 'endorsement_sig': null},
+      ];
+
+  @override
+  Future<List<Json>> countersignatures(String chamaId) async => [...countersigned];
+
+  @override
+  Future<List<Json>> countersign(String chamaId, {required int seq, required String hash,
+      required String signature}) async {
+    calls.add('countersign:$seq');
+    countersigned.add({'member_code': 'JC-4821-004', 'seq': seq, 'hash': hash,
+        'signature': signature, 'device_public_key': fakeDevicePublicKey,
+        'device_active': true, 'at': '2026-03-10T09:00:00Z'});
+    return countersignatures(chamaId);
+  }
+
+  /// The phone key the fake signer "uses" (any valid P-256 SPKI); signatures made with
+  /// it are not checked here, so countersign tests add real ones from the vectors.
+  String fakeDevicePublicKey = '';
+
+  @override
+  Future<List<int>> anchorProofFile(String anchorId) async {
+    calls.add('ots:$anchorId');
+    return [0, 79, 84, 83];
+  }
+
   // Public anchors
   List<Json> anchorsList = [];
 

@@ -56,6 +56,7 @@ String outcomeLabel(AppLocalizations l, String o) => switch (o) {
 
 String electionStateLabel(AppLocalizations l, String s) => switch (s) {
       'voting' => l.elVoting,
+      'awaiting_lot' => l.elAwaitingLot,
       'won' => l.elWon,
       'in_office' => l.elInOffice,
       'acting' => l.elActing,

@@ -27,6 +27,11 @@ abstract class ChamaRepository {
   Future<LedgerPage> ledger(String id, {int afterSeq = 0});
   Future<List<AnchorProof>> anchors(String id);
   Future<String> platformKeyPem();
+  Future<List<Json>> platformKeyChain();
+  Future<List<Json>> countersignatures(String chamaId);
+  Future<List<Json>> countersign(String chamaId, {required int seq, required String hash,
+      required String signature});
+  Future<List<int>> anchorProofFile(String anchorId);
   Future<List<Statement>> statements(String id);
   Future<Statement> uploadStatement(String id, {required String filename,
       required List<int> bytes, required String idempotencyKey});
@@ -258,6 +263,26 @@ class HttpChamaRepository implements ChamaRepository {
   @override
   Future<String> platformKeyPem() async =>
       (await _api.get('/platform-key/') as Json)['public_key_pem'] as String;
+
+  @override
+  Future<List<Json>> platformKeyChain() async =>
+      [for (final k in await _api.get('/platform-keys/') as List) k as Json];
+
+  @override
+  Future<List<Json>> countersignatures(String chamaId) async =>
+      [for (final c in await _api.get('/chamas/$chamaId/countersignatures/') as List) c as Json];
+
+  @override
+  Future<List<Json>> countersign(String chamaId, {required int seq, required String hash,
+      required String signature}) async {
+    await _api.post('/chamas/$chamaId/countersignatures/',
+        body: {'seq': seq, 'hash': hash, 'signature': signature}, auth: true);
+    return countersignatures(chamaId);
+  }
+
+  @override
+  Future<List<int>> anchorProofFile(String anchorId) =>
+      _api.getBytes('/anchors/$anchorId/ots/');
 
   @override
   Future<List<Statement>> statements(String id) async =>

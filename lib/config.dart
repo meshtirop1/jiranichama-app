@@ -11,4 +11,9 @@ abstract final class AppConfig {
   static const flavor = String.fromEnvironment('FLAVOR', defaultValue: 'dev');
 
   static bool get isProduction => flavor == 'prod';
+
+  /// The fingerprint (SHA-256 of the DER) of the first platform signing key, built into
+  /// the app. The phone trusts only keys chained from it. Empty on dev builds: the phone
+  /// then pins the first key it sees and refuses any change not endorsed by it.
+  static const platformKeyFingerprint = String.fromEnvironment('PLATFORM_KEY_FP');
 }
