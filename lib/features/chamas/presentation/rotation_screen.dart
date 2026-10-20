@@ -113,7 +113,7 @@ class _RotationScreenState extends ConsumerState<RotationScreen> {
                       onPressed: () => _start(r, bundle)))
           : null,
       body: info.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
+        loading: () => const LoadingView(),
         error: (e, _) => Padding(padding: const EdgeInsets.all(JiraniSpace.m),
             child: Notice(problemText(l, e), tone: NoticeTone.critical)),
         data: (r) => ListView(

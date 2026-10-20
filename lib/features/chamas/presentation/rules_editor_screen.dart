@@ -32,7 +32,7 @@ class RulesEditorScreen extends ConsumerWidget {
     final l = AppLocalizations.of(context);
     final bundle = ref.watch(chamaBundleProvider(chamaId));
     return bundle.when(
-      loading: () => const Scaffold(body: Center(child: CircularProgressIndicator())),
+      loading: () => const Scaffold(body: LoadingView()),
       error: (e, _) => Scaffold(appBar: AppBar(),
           body: Padding(padding: const EdgeInsets.all(JiraniSpace.m),
               child: Notice(problemText(l, e), tone: NoticeTone.critical))),

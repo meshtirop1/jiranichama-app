@@ -142,7 +142,7 @@ class _MoneyOutScreenState extends ConsumerState<MoneyOutScreen> {
               const SizedBox(height: JiraniSpace.s),
             ],
             ...status.when(
-              loading: () => [const LinearProgressIndicator()],
+              loading: () => [const Padding(padding: EdgeInsets.all(JiraniSpace.l), child: LoadingView())],
               error: (e, _) => [Notice(problemText(l, e), tone: NoticeTone.critical)],
               data: (s) => s.on
                   ? [
@@ -192,7 +192,7 @@ class _MoneyOutScreenState extends ConsumerState<MoneyOutScreen> {
             if (on) ...[
               SectionHeader(l.proposalsHeading),
               ...ref.watch(proposalsProvider(widget.chamaId)).when(
-                    loading: () => [const LinearProgressIndicator()],
+                    loading: () => [const Padding(padding: EdgeInsets.all(JiraniSpace.l), child: LoadingView())],
                     error: (e, _) => [Notice(problemText(l, e), tone: NoticeTone.critical)],
                     data: (items) => items.isEmpty
                         ? [SurfaceCard(child: EmptyState(icon: Icons.outbox_outlined,
@@ -618,7 +618,7 @@ class _ProposalScreenState extends ConsumerState<ProposalScreen> {
     final p = _find(ref.watch(proposalsProvider(widget.chamaId)).value);
     if (p == null) {
       return Scaffold(appBar: AppBar(),
-          body: const Center(child: CircularProgressIndicator()));
+          body: const LoadingView());
     }
     final me = bundle?.me;
     final official = bundle?.chama.iAmOfficial ?? false;

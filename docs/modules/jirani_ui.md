@@ -30,6 +30,9 @@ redesign follows the money apps people in Kenya already trust:
 | `QuickActions`, `QuickAction` | The shortcut grid: three to a row, four on wide screens |
 | `NavTile` | A row that leads to a screen: tinted icon, title, one-line summary, chevron |
 | `SurfaceCard` | A plain card (tappable if given `onTap`) |
+| `BrandLoader`, `LoadingView` | The loading sign: the mark with its gold dots spinning fast around the pot; slow with reduced motion. Used for every page load instead of a plain spinner |
+| `FlowArrow`, `FlowTotal` | Money in (green, round, arrow in), out (red, round, arrow away) and fines (amber, square, gavel): different in colour and shape, for colour-blind readers. `FlowTotal` is the tappable total above a list |
+| `JiraniTheme.light(highContrast:, largeTargets:)` | "Easy to read": full-contrast text and borders, and taller tap targets |
 | `SectionHeader` | The heading over a group |
 | `StatusPill` | A short status on a soft pill ("Active", "Chairperson") |
 | `InfoRow` | A label and a figure in a card |

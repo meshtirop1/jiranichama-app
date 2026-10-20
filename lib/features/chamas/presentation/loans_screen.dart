@@ -101,7 +101,7 @@ class LoansScreen extends ConsumerWidget {
             builder: (_) => LoanRequestScreen(chamaId: chamaId))),
       ),
       body: async.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
+        loading: () => const LoadingView(),
         error: (e, _) => Padding(padding: const EdgeInsets.all(JiraniSpace.m),
             child: Notice(problemText(l, e), tone: NoticeTone.critical)),
         data: (list) => list.isEmpty
@@ -426,7 +426,7 @@ class _LoanScreenState extends ConsumerState<LoanScreen> {
       return Scaffold(appBar: AppBar(), body: list.hasError
           ? Padding(padding: const EdgeInsets.all(JiraniSpace.m),
               child: Notice(problemText(l, list.error!), tone: NoticeTone.critical))
-          : const Center(child: CircularProgressIndicator()));
+          : const LoadingView());
     }
     final repo = ref.read(chamaRepositoryProvider);
     final b = loan.balance;

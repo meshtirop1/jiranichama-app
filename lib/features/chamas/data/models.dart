@@ -56,6 +56,9 @@ class Chama {
   /// in it (see Kes.currency).
   String get currency => json['currency'] as String? ?? 'KES';
   String? get myRole => json['my_role'] as String?;
+
+  /// The chama has told JiraniChama its government registration certificate.
+  bool get registered => json['registered'] == true;
   String? get myMemberCode => json['my_member_code'] as String?;
   bool get iAmFounder => json['i_am_founder'] == true;
   String? get statementInbox => json['statement_inbox'] as String?;

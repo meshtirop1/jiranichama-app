@@ -100,7 +100,7 @@ class _VoteScreenState extends ConsumerState<VoteScreen> {
         ?.where((x) => x.id == widget.voteId).firstOrNull;
     if (v == null) {
       return Scaffold(appBar: AppBar(),
-          body: const Center(child: CircularProgressIndicator()));
+          body: const LoadingView());
     }
     return Scaffold(
       appBar: AppBar(title: Text(l.membersVote)),

@@ -90,7 +90,7 @@ class _CashScreenState extends ConsumerState<CashScreen> {
               onPressed: () => _record(bundle)))
           : null,
       body: receipts.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
+        loading: () => const LoadingView(),
         error: (e, _) => Padding(padding: const EdgeInsets.all(JiraniSpace.m),
             child: Notice(problemText(l, e), tone: NoticeTone.critical)),
         data: (items) => ListView(

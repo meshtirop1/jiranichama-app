@@ -8,6 +8,7 @@ import '../../../core/locale.dart';
 import '../../../core/providers.dart';
 import '../../../core/tours.dart';
 import '../../../l10n/app_localizations.dart';
+import '../../settings/accessibility_sheet.dart';
 import 'auth_layout.dart';
 import 'problem_text.dart';
 
@@ -93,7 +94,7 @@ class _PhoneScreenState extends ConsumerState<PhoneScreen> {
     showTourOnce(context, ref, 'sign-in', _steps);
     final language = Localizations.localeOf(context).languageCode;
     return AuthLayout(
-      actions: [TourButton(steps: _steps)],
+      actions: [const AccessibilityButton(), TourButton(steps: _steps)],
       hero: AuthHero(appName: l.appName, tagline: l.tagline),
       title: l.phoneTitle,
       children: [

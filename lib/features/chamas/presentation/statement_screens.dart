@@ -65,7 +65,7 @@ class _MemberStatementScreenState extends ConsumerState<MemberStatementScreen> {
       issue: (repo, language, key) => repo.issueMemberStatementPdf(widget.membershipId,
           from: from, language: language, idempotencyKey: key),
       body: figures.when(
-        loading: () => [const LinearProgressIndicator()],
+        loading: () => [const Padding(padding: EdgeInsets.all(JiraniSpace.l), child: LoadingView())],
         error: (e, _) => [Notice(problemText(l, e), tone: NoticeTone.critical)],
         data: (s) => _memberBody(context, l, s),
       ),
@@ -150,7 +150,7 @@ class _ChamaStatementScreenState extends ConsumerState<ChamaStatementScreen> {
       issue: (repo, language, key) => repo.issueChamaStatementPdf(widget.chamaId,
           from: from, language: language, idempotencyKey: key),
       body: figures.when(
-        loading: () => [const LinearProgressIndicator()],
+        loading: () => [const Padding(padding: EdgeInsets.all(JiraniSpace.l), child: LoadingView())],
         error: (e, _) => [Notice(problemText(l, e), tone: NoticeTone.critical)],
         data: (s) => [
           HeroCard(

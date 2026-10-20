@@ -1,12 +1,28 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-/// The language the member picked. Null follows the phone's language.
-class LocaleController extends Notifier<Locale?> {
-  @override
-  Locale? build() => null;
+import 'prefs.dart';
 
-  void set(Locale locale) => state = locale;
+/// The language the member picked. Null follows the phone's language. Remembered on this
+/// phone, so the app opens in it next time, even before signing in.
+class LocaleController extends Notifier<Locale?> {
+  static const _key = 'language';
+
+  @override
+  Locale? build() {
+    _load();
+    return null;
+  }
+
+  Future<void> _load() async {
+    final code = await ref.read(prefsStoreProvider).read(_key);
+    if (code != null && code.isNotEmpty && state == null) state = Locale(code);
+  }
+
+  void set(Locale locale) {
+    state = locale;
+    ref.read(prefsStoreProvider).write(_key, locale.languageCode);
+  }
 }
 
 final localeProvider = NotifierProvider<LocaleController, Locale?>(LocaleController.new);

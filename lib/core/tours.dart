@@ -10,7 +10,12 @@ import '../l10n/app_localizations.dart';
 abstract class TourMemory {
   Future<bool> seen(String tour);
   Future<void> markSeen(String tour);
+  Future<void> forget(String tour);
 }
+
+/// Every guided tour in the app, so Settings can play them all again.
+const allTours = ['sign-in', 'home', 'chama-overview', 'chama-records', 'chama-members',
+    'chama-rules', 'money-out'];
 
 class SecureTourMemory implements TourMemory {
   static const _storage = FlutterSecureStorage();
@@ -31,6 +36,13 @@ class SecureTourMemory implements TourMemory {
       await _storage.write(key: 'tour_$tour', value: '1');
     } catch (_) {}
   }
+
+  @override
+  Future<void> forget(String tour) async {
+    try {
+      await _storage.delete(key: 'tour_$tour');
+    } catch (_) {}
+  }
 }
 
 class MemoryTourMemory implements TourMemory {
@@ -41,6 +53,9 @@ class MemoryTourMemory implements TourMemory {
 
   @override
   Future<void> markSeen(String tour) async => shown.add(tour);
+
+  @override
+  Future<void> forget(String tour) async => shown.remove(tour);
 }
 
 final tourMemoryProvider = Provider<TourMemory>((ref) => SecureTourMemory());
@@ -48,6 +63,15 @@ final tourMemoryProvider = Provider<TourMemory>((ref) => SecureTourMemory());
 /// Tours already looked at while the app runs: a screen that rebuilds does not check (or
 /// start) its tour again.
 final _handled = <String>{};
+
+/// Settings → "Show the guided tours again": each one plays the next time its screen opens.
+Future<void> replayTours(WidgetRef ref) async {
+  final memory = ref.read(tourMemoryProvider);
+  for (final t in allTours) {
+    _handled.remove(t);
+    await memory.forget(t);
+  }
+}
 
 TourLabels tourLabels(AppLocalizations l) =>
     TourLabels(next: l.tourNext, done: l.tourDone, skip: l.tourSkip);

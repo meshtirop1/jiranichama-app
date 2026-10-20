@@ -517,7 +517,7 @@ class _DisputeScreenState extends ConsumerState<DisputeScreen> {
       return Scaffold(appBar: AppBar(), body: list.hasError
           ? Padding(padding: const EdgeInsets.all(JiraniSpace.m),
               child: Notice(problemText(l, list.error!), tone: NoticeTone.critical))
-          : const Center(child: CircularProgressIndicator()));
+          : const LoadingView());
     }
     final repo = ref.read(chamaRepositoryProvider);
     return Scaffold(

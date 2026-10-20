@@ -5,6 +5,7 @@ import 'package:jirani_ui/jirani_ui.dart';
 
 import 'config.dart';
 import 'core/locale.dart';
+import 'core/prefs.dart';
 import 'l10n/app_localizations.dart';
 import 'router.dart';
 
@@ -15,11 +16,17 @@ class JiraniApp extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final router = ref.watch(routerProvider);
     final locale = ref.watch(localeProvider);
+    final a11y = ref.watch(a11yProvider);
     return MaterialApp.router(
       onGenerateTitle: (context) => AppLocalizations.of(context).appName,
       debugShowCheckedModeBanner: false,
-      theme: JiraniTheme.light(),
-      darkTheme: JiraniTheme.dark(),
+      theme: JiraniTheme.light(highContrast: a11y.highContrast,
+          largeTargets: a11y.largeTargets),
+      darkTheme: JiraniTheme.dark(highContrast: a11y.highContrast,
+          largeTargets: a11y.largeTargets),
+      themeMode: a11y.themeMode,
+      themeAnimationDuration: a11y.reduceMotion ? Duration.zero
+          : const Duration(milliseconds: 200),
       locale: locale,
       supportedLocales: AppLocalizations.supportedLocales,
       localizationsDelegates: const [
@@ -29,13 +36,17 @@ class JiraniApp extends ConsumerWidget {
         GlobalCupertinoLocalizations.delegate,
       ],
       routerConfig: router,
-      builder: (context, child) => AppConfig.isProduction
-          ? child!
-          : Banner(
-              message: AppConfig.flavor.toUpperCase(),
-              location: BannerLocation.topEnd,
-              child: child!,
-            ),
+      // "Easy to read" applies to every screen: text size, bold, contrast, motion.
+      builder: (context, child) => MediaQuery(
+        data: a11y.apply(MediaQuery.of(context)),
+        child: AppConfig.isProduction
+            ? child!
+            : Banner(
+                message: AppConfig.flavor.toUpperCase(),
+                location: BannerLocation.topEnd,
+                child: child!,
+              ),
+      ),
     );
   }
 }

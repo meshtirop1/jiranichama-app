@@ -97,7 +97,7 @@ class _Numbers extends ConsumerWidget {
     final l = AppLocalizations.of(context);
     final text = Theme.of(context).textTheme;
     return ref.watch(analyticsProvider(chamaId)).when(
-      loading: () => const Center(child: CircularProgressIndicator()),
+      loading: () => const LoadingView(),
       error: (e, _) => Padding(padding: const EdgeInsets.all(JiraniSpace.m),
           child: Notice(problemText(l, e), tone: NoticeTone.critical)),
       data: (a) => ListView(padding: const EdgeInsets.all(JiraniSpace.m), children: [
@@ -220,7 +220,7 @@ class _InvestmentsState extends ConsumerState<_Investments> {
     final official = widget.chama.iAmOfficial;
     final repo = ref.read(chamaRepositoryProvider);
     return ref.watch(portfolioProvider(widget.chama.id)).when(
-      loading: () => const Center(child: CircularProgressIndicator()),
+      loading: () => const LoadingView(),
       error: (e, _) => Padding(padding: const EdgeInsets.all(JiraniSpace.m),
           child: Notice(problemText(l, e), tone: NoticeTone.critical)),
       data: (f) => ListView(padding: const EdgeInsets.all(JiraniSpace.m), children: [
