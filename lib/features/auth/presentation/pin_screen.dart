@@ -5,6 +5,7 @@ import 'package:jirani_ui/jirani_ui.dart';
 import '../../../core/providers.dart';
 import '../../../l10n/app_localizations.dart';
 import '../application/session.dart';
+import 'auth_layout.dart';
 import 'problem_text.dart';
 
 class PinScreen extends ConsumerStatefulWidget {
@@ -60,42 +61,36 @@ class _PinScreenState extends ConsumerState<PinScreen> {
   @override
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
-    return Scaffold(
-      appBar: AppBar(),
-      body: SafeArea(
-        child: ListView(
-          padding: const EdgeInsets.all(JiraniSpace.l),
-          children: [
-            Text(l.pinTitle, style: Theme.of(context).textTheme.titleLarge),
-            const SizedBox(height: JiraniSpace.s),
-            Text(l.pinBody),
-            const SizedBox(height: JiraniSpace.l),
-            TextField(
-              controller: _name,
-              autofocus: true,
-              textCapitalization: TextCapitalization.words,
-              autofillHints: const [AutofillHints.name],
-              decoration: InputDecoration(labelText: l.nameLabel, hintText: l.nameHint),
-            ),
-            const SizedBox(height: JiraniSpace.m),
-            DigitsField(controller: _pin, label: l.pinLabel, obscure: true, autofocus: false),
-            const SizedBox(height: JiraniSpace.m),
-            DigitsField(
-              controller: _confirm,
-              label: l.pinConfirmLabel,
-              obscure: true,
-              autofocus: false,
-              onSubmitted: (_) => _save(),
-            ),
-            if (_error != null) ...[
-              const SizedBox(height: JiraniSpace.m),
-              Notice(_error!, tone: NoticeTone.critical),
-            ],
-            const SizedBox(height: JiraniSpace.l),
-            PrimaryButton(label: l.savePin, busy: _busy, onPressed: _save),
-          ],
+    return AuthLayout(
+      icon: Icons.password_rounded,
+      title: l.pinTitle,
+      subtitle: l.pinBody,
+      children: [
+        TextField(
+          controller: _name,
+          autofocus: true,
+          textCapitalization: TextCapitalization.words,
+          autofillHints: const [AutofillHints.name],
+          decoration: InputDecoration(labelText: l.nameLabel, hintText: l.nameHint,
+              prefixIcon: const Icon(Icons.person_outline_rounded)),
         ),
-      ),
+        const SizedBox(height: JiraniSpace.m),
+        DigitsField(controller: _pin, label: l.pinLabel, obscure: true, autofocus: false),
+        const SizedBox(height: JiraniSpace.m),
+        DigitsField(
+          controller: _confirm,
+          label: l.pinConfirmLabel,
+          obscure: true,
+          autofocus: false,
+          onSubmitted: (_) => _save(),
+        ),
+        if (_error != null) ...[
+          const SizedBox(height: JiraniSpace.m),
+          Notice(_error!, tone: NoticeTone.critical),
+        ],
+        const SizedBox(height: JiraniSpace.l),
+        PrimaryButton(label: l.savePin, busy: _busy, onPressed: _save),
+      ],
     );
   }
 }

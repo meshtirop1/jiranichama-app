@@ -46,20 +46,19 @@ class FinesCard extends ConsumerWidget {
         .fold(0, (t, f) => t + f.outstandingCents);
     return Padding(
       padding: const EdgeInsets.only(top: JiraniSpace.s),
-      child: Card(
-        child: ListTile(
-          key: const ValueKey('fines-card'),
-          leading: const Icon(Icons.gavel_outlined),
-          title: Text(l.finesTitle),
-          subtitle: Text([
+      child: NavTile(
+        key: const ValueKey('fines-card'),
+        icon: Icons.gavel_rounded,
+        tone: JiraniTone.critical,
+        margin: EdgeInsets.zero,
+        title: l.finesTitle,
+        subtitle: [
             if (mine > 0) l.finesMineOwed(_kes(mine)),
             if (toDecide > 0) l.waiversToDecide(toDecide),
             if (mine == 0 && toDecide == 0) l.finesNoneOwed,
-          ].join(' · ')),
-          trailing: const Icon(Icons.chevron_right),
-          onTap: () => Navigator.of(context).push(MaterialPageRoute(
+          ].join(' · '),
+        onTap: () => Navigator.of(context).push(MaterialPageRoute(
               builder: (_) => FinesScreen(chamaId: chamaId))),
-        ),
       ),
     );
   }
@@ -129,9 +128,22 @@ class _FinesScreenState extends ConsumerState<FinesScreen> {
               child: Padding(
                 padding: const EdgeInsets.all(JiraniSpace.m),
                 child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-                  Text('${f.member} · ${_kes(f.amountCents)}', style: text.titleSmall),
-                  Text(l.fineLine(f.ruleRef, f.period, fineStateLabel(l, f.state),
-                      f.receipt), style: text.bodySmall),
+                  Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                    Avatar(f.member, size: 40),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                        Text(f.member, style: text.titleSmall),
+                        const SizedBox(height: 2),
+                        Text(l.fineLine(f.ruleRef, f.period, fineStateLabel(l, f.state),
+                            f.receipt), style: text.bodySmall),
+                      ]),
+                    ),
+                    const SizedBox(width: 8),
+                    Text(_kes(f.amountCents), style: text.titleSmall?.copyWith(
+                        color: f.outstandingCents > 0
+                            ? Theme.of(context).colorScheme.error : null)),
+                  ]),
                   if (f.waiver != null) ...[
                     const SizedBox(height: JiraniSpace.xs),
                     Text(l.waiverLine(waiverStateLabel(l, f.waiver!.state), f.waiver!.reason,

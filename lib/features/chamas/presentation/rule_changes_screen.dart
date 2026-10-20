@@ -49,15 +49,15 @@ class RuleChangesSection extends ConsumerWidget {
               builder: (_) => RulesEditorScreen(chamaId: chamaId, propose: true))),
         ),
       for (final p in list)
-        Card(
-          child: ListTile(
-            key: ValueKey('rule-proposal-${p.id}'),
-            title: Text(p.reason),
-            subtitle: Text(ruleProposalStateLabel(l, p.state)),
-            trailing: const Icon(Icons.chevron_right),
-            onTap: () => Navigator.of(context).push(MaterialPageRoute(
-                builder: (_) => RuleProposalScreen(chamaId: chamaId, proposalId: p.id))),
-          ),
+        NavTile(
+          key: ValueKey('rule-proposal-${p.id}'),
+          icon: Icons.edit_document,
+          tone: JiraniTone.warning,
+          margin: const EdgeInsets.only(top: JiraniSpace.s),
+          title: p.reason,
+          subtitle: ruleProposalStateLabel(l, p.state),
+          onTap: () => Navigator.of(context).push(MaterialPageRoute(
+              builder: (_) => RuleProposalScreen(chamaId: chamaId, proposalId: p.id))),
         ),
       if (official || list.isNotEmpty) const SizedBox(height: JiraniSpace.m),
     ]);

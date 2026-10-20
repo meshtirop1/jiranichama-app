@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:jirani_ui/jirani_ui.dart';
 
 import 'features/auth/application/session.dart';
 import 'features/auth/presentation/code_screen.dart';
@@ -92,6 +93,11 @@ class _Splash extends StatelessWidget {
   const _Splash();
 
   @override
-  Widget build(BuildContext context) =>
-      const Scaffold(body: Center(child: CircularProgressIndicator()));
+  Widget build(BuildContext context) => const Scaffold(
+        body: Center(child: Column(mainAxisSize: MainAxisSize.min, children: [
+          BrandMark(size: 84),
+          SizedBox(height: JiraniSpace.l),
+          SizedBox(width: 120, child: LinearProgressIndicator()),
+        ])),
+      );
 }

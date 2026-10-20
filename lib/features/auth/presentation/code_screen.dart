@@ -5,6 +5,7 @@ import 'package:jirani_ui/jirani_ui.dart';
 import '../../../core/providers.dart';
 import '../../../l10n/app_localizations.dart';
 import '../application/session.dart';
+import 'auth_layout.dart';
 import 'problem_text.dart';
 
 class CodeScreen extends ConsumerStatefulWidget {
@@ -60,28 +61,21 @@ class _CodeScreenState extends ConsumerState<CodeScreen> {
   @override
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
-    return Scaffold(
-      appBar: AppBar(),
-      body: SafeArea(
-        child: ListView(
-          padding: const EdgeInsets.all(JiraniSpace.l),
-          children: [
-            Text(l.codeTitle, style: Theme.of(context).textTheme.titleLarge),
-            const SizedBox(height: JiraniSpace.s),
-            Text(l.codeSentTo(widget.phoneHint)),
-            const SizedBox(height: JiraniSpace.l),
-            DigitsField(controller: _code, label: l.codeLabel, onSubmitted: (_) => _verify()),
-            if (_error != null) ...[
-              const SizedBox(height: JiraniSpace.m),
-              Notice(_error!, tone: NoticeTone.critical),
-            ],
-            const SizedBox(height: JiraniSpace.l),
-            PrimaryButton(label: l.verify, busy: _busy, onPressed: _verify),
-            const SizedBox(height: JiraniSpace.s),
-            TextButton(onPressed: _busy ? null : _resend, child: Text(l.resendCode)),
-          ],
-        ),
-      ),
+    return AuthLayout(
+      icon: Icons.sms_outlined,
+      title: l.codeTitle,
+      subtitle: l.codeSentTo(widget.phoneHint),
+      children: [
+        DigitsField(controller: _code, label: l.codeLabel, onSubmitted: (_) => _verify()),
+        if (_error != null) ...[
+          const SizedBox(height: JiraniSpace.m),
+          Notice(_error!, tone: NoticeTone.critical),
+        ],
+        const SizedBox(height: JiraniSpace.l),
+        PrimaryButton(label: l.verify, busy: _busy, onPressed: _verify),
+        const SizedBox(height: JiraniSpace.s),
+        TextButton(onPressed: _busy ? null : _resend, child: Text(l.resendCode)),
+      ],
     );
   }
 }

@@ -87,17 +87,20 @@ void main() {
     final fields = find.byType(TextField);
     await tester.enterText(fields.at(1), '482916');
     await tester.enterText(fields.at(2), '482916');
+    await tester.ensureVisible(find.text('Save PIN'));
     await tester.tap(find.text('Save PIN'));
     await tester.pumpAndSettle();
     expect(find.text('Enter your name.'), findsOneWidget);
 
     await tester.enterText(fields.at(0), 'Wanjiru Kamau');
     await tester.enterText(fields.at(2), '482917');
+    await tester.ensureVisible(find.text('Save PIN'));
     await tester.tap(find.text('Save PIN'));
     await tester.pumpAndSettle();
     expect(find.text('The two PINs are not the same.'), findsOneWidget);
 
     await tester.enterText(fields.at(2), '482916');
+    await tester.ensureVisible(find.text('Save PIN'));
     await tester.tap(find.text('Save PIN'));
     await tester.pumpAndSettle();
     expect(auth.pin, '482916');

@@ -66,7 +66,7 @@ class RecordsTab extends ConsumerWidget {
               AsyncData(:final value) => Notice(
                   key: ValueKey('chain-${value.ok}'),
                   value.ok ? l.chainOk(value.entries) : l.chainBad,
-                  tone: value.ok ? NoticeTone.info : NoticeTone.critical),
+                  tone: value.ok ? NoticeTone.good : NoticeTone.critical),
               AsyncError() => Notice(key: const ValueKey('chain-error'), l.chainBad,
                   tone: NoticeTone.critical),
               _ => Notice(key: const ValueKey('chain-checking'),
@@ -79,7 +79,7 @@ class RecordsTab extends ConsumerWidget {
                 const SizedBox(height: JiraniSpace.s),
                 Notice(a.ok ? l.anchorOk(a.at.substring(0, 10), '${a.seq}')
                     : l.anchorBad(a.at.substring(0, 10)),
-                    tone: a.ok ? NoticeTone.info : NoticeTone.critical),
+                    tone: a.ok ? NoticeTone.good : NoticeTone.critical),
               ],
           },
           if (check.value case final c? when c.ok && c.unsigned > 0) ...[
@@ -133,7 +133,7 @@ class _RecordsSkeleton extends StatelessWidget {
           Container(
             height: i == 0 ? 56 : 76,
             margin: const EdgeInsets.only(bottom: JiraniSpace.s),
-            decoration: BoxDecoration(color: grey, borderRadius: BorderRadius.circular(12)),
+            decoration: BoxDecoration(color: grey, borderRadius: BorderRadius.circular(16)),
           ),
       ],
     );
@@ -184,30 +184,62 @@ class _EntryTileState extends ConsumerState<_EntryTile> {
       l.receipt(i.receiptCode),
       if (widget.correctsReceipt != null) l.correctsReceipt(widget.correctsReceipt!),
     ].join(' · ');
-    final muted = Theme.of(context).colorScheme.onSurfaceVariant;
-    return Card(
-      child: ListTile(
-        // A reversed record stays in the list (nothing is deleted) but is marked and
-        // struck through, so nobody counts it twice.
-        title: Text.rich(TextSpan(children: [
-          TextSpan(text: entryLabel(l, i.type),
-              style: widget.isReversed ? TextStyle(decoration: TextDecoration.lineThrough,
-                  color: muted) : null),
-          if (widget.isReversed) TextSpan(text: '  ${l.reversedLabel}',
-              style: TextStyle(color: muted, fontSize: 12)),
-        ])),
-        subtitle: Text(details),
-        trailing: i.amount.cents == 0 ? null : MoneyText(i.amount),
-        isThreeLine: widget.canSendBack,
-        // The only action a member has on a record: say an assigned payment is not theirs.
-        leading: widget.canSendBack
-            ? IconButton(
-                tooltip: l.notMe,
-                icon: const Icon(Icons.undo),
-                onPressed: _busy ? null : _sendBack,
-              )
-            : null,
-      ),
+    final scheme = Theme.of(context).colorScheme;
+    final text = Theme.of(context).textTheme;
+    final status = JiraniStatus.of(context);
+    final muted = scheme.onSurfaceVariant;
+    final (IconData icon, JiraniTone tone) = switch (i.type) {
+      'contribution' || 'contribution_pending_cash' => (Icons.south_west_rounded,
+          JiraniTone.good),
+      'opening_balance' => (Icons.history_edu_outlined, JiraniTone.info),
+      'fine_raised' => (Icons.gavel_rounded, JiraniTone.critical),
+      'fine_waived' => (Icons.do_not_disturb_on_outlined, JiraniTone.neutral),
+      'fine_paid' => (Icons.task_alt_rounded, JiraniTone.good),
+      'reversal' || 'correction' => (Icons.undo_rounded, JiraniTone.warning),
+      'membership' => (Icons.person_add_alt_1_outlined, JiraniTone.brand),
+      'rule_version_adopted' => (Icons.menu_book_outlined, JiraniTone.brand),
+      _ => (Icons.receipt_long_outlined, JiraniTone.neutral),
+    };
+    final incoming = tone == JiraniTone.good;
+    return SurfaceCard(
+      margin: const EdgeInsets.only(bottom: JiraniSpace.s),
+      padding: const EdgeInsets.fromLTRB(12, 12, 14, 12),
+      child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        ToneIcon(icon, tone: widget.isReversed ? JiraniTone.neutral : tone, size: 42),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            // A reversed record stays in the list (nothing is deleted) but is marked and
+            // struck through, so nobody counts it twice.
+            Text.rich(TextSpan(children: [
+              TextSpan(text: entryLabel(l, i.type),
+                  style: widget.isReversed ? TextStyle(decoration: TextDecoration.lineThrough,
+                      color: muted) : null),
+              if (widget.isReversed) TextSpan(text: '  ${l.reversedLabel}',
+                  style: TextStyle(color: muted, fontSize: 12)),
+            ]), style: text.titleSmall),
+            const SizedBox(height: 3),
+            Text(details, style: text.bodySmall),
+            // The only action a member has on a record: say an assigned payment is not
+            // theirs.
+            if (widget.canSendBack)
+              Padding(
+                padding: const EdgeInsets.only(top: 6),
+                child: IconButton.filledTonal(
+                  tooltip: l.notMe,
+                  icon: const Icon(Icons.undo_rounded, size: 20),
+                  onPressed: _busy ? null : _sendBack,
+                ),
+              ),
+          ]),
+        ),
+        if (i.amount.cents != 0) ...[
+          const SizedBox(width: 8),
+          MoneyText(i.amount, style: text.titleSmall?.copyWith(
+              color: widget.isReversed ? muted : incoming ? status.good : scheme.onSurface,
+              decoration: widget.isReversed ? TextDecoration.lineThrough : null)),
+        ],
+      ]),
     );
   }
 }

@@ -35,7 +35,9 @@ class DigitsField extends StatelessWidget {
         FilteringTextInputFormatter.digitsOnly,
         LengthLimitingTextInputFormatter(length),
       ],
-      style: Theme.of(context).textTheme.headlineSmall?.copyWith(letterSpacing: 6),
+      textAlign: TextAlign.center,
+      style: Theme.of(context).textTheme.headlineSmall
+          ?.copyWith(letterSpacing: 12, fontWeight: FontWeight.w800),
       decoration: InputDecoration(labelText: label, errorText: errorText, counterText: ''),
       onSubmitted: onSubmitted,
     );
