@@ -80,6 +80,8 @@ class _EditorState extends ConsumerState<_Editor> {
   late bool _fineOn = _fine['enabled'] as bool;
   late final _fineAmount = TextEditingController(text: _kes(_fine['amount_cents'] as int));
   late final _fineCap = TextEditingController(text: _kes(_fine['monthly_cap_cents'] as int?));
+  late final _stopAfter = TextEditingController(
+      text: '${(_r['fines'] as Json)['stop_after_missed_months'] ?? 3}');
 
   late final Set<String> _roles =
       Set<String>.from((_r['officials'] as Json)['roles'] as List);
@@ -116,7 +118,7 @@ class _EditorState extends ConsumerState<_Editor> {
 
   @override
   void dispose() {
-    for (final c in [_amount, _dueDay, _grace, _cashDays, _fineAmount, _fineCap, _deadline,
+    for (final c in [_amount, _dueDay, _grace, _cashDays, _fineAmount, _fineCap, _stopAfter, _deadline,
       _entryFee, _share, _everyDays, _reason, _absenceFine, _lateFine, _lateAfter,
       _objectionDays, for (final t in _tiers) t.upTo]) {
       c.dispose();
@@ -147,6 +149,7 @@ class _EditorState extends ConsumerState<_Editor> {
             'amount_cents': _fineOn ? _cents(_fineAmount) : 0,
             'monthly_cap_cents': _fineCap.text.trim().isEmpty ? null : _cents(_fineCap),
           },
+          'stop_after_missed_months': _int(_stopAfter),
         },
         'officials': {
           'roles': [for (final r in const ['chair', 'treasurer', 'secretary'])
@@ -342,6 +345,8 @@ class _EditorState extends ConsumerState<_Editor> {
               _number('fine_cap', _fineCap, l.fineCapLabel,
                   'fines/late_contribution/monthly_cap_cents'),
             ],
+            _number('stop_after', _stopAfter, l.stopAfterLabel,
+                'fines/stop_after_missed_months', help: l.stopAfterHelp),
           ]),
           _section(l.secOfficials, [
             Text(l.officialsHelp),

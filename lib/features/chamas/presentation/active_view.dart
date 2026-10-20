@@ -202,6 +202,22 @@ class _Overview extends ConsumerWidget {
                         alert: p.fines.cents > 0),
                     if (p.credit.cents > 0)
                       HeroFigure(l.creditLabel, MoneyText(p.credit, style: white)),
+                    if (p.finesStopped)
+                      Container(
+                        key: const ValueKey('fines-stopped'),
+                        margin: const EdgeInsets.only(top: 10),
+                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFFFC46B).withValues(alpha: .18),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Row(children: [
+                          const Icon(Icons.pan_tool_alt_outlined, size: 18),
+                          const SizedBox(width: 8),
+                          Expanded(child: Text(l.finesStoppedNote,
+                              style: text.bodyMedium?.copyWith(color: Colors.white))),
+                        ]),
+                      ),
                     if (p.nextDuePeriod != null)
                       Container(
                         margin: const EdgeInsets.only(top: 10),

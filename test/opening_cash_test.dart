@@ -11,14 +11,14 @@ class _SignedIn implements AuthRepository {
   @override
   Future<bool> hasSession() async => true;
   @override
-  Future<CodeSent> requestCode(String phone, {required String language}) =>
+  Future<CodeSent> requestCode(String phone, {required String language, String country = 'KE'}) =>
       throw UnimplementedError();
   @override
   Future<SignedIn> verifyCode(String phone, String code) => throw UnimplementedError();
   @override
   Future<void> setPin(String pin) async {}
   @override
-  Future<void> setProfile({required String name, required String language}) async {}
+  Future<void> setProfile({required String name, required String language, String? country}) async {}
   @override
   Future<void> signOut() async {}
 }
@@ -104,7 +104,7 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(find.text('Wanjiru (JC-4821-004)').last);
     await tester.pumpAndSettle();
-    await tester.enterText(find.widgetWithText(TextField, 'Amount (KES)'), '1000');
+    await tester.enterText(find.widgetWithText(TextField, 'Amount'), '1000');
     await tester.tap(find.widgetWithText(FilledButton, 'Record'));
     await tester.pumpAndSettle();
     expect(repo.calls, contains('recordCash:m4:100000'));

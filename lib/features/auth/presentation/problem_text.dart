@@ -26,7 +26,12 @@ String problemText(AppLocalizations l, Object error) {
       l.codeExpired,
     'otp_locked' || 'signing_locked' => l.codeLocked,
     'otp_rate_limited' || 'signing_rate_limited' || 'throttled' => l.tooManyCodes,
-    'invalid' when fields.containsKey('phone') => l.phoneInvalid,
+    // The server names the country: "Enter a Uganda mobile number…" or "not open yet".
+    'invalid' when fields.containsKey('phone') => switch (fields['phone']) {
+        [final String message, ...] => message,
+        final String message => message,
+        _ => l.genericError,
+      },
     'invalid' when fields.containsKey('pin') => l.pinWeak,
     'treasurer_cannot_upload' => l.errTreasurerUpload,
     'second_official_required' => l.errSecondOfficial,

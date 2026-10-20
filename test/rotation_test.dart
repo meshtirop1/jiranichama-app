@@ -12,14 +12,14 @@ class _SignedIn implements AuthRepository {
   @override
   Future<bool> hasSession() async => true;
   @override
-  Future<CodeSent> requestCode(String phone, {required String language}) =>
+  Future<CodeSent> requestCode(String phone, {required String language, String country = 'KE'}) =>
       throw UnimplementedError();
   @override
   Future<SignedIn> verifyCode(String phone, String code) => throw UnimplementedError();
   @override
   Future<void> setPin(String pin) async {}
   @override
-  Future<void> setProfile({required String name, required String language}) async {}
+  Future<void> setProfile({required String name, required String language, String? country}) async {}
   @override
   Future<void> signOut() async {}
 }

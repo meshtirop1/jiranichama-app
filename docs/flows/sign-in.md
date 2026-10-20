@@ -1,16 +1,27 @@
 # Sign-in
 
-1. **Phone.** The member types their number in any Kenyan format. The app normalises it
-   to `+254…` with the same rules as the server (`normalisePhone` in `jirani_domain`) and
-   refuses anything else before calling the API. The language picker (top right) switches
-   between English and Kiswahili; the SMS comes in the chosen language.
-2. **Code.** The server sends a 6-digit code by SMS. The screen shows only a hint of the
+1. **Country and language.** Two boxes above the phone number:
+   - **Country:** Kenya, Uganda and Tanzania can be chosen. The other six (Rwanda,
+     Burundi, DR Congo, South Sudan, Ethiopia, Somalia) are listed as "Coming soon" (see
+     the API's `docs/flows/countries.md`).
+   - Choosing a country sets the dialling code shown in the phone field (+254, +256,
+     +255) and the example number. It also switches to the country's own language where
+     the app has it, so Tanzania opens in Kiswahili.
+   - **Language:** lists the country's languages first. Only English and Kiswahili can
+     be chosen today; the rest (Luganda, Runyankore, Somali and others) show "Coming soon"
+     until a native speaker has checked a translation.
+2. **Phone.** The member types their number the local way (0772…) or with a country code
+   (+256…). The app reads it with the same rules as the server (`normalisePhoneIn` in
+   `jirani_domain`) and refuses a wrong number before calling the API. The message names
+   the country: "Enter a Uganda mobile number, for example 0772 123 456". The SMS comes in
+   the chosen language. The country is saved on the member's profile with their name.
+3. **Code.** The server sends a 6-digit code by SMS. The screen shows only a hint of the
    number (`+2547••• ••• 678`). A wrong code shows how many tries are left; after 5 the
    code is locked and the member asks for a new one.
-3. **Name and PIN.** A new member gives the name their chama knows them by (other members
+4. **Name and PIN.** A new member gives the name their chama knows them by (other members
    see it on statements and lists) and sets a 6-digit app PIN, typed twice. Very common
    PINs are refused by the server.
-4. **Home.** From then on the app opens straight to home. Signing out ends the session on
+5. **Home.** From then on the app opens straight to home. Signing out ends the session on
    the server and clears the tokens on the phone, even when offline.
 
 ## Why it is built this way

@@ -26,7 +26,8 @@ class SetupView extends ConsumerStatefulWidget {
 
 class _SetupViewState extends ConsumerState<SetupView> {
   // Bank account
-  late String _bank = widget.bundle.chama.bankAccount?.bank ?? 'equity';
+  late String _bank = widget.bundle.chama.bankAccount?.bank
+      ?? banksFor(widget.bundle.chama.country).first;
   late final _accountName =
       TextEditingController(text: widget.bundle.chama.bankAccount?.accountName ?? '');
   final _accountNo = TextEditingController();
@@ -191,7 +192,8 @@ class _SetupViewState extends ConsumerState<SetupView> {
                 initialValue: _bank,
                 decoration: InputDecoration(labelText: l.bankLabel),
                 items: [
-                  for (final e in bankNames.entries)
+                  for (final e in banksFor(chama.country)
+                      .map((b) => MapEntry(b, bankNames[b] ?? b)))
                     DropdownMenuItem(value: e.key, child: Text(e.value)),
                 ],
                 onChanged: (v) => setState(() => _bank = v ?? _bank),

@@ -22,8 +22,40 @@ void main() {
       '712345678']) {
       test('accepts $raw', () => expect(normalisePhone(raw), '+254712345678'));
     }
-    for (final raw in ['', '0812345678', '+255712345678', '07123456']) {
+    for (final raw in ['', '0812345678', '07123456']) {
       test('rejects "$raw"', () => expect(normalisePhone(raw), isNull));
     }
+    test('reads a number with another country code in that country',
+        () => expect(normalisePhone('+255712345678'), '+255712345678'));
+  });
+
+  group('normalisePhoneIn (nine countries, same rules as the server)', () {
+    final cases = {
+      ('0772 123 456', 'UG'): '+256772123456',
+      ('0754 123 456', 'TZ'): '+255754123456',
+      ('0788123456', 'RW'): '+250788123456',
+      ('79 123 456', 'BI'): '+25779123456',
+      ('0812345678', 'CD'): '+243812345678',
+      ('0912345678', 'SS'): '+211912345678',
+      ('0911234567', 'ET'): '+251911234567',
+      ('+252612345678', 'KE'): '+252612345678',
+      ('+254712345678', 'UG'): '+254712345678',
+    };
+    cases.forEach((input, expected) {
+      test('${input.$1} in ${input.$2}',
+          () => expect(normalisePhoneIn(input.$1, input.$2), expected));
+    });
+    test('a wrong local number is refused', () => expect(normalisePhoneIn('0612', 'UG'), isNull));
+  });
+
+  group('currency', () {
+    tearDown(() => Kes.currency = 'KES');
+    test('amounts show in the open chama currency, without cents where none are used', () {
+      Kes.currency = 'UGX';
+      expect(const Kes(5000050).format(), 'UGX 50,000');
+      Kes.currency = 'USD';
+      expect(const Kes(1250).format(), 'USD 12.50');
+      expect(Kes.currencyName, 'US dollars');
+    });
   });
 }

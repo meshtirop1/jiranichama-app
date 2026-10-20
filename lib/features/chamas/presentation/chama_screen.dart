@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:jirani_domain/jirani_domain.dart';
 import 'package:jirani_ui/jirani_ui.dart';
 
 import '../../../core/providers.dart';
@@ -48,11 +49,15 @@ class ChamaScreen extends ConsumerWidget {
           TextButton(onPressed: refresh, child: Text(l.retry)),
         ]),
       ),
-      data: (b) => switch (b.chama.state) {
+      data: (b) {
+        // One chama is on screen at a time: its amounts show in its own currency.
+        Kes.currency = b.chama.currency;
+        return switch (b.chama.state) {
         ChamaState.setup || ChamaState.awaitingOfficials =>
           SetupView(bundle: b, onChanged: refresh),
         ChamaState.awaitingAdoption => AdoptionView(bundle: b, onChanged: refresh),
         _ => ActiveView(bundle: b, onChanged: refresh),
+      };
       },
     );
   }

@@ -18,7 +18,7 @@ class FakeAuth implements AuthRepository {
   Future<bool> hasSession() async => session;
 
   @override
-  Future<CodeSent> requestCode(String phone, {required String language}) async {
+  Future<CodeSent> requestCode(String phone, {required String language, String country = 'KE'}) async {
     sentTo = phone;
     return const CodeSent(phoneHint: '+2547••• ••• 678', expiresIn: 300);
   }
@@ -39,7 +39,7 @@ class FakeAuth implements AuthRepository {
   Future<void> setPin(String pin) async => this.pin = pin;
 
   @override
-  Future<void> setProfile({required String name, required String language}) async =>
+  Future<void> setProfile({required String name, required String language, String? country}) async =>
       this.name = name;
 
   @override
@@ -66,7 +66,7 @@ void main() {
     await tester.enterText(find.byType(TextField), '12');
     await tester.tap(find.text('Send code'));
     await tester.pumpAndSettle();
-    expect(find.textContaining('Enter a Kenyan mobile number'), findsOneWidget);
+    expect(find.textContaining('Enter a Kenya mobile number'), findsOneWidget);
 
     await tester.enterText(find.byType(TextField), '0712 345 678');
     await tester.tap(find.text('Send code'));
@@ -119,11 +119,28 @@ void main() {
 
   testWidgets('the sign-in screen switches to Kiswahili', (tester) async {
     await _pumpApp(tester, FakeAuth());
-    await tester.tap(find.byIcon(Icons.translate));
+    await tester.tap(find.byKey(const ValueKey('pick-language')));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Kiswahili').last);
+    await tester.tap(find.byKey(const ValueKey('language-sw')));
     await tester.pumpAndSettle();
     expect(find.text('Ingia kwa simu yako'), findsOneWidget);
     expect(find.text('Tuma nambari'), findsOneWidget);
+  });
+
+  testWidgets('a member in Uganda picks the country and signs in with a Ugandan number',
+      (tester) async {
+    final auth = FakeAuth();
+    await _pumpApp(tester, auth);
+    await tester.tap(find.byKey(const ValueKey('pick-country')));
+    await tester.pumpAndSettle();
+    expect(find.text('Coming soon'), findsWidgets); // Rwanda and the others
+    await tester.tap(find.byKey(const ValueKey('country-UG')));
+    await tester.pumpAndSettle();
+    expect(find.textContaining('Uganda'), findsOneWidget);
+    expect(find.text('+256'), findsOneWidget);
+    await tester.enterText(find.byType(TextField), '0772 123 456');
+    await tester.tap(find.text('Send code'));
+    await tester.pumpAndSettle();
+    expect(auth.sentTo, '+256772123456');
   });
 }

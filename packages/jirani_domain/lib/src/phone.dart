@@ -1,11 +1,5 @@
-// Kenyan mobile numbers, normalised the same way as the server
-// (`apps/accounts/phones.py`): 07…, 01…, 2547…, +2547… all become +254XXXXXXXXX.
+import 'countries.dart';
 
-final RegExp _kenya = RegExp(r'^(?:\+?254|0)?([17]\d{8})$');
-final RegExp _separators = RegExp(r'[\s\-()]');
-
-/// Returns +254XXXXXXXXX, or null if [raw] is not a Kenyan mobile number.
-String? normalisePhone(String raw) {
-  final match = _kenya.firstMatch(raw.replaceAll(_separators, ''));
-  return match == null ? null : '+254${match.group(1)}';
-}
+/// A Kenyan mobile number as +254XXXXXXXXX, or null. Kept for callers that only know
+/// Kenya; new code uses [normalisePhoneIn] with the person's country.
+String? normalisePhone(String raw) => normalisePhoneIn(raw, 'KE');
