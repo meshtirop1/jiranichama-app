@@ -2135,5 +2135,12 @@
   "typeAboutTable": "Members save every month and borrow from the pot, paying it back with interest.",
   "typeAboutWelfare": "Members save together to help each other in bad times: illness, funerals, emergencies.",
   "typeAboutInvestment": "Members pool money to invest together, in land, shares or a business.",
-  "createNext": "Next: you choose the rules (we start you with a template), add the bank account and invite at least four more members. The chama starts once enough members confirm the rules."
+  "createNext": "Next: you choose the rules (we start you with a template), add the bank account and invite at least four more members. The chama starts once enough members confirm the rules.",
+  "packTitle": "The law in {country}",
+  "packIntro": "What the law asks of savings groups here. Your rules can be stricter, never weaker.",
+  "packProblems": "{count} things to fix to follow the law here",
+  "packSizeMin": "Members: {members}. The group needs at least {min} to start.",
+  "packSizeRange": "Members: {members}. The law here allows {min} to {max} members.",
+  "packRateHigh": "Loan interest is above {pct}% a year, the usual legal limit here.",
+  "packDisclaimer": "A guide from public law, not legal advice."
 }

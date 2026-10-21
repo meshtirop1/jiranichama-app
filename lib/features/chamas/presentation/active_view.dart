@@ -19,6 +19,7 @@ import 'fines_screen.dart';
 import 'governance_screen.dart';
 import 'growth_screen.dart';
 import 'loans_screen.dart';
+import 'country_rules_card.dart';
 import 'mandate_screen.dart';
 import 'meetings_screen.dart';
 import 'money_out_screen.dart';
@@ -148,6 +149,7 @@ class _ActiveViewState extends ConsumerState<ActiveView> {
         1 => RecordsTab(bundle: bundle, chainKey: _keys.chain, listKey: _keys.records),
         2 => _MembersTab(bundle: bundle, tourKeys: _keys),
         _ => ListView(padding: const EdgeInsets.all(JiraniSpace.m), children: [
+            CountryRulesCard(chamaId: chama.id),
             KeyedSubtree(key: _keys.ruleChange,
                 child: RuleChangesSection(chamaId: chama.id, official: chama.iAmOfficial)),
             KeyedSubtree(key: _keys.rules, child: RuleBookList(bundle.rules.clauses(lang))),

@@ -370,4 +370,26 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.textContaining('Does NOT match the public anchor'), findsOneWidget);
   });
+
+  testWidgets("the Rules tab shows what the country's law asks", (tester) async {
+    final repo = FakeChamaRepository()
+      ..countryRulesJson = {
+        'country': 'UG', 'min_members': 10, 'max_members': 30,
+        'items': [
+          {'key': 'size', 'ok': false, 'level': 'block', 'members': 8, 'min': 10, 'max': 30},
+          {'key': 'country_simple_interest', 'ok': false, 'level': 'block',
+           'text': "The law here allows simple interest only on members' loans."},
+          {'key': 'money_counters', 'ok': null, 'level': 'duty',
+           'text': 'The committee has two money counters.'},
+        ],
+      };
+    await _pump(tester, repo);
+    await _openChama(tester);
+    await tester.tap(find.text('Rules'));
+    await tester.pumpAndSettle();
+    expect(find.textContaining('The law in'), findsOneWidget);
+    expect(find.text('2 things to fix to follow the law here'), findsOneWidget);
+    expect(find.text('Members: 8. The law here allows 10 to 30 members.'), findsOneWidget);
+    expect(find.text('The committee has two money counters.'), findsOneWidget);
+  });
 }

@@ -568,6 +568,19 @@ class FakeChamaRepository implements ChamaRepository {
   @override
   Future<Json> bills(String chamaId) async => billsJson;
 
+  // The country rule pack (Kenya by default)
+  Json countryRulesJson = {
+    'country': 'KE', 'min_members': 5, 'max_members': null,
+    'items': [
+      {'key': 'size', 'ok': true, 'level': 'block', 'members': 12, 'min': 5, 'max': null},
+      {'key': 'register_voluntary', 'ok': null, 'level': 'duty',
+       'text': 'Registering is voluntary.'},
+    ],
+  };
+
+  @override
+  Future<Json> countryRules(String chamaId, String language) async => countryRulesJson;
+
   // Bank mandate (protection plan 2026-10-20)
   Json? mandateCurrent;
   Json? mandatePending;
