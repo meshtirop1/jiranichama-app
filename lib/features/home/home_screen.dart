@@ -41,8 +41,11 @@ class _HomeScreenState extends State<HomeScreen> {
     const tabs = [ChamasTab(), RegistrationScreen(inTab: true), SettingsScreen()];
     return Scaffold(
       body: IndexedStack(index: _tab, children: [
+        // A hidden tab keeps its place but not its animations: no loader spinning
+        // off-screen, so no frames drawn for nothing (battery, Android vitals).
         for (var i = 0; i < tabs.length; i++)
-          _opened.contains(i) ? tabs[i] : const SizedBox.shrink(),
+          TickerMode(enabled: i == _tab,
+              child: _opened.contains(i) ? tabs[i] : const SizedBox.shrink()),
       ]),
       bottomNavigationBar: NavigationBar(
         key: const ValueKey('home-nav'),

@@ -44,7 +44,13 @@ final countersignCheckProvider = FutureProvider.autoDispose
   final (chamaId, myCode) = args;
   final chain = await ref.watch(chainCheckProvider(chamaId).future);
   final signed = await ref.watch(chamaRepositoryProvider).countersignatures(chamaId);
-  return checkCountersignatures(chamaId, signed, chain.items, myCode);
+  if (signed.isEmpty) return checkCountersignatures(chamaId, signed, chain.items, myCode);
+  // One signature check per member: done off the main thread so scrolling stays smooth.
+  final items = chain.items;
+  final result = await ref.watch(chainRunnerProvider)(() => {
+        'check': checkCountersignatures(chamaId, signed, items, myCode),
+      });
+  return result['check']! as CountersignCheck;
 });
 
 /// Which way a record moved money, as members read it (the arrows on each record).
