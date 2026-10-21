@@ -29,6 +29,25 @@ String stateLabel(AppLocalizations l, ChamaState s) => switch (s) {
       ChamaState.expired => l.stateExpired,
     };
 
+/// A record's name, reading what changed for membership records (joined, left, a death
+/// reported or confirmed).
+String entryLabelOf(AppLocalizations l, String type, Map<String, Object?> decision) {
+  if (type == 'membership') {
+    return switch (decision['change']) {
+      'death_reported' => l.entryDeathReported,
+      'death_confirmed' => l.entryDeathConfirmed,
+      'death_report_cancelled' => l.entryDeathCancelled,
+      'deceased' => l.entryDeceased,
+      'exiting' => l.entryExiting,
+      'exited' => l.entryExited,
+      'stays' => l.entryStays,
+      _ => l.entryMembership,
+    };
+  }
+  if (type == 'vote_result' && decision['lot'] == true) return l.entryLot;
+  return entryLabel(l, type);
+}
+
 String entryLabel(AppLocalizations l, String type) => switch (type) {
       'contribution' => l.entryContribution,
       'opening_balance' => l.entryOpening,
@@ -41,6 +60,28 @@ String entryLabel(AppLocalizations l, String type) => switch (type) {
       'rule_version_adopted' => l.entryRulesAdopted,
       'statement_accepted' => l.entryStatementSealed,
       'bank_mandate' => l.entryBankMandate,
+      'cash_banked' => l.entryCashBanked,
+      'payment' || 'payout' => l.entryPayment,
+      'loan_disbursed' => l.entryLoanOut,
+      'loan_repayment' => l.entryLoanRepaid,
+      'loan_interest' => l.entryLoanInterest,
+      'bank_charge' => l.entryBankCharge,
+      'interest_earned' => l.entryInterest,
+      'unapproved_debit_detected' => l.entryUnapproved,
+      'rotation_set' => l.entryRotation,
+      'vote_result' => l.entryVote,
+      'meeting_closed' => l.entryMeeting,
+      'minutes_sealed' => l.entryMinutes,
+      'dispute_resolved' => l.entryDispute,
+      'investment_recorded' => l.entryInvestment,
+      'valuation' => l.entryValuation,
+      'investment_income' => l.entryInvestmentIncome,
+      'referral_consent' => l.entryReferral,
+      'support_access' => l.entrySupport,
+      'device_registered' => l.entryDevice,
+      'role_changed' => l.entryRole,
+      'seal' => l.entrySeal,
+      'table_banking' => l.entryTableBanking,
       _ => l.entryOther,
     };
 

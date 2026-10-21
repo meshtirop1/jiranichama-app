@@ -349,8 +349,8 @@ class _GovernanceScreenState extends ConsumerState<GovernanceScreen> {
                 key: ValueKey('exit-${e.id}'),
                 contentPadding: EdgeInsets.zero,
                 leading: Avatar(e.member, size: 38),
-                title: Text(e.kind == 'death' ? l.exitDied(e.member)
-                    : l.exitLeaving(e.member)),
+                title: Text(e.isDeathReport && !e.confirmed ? l.exitReported(e.member)
+                    : e.kind == 'death' ? l.exitDied(e.member) : l.exitLeaving(e.member)),
                 subtitle: Text(!e.isDeathReport
                     ? l.exitLine(e.exitOn, _kes(e.settlementCents), e.state)
                     : e.confirmed ? l.deathConfirmedSettles(e.exitOn)

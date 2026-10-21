@@ -44,7 +44,8 @@ void main() {
     final repo = FakeChamaRepository(myRole: 'member', founder: false);
     repo.finesList.add(repo.newFine());
     await _fines(tester, repo);
-    expect(find.text('Rule 3.2 · 2026-09 · owed · receipt FINE1234'), findsOneWidget);
+    expect(find.text('Rule 3.2 · 2026-09 · receipt FINE1234'), findsOneWidget);
+    expect(find.text('Owed'), findsWidgets);
     await tester.tap(find.byKey(const ValueKey('ask-waiver-f1')));
     await tester.pumpAndSettle();
     await tester.enterText(find.byKey(const ValueKey('reason-text')), 'I was in hospital');

@@ -94,6 +94,7 @@ class FakeChamaRepository implements ChamaRepository {
   }
 
   bool loansOn = false;
+  bool mandateSafe = true;
 
   Json get _chamaJson => {
         'id': 'c1', 'name': 'Umoja Women Group', 'type': 'merry_go_round', 'state': state,
@@ -102,6 +103,7 @@ class FakeChamaRepository implements ChamaRepository {
         'my_member_code': myRole == 'member' ? 'JC-4821-004' : 'JC-4821-001',
         'i_am_founder': founder, 'statement_inbox': 'jc-4821-ab12@statements.example',
         'loans_on': loansOn,
+        'mandate_safe': mandateSafe,
         'bank_account': {'bank': 'equity', 'account_name': 'UMOJA', 'account_no_last4': '9012',
                          'paybill': '247247', 'till': '', 'statement_route': 'upload'},
         if (state == 'awaiting_adoption')

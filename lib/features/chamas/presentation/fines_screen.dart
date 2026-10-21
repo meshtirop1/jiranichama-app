@@ -78,6 +78,9 @@ class _FinesScreenState extends ConsumerState<FinesScreen> {
   String? _error;
   bool _busy = false;
 
+  /// Unpaid fines first; members can see all, or only their own.
+  String _filter = 'owed';
+
   Future<void> _run(Future<void> Function() action) async {
     final l = AppLocalizations.of(context);
     setState(() {
@@ -119,8 +122,38 @@ class _FinesScreenState extends ConsumerState<FinesScreen> {
         loading: () => const LoadingView(),
         error: (e, _) => Padding(padding: const EdgeInsets.all(JiraniSpace.m),
             child: Notice(problemText(l, e), tone: NoticeTone.critical)),
-        data: (list) => ListView(padding: const EdgeInsets.all(JiraniSpace.m), children: [
+        data: (all) {
+          final owed = all.where((f) => f.outstandingCents > 0).toList();
+          final owedCents = owed.fold<int>(0, (sum, f) => sum + f.outstandingCents);
+          final members = {for (final f in owed) f.member}.length;
+          final list = switch (_filter) {
+            'owed' => owed,
+            'mine' => all.where((f) => f.mine).toList(),
+            _ => all,
+          };
+          return ListView(padding: const EdgeInsets.all(JiraniSpace.m), children: [
           if (_error != null) Notice(_error!, tone: NoticeTone.critical),
+          HeroCard(
+            label: l.finesOwedTotal,
+            value: Text(_kes(owedCents), key: const ValueKey('fines-owed-total'),
+                style: text.displaySmall?.copyWith(color: Colors.white)),
+            children: [
+              Text(l.finesSummary('${owed.length}', '$members'),
+                  style: text.bodyMedium?.copyWith(color: Colors.white70)),
+            ],
+          ),
+          const SizedBox(height: JiraniSpace.m),
+          Wrap(spacing: JiraniSpace.s, children: [
+            for (final (key, label) in [('owed', l.finesFilterOwed),
+                ('mine', l.finesFilterMine), ('all', l.finesFilterAll)])
+              ChoiceChip(
+                key: ValueKey('fines-filter-$key'),
+                label: Text(label),
+                selected: _filter == key,
+                onSelected: (_) => setState(() => _filter = key),
+              ),
+          ]),
+          const SizedBox(height: JiraniSpace.s),
           if (list.isEmpty) Notice(l.finesNone),
           for (final f in list)
             Card(
@@ -135,8 +168,16 @@ class _FinesScreenState extends ConsumerState<FinesScreen> {
                       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                         Text(f.member, style: text.titleSmall),
                         const SizedBox(height: 2),
-                        Text(l.fineLine(f.ruleRef, f.period, fineStateLabel(l, f.state),
-                            f.receipt), style: text.bodySmall),
+                        Text(l.fineLineShort(f.period, f.receipt, f.ruleRef),
+                            style: text.bodySmall),
+                        const SizedBox(height: 6),
+                        StatusPill(fineStateLabel(l, f.state),
+                            tone: switch (f.state) {
+                              'raised' when f.outstandingCents > 0 => JiraniTone.critical,
+                              'paid' => JiraniTone.good,
+                              'waived' => JiraniTone.info,
+                              _ => JiraniTone.neutral,
+                            }),
                       ]),
                     ),
                     const SizedBox(width: 8),
@@ -184,7 +225,8 @@ class _FinesScreenState extends ConsumerState<FinesScreen> {
                 ]),
               ),
             ),
-        ]),
+          ]);
+        },
       ),
     );
   }

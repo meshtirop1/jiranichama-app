@@ -386,8 +386,23 @@ class _EntryTileState extends ConsumerState<_EntryTile> {
     final muted = scheme.onSurfaceVariant;
     final flow = flowOf(i.type);
     // Records that move no money keep their own small sign.
+    final change = i.decision['change'];
     final (IconData icon, JiraniTone tone) = switch (i.type) {
+      'membership' when '$change'.startsWith('death') || change == 'deceased' =>
+        (Icons.local_florist_outlined, JiraniTone.neutral),
+      'membership' when change == 'exiting' || change == 'exited' =>
+        (Icons.logout_rounded, JiraniTone.neutral),
       'reversal' || 'correction' => (Icons.undo_rounded, JiraniTone.warning),
+      'vote_result' => (Icons.how_to_vote_outlined, JiraniTone.info),
+      'role_changed' => (Icons.badge_outlined, JiraniTone.brand),
+      'device_registered' => (Icons.phonelink_lock_outlined, JiraniTone.info),
+      'seal' || 'minutes_sealed' => (Icons.lock_outline_rounded, JiraniTone.info),
+      'meeting_closed' => (Icons.event_available_outlined, JiraniTone.info),
+      'rotation_set' => (Icons.autorenew_rounded, JiraniTone.brand),
+      'dispute_resolved' => (Icons.balance_outlined, JiraniTone.info),
+      'support_access' => (Icons.support_agent_outlined, JiraniTone.warning),
+      'referral_consent' => (Icons.handshake_outlined, JiraniTone.info),
+      'valuation' => (Icons.trending_up_rounded, JiraniTone.info),
       'membership' => (Icons.person_add_alt_1_outlined, JiraniTone.brand),
       'rule_version_adopted' => (Icons.menu_book_outlined, JiraniTone.brand),
       'statement_accepted' => (Icons.verified_outlined, JiraniTone.info),
@@ -408,7 +423,7 @@ class _EntryTileState extends ConsumerState<_EntryTile> {
             // A reversed record stays in the list (nothing is deleted) but is marked and
             // struck through, so nobody counts it twice.
             Text.rich(TextSpan(children: [
-              TextSpan(text: entryLabel(l, i.type),
+              TextSpan(text: entryLabelOf(l, i.type, i.decision),
                   style: widget.isReversed ? TextStyle(decoration: TextDecoration.lineThrough,
                       color: muted) : null),
               if (widget.isReversed) TextSpan(text: '  ${l.reversedLabel}',

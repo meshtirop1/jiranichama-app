@@ -139,7 +139,8 @@ class MeetingsScreen extends ConsumerWidget {
         data: (list) => list.isEmpty
             ? ListView(padding: const EdgeInsets.all(JiraniSpace.m), children: [
                 SurfaceCard(child: EmptyState(icon: Icons.event_available_outlined,
-                    title: l.meetNoneYet)),
+                    title: l.meetNoneYet,
+                    message: runner ? l.meetNoneYetRunner : l.meetNoneYetMember)),
               ])
             : ListView(padding: const EdgeInsets.fromLTRB(JiraniSpace.m, JiraniSpace.s,
                 JiraniSpace.m, 96), children: [

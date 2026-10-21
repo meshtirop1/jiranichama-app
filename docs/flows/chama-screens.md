@@ -412,3 +412,26 @@ refresh on every list.
 - past bills, marked paid, free, or due by a date.
 
 See `docs/flows/billing.md` in the API repository.
+
+## Screen-by-screen polish (2026-10-21)
+
+After a screen-by-screen pass on the emulator:
+
+- **Records:** every kind of record has a real name and icon, for example "Phone key set
+  up", "Records sealed", "Vote result" and "Loan repayment". Membership records say what
+  changed: "Death reported", "Gave notice to leave", "Left the chama" and so on. A death
+  report used to read "Joined".
+- **Records totals:** a total of zero is shown plain grey, not in green or red.
+- **Fines:**
+  - a header shows the total still owed and how many unpaid fines and members there are;
+  - filter chips show unpaid fines (the default), mine, or all;
+  - each fine has a status pill (Owed, Paid, Waived);
+  - the line under the name drops the lowercase status word.
+- **Leaving and deaths:** an unconfirmed report reads "Name: reported dead", not "has died".
+- **Meetings:** when the list is empty it says who schedules meetings. The secretary sees
+  how to start one.
+- **Money out:** without a safe bank mandate, officials see what to do first instead of a
+  "Switch on" button that would fail.
+- **Settings:** the profile card shows the phone and the country on their own lines.
+- **Create a chama and Join a chama:** each has a short heading and explanation. Create
+  also explains each kind of chama and what comes next.

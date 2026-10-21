@@ -417,7 +417,7 @@ class _LineTile extends StatelessWidget {
     final l = AppLocalizations.of(context);
     final what = line.type == 'reversal' && line.reversesReceipt != null
         ? l.reversalOf(line.reversesReceipt!)
-        : entryLabel(l, line.type);
+        : entryLabel(l, line.type);  // statement lines carry no decision
     final struck = line.reversed
         ? const TextStyle(decoration: TextDecoration.lineThrough)
         : null;

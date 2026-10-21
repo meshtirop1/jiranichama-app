@@ -176,10 +176,11 @@ class _ProfileCard extends ConsumerWidget {
                 key: const ValueKey('settings-profile-name'),
                 style: text.titleLarge?.copyWith(color: Colors.white)),
             const SizedBox(height: 4),
-            Text([
-              if (profile.phoneHint.isNotEmpty) profile.phoneHint,
-              '${country.flag} ${country.name}',
-            ].join(' · '), style: text.bodyMedium?.copyWith(color: Colors.white70)),
+            if (profile.phoneHint.isNotEmpty)
+              Text(profile.phoneHint, maxLines: 1, overflow: TextOverflow.ellipsis,
+                  style: text.bodyMedium?.copyWith(color: Colors.white70)),
+            Text('${country.flag}  ${country.name}',
+                style: text.bodyMedium?.copyWith(color: Colors.white70)),
             if (profile.joined.isNotEmpty)
               Text(l.settingsJoined(profile.joined),
                   style: text.bodySmall?.copyWith(color: Colors.white60)),
