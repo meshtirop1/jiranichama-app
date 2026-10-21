@@ -7,6 +7,8 @@ import 'package:jirani_domain/jirani_domain.dart';
 import 'package:jirani_secure_keys/jirani_secure_keys.dart';
 import 'package:jiranichama/core/api/problem.dart';
 import 'package:jiranichama/core/providers.dart';
+import 'package:jiranichama/features/automation/automation_repository.dart';
+import 'package:jiranichama/features/automation/models.dart';
 import 'package:jiranichama/features/chamas/data/chama_repository.dart';
 import 'package:jiranichama/features/chamas/data/models.dart';
 
@@ -29,7 +31,7 @@ ApiProblem wrongCode(int left) =>
     ApiProblem(code: 'signing_wrong', detail: '', status: 400, extra: {'attempts_left': left});
 
 /// An in-memory chama service: enough state to walk every Phase 1 screen.
-class FakeChamaRepository implements ChamaRepository {
+class FakeChamaRepository with FakeAutomation implements ChamaRepository {
   FakeChamaRepository({this.state = 'active', this.myRole = 'chair', this.founder = true}) {
     useVectorChain();
   }
@@ -38,6 +40,7 @@ class FakeChamaRepository implements ChamaRepository {
   String myRole;
   bool founder;
   bool myAdopted = false;
+  @override
   final calls = <String>[];
   final statementsList = <Json>[];
   final unmatchedList = <Json>[
@@ -661,9 +664,11 @@ class FakeChamaRepository implements ChamaRepository {
 
   void _castFake(String voteId, String choice) {
     final v = _voteJson(voteId);
-    v['cast'] = (v['cast'] as int) + 1;
-    (v['voted'] as List).add('Jane');
-    v['i_can_vote'] = false;
+    if (v['i_voted'] != true) {
+      v['cast'] = (v['cast'] as int) + 1;
+      (v['voted'] as List).add('Jane');
+    }
+    v['i_can_vote'] = v['allow_change'] == true; // may change it until it closes
     v['i_voted'] = true;
     v['my_choice'] = v['secret'] == true ? null : choice;
     calls.add('ballot:$voteId:$choice');
@@ -1574,5 +1579,175 @@ class FakePhoneSigner implements PhoneSigner {
     if (cancel) throw const SecureKeysCancelled('back');
     signed.add('$title|${utf8.decode(data)}');
     return 'SIG';
+  }
+}
+
+
+/// The automation endpoints in memory (notices, Pay now, payer links, share-out, motions,
+/// comments), mixed into the chama fake so one override covers both repositories.
+mixin FakeAutomation implements AutomationRepository {
+  List<String> get calls;
+
+  final noticesList = <Json>[];
+  Json payJson = {
+    'owed': {'total_cents': 0, 'arrears_cents': 0, 'fines_cents': 0, 'current_cents': 0,
+             'current_period': null, 'due_on': null},
+    'how': {'member_code': 'JC-4821-001', 'text': '', 'pay_now': false},
+  };
+  String payOutcome = 'paid';
+  final payerLinksList = <Json>[];
+  final shareOutsList = <Json>[];
+  bool canManageShareOut = true;
+  final motionsList = <Json>[];
+  final commentsList = <Json>[];
+
+  @override
+  Future<NoticeList> notices() async => NoticeList({
+        'unread': noticesList.where((n) => n['read'] != true).length,
+        'notices': noticesList,
+      });
+
+  @override
+  Future<void> readNotices({List<int>? ids}) async {
+    for (final n in noticesList) {
+      n['read'] = true;
+    }
+    calls.add('notices-read');
+  }
+
+  @override
+  Future<PayInfo> pay(String chamaId) async => PayInfo(payJson);
+
+  @override
+  Future<PayRequest> payNow(String chamaId, {int? amountCents}) async {
+    calls.add('pay-now:${amountCents ?? 0}');
+    return PayRequest({'id': 'stk-1', 'state': 'sent', 'amount_cents': amountCents ?? 0,
+                       'phone_hint': '+2547•• ••• 001'});
+  }
+
+  @override
+  Future<PayRequest> payStatus(String requestId) async => PayRequest({
+        'id': requestId, 'state': payOutcome, 'amount_cents': 100000,
+        'receipt': payOutcome == 'paid' ? 'QKL1234567' : '', 'result_text': ''});
+
+  @override
+  Future<List<PayerLink>> payerLinks(String chamaId) async =>
+      [for (final x in payerLinksList) PayerLink(x)];
+
+  @override
+  Future<PayerLink> answerPayerLink(String id, {required bool yes}) async {
+    final x = payerLinksList.firstWhere((x) => x['id'] == id);
+    x['state'] = yes ? 'confirmed' : 'declined';
+    calls.add('payer:$id:$yes');
+    return PayerLink(x);
+  }
+
+  @override
+  Future<PayerLink> endPayerLink(String id) async {
+    final x = payerLinksList.firstWhere((x) => x['id'] == id);
+    x['state'] = 'ended';
+    return PayerLink(x);
+  }
+
+  static Json shareOutJson({String state = 'draft'}) => {
+        'id': 'so-1', 'label': '2025', 'state': state, 'from': '2025-01-01',
+        'to': '2025-12-31', 'return_savings': true, 'keep_pct': 0,
+        'weight': 'savings_months', 'figures_hash': 'abcd1234', 'vote_id': null,
+        'receipt': null, 'created_at': '2026-01-05T10:00:00Z',
+        'earned': {'total_cents': 90000, 'by_type': {}}, 'shared_cents': 90000,
+        'reserve_cents': 0, 'savings_back_cents': 900000, 'fines_cents': 20000,
+        'loans_cents': 0, 'payout_cents': 970000, 'bank_cents': 2000000,
+        'bank_status': 'match', 'short_cents': 0, 'can_manage': true,
+        'lines': [
+          {'membership_id': 'm-1', 'member_code': 'JC-4821-001', 'name': 'Jane',
+           'savings_cents': 200000, 'weight': 1, 'profit_cents': 20000, 'fines_cents': 0,
+           'loan_cents': 0, 'payout_cents': 220000, 'proposal_state': null, 'mine': true},
+          {'membership_id': 'm-2', 'member_code': 'JC-4821-002', 'name': 'Akinyi',
+           'savings_cents': 200000, 'weight': 1, 'profit_cents': 20000, 'fines_cents': 20000,
+           'loan_cents': 0, 'payout_cents': 200000, 'proposal_state': null, 'mine': false},
+        ],
+      };
+
+  @override
+  Future<ShareOutList> shareOuts(String chamaId) async => ShareOutList({
+        'shareouts': shareOutsList, 'can_manage': canManageShareOut,
+        'suggested': {'period_from': '2025-01-01', 'period_to': '2025-12-31'},
+      });
+
+  @override
+  Future<ShareOutInfo> draftShareOut(String chamaId, Json body) async {
+    calls.add('shareout-draft:${body['weight']}:${body['keep_pct']}');
+    final so = shareOutJson();
+    shareOutsList.insert(0, so);
+    return ShareOutInfo(so);
+  }
+
+  @override
+  Future<ShareOutInfo> shareOut(String id) async =>
+      ShareOutInfo(shareOutsList.firstWhere((x) => x['id'] == id));
+
+  @override
+  Future<ShareOutInfo> shareOutAction(String id, String action) async {
+    final so = shareOutsList.firstWhere((x) => x['id'] == id);
+    so['state'] = switch (action) {
+      'submit' => 'voting',
+      'cancel' => 'cancelled',
+      _ => so['state'],
+    };
+    calls.add('shareout-$action');
+    return ShareOutInfo(so);
+  }
+
+  @override
+  Future<List<MotionInfo>> motions(String chamaId) async =>
+      [for (final m in motionsList) MotionInfo(m)];
+
+  @override
+  Future<MotionInfo> raiseMotion(String chamaId, Json body) async {
+    calls.add('motion:${body['kind']}:${body['question']}:${body['options'] ?? []}');
+    final m = <String, dynamic>{
+      'id': 'mo-${motionsList.length + 1}', 'kind': body['kind'],
+      'question': body['question'], 'details': body['details'] ?? '',
+      'options': body['options'] ?? [], 'vote_days': body['vote_days'],
+      'state': 'seconding', 'seconds_needed': 2, 'seconds': 0, 'seconded_by': <String>[],
+      'i_can_second': false, 'mine': true, 'raised_by': 'Jane', 'vote': null};
+    motionsList.insert(0, m);
+    return MotionInfo(m);
+  }
+
+  @override
+  Future<MotionInfo> secondMotion(String id) async {
+    final m = motionsList.firstWhere((x) => x['id'] == id);
+    m['seconds'] = (m['seconds'] as int) + 1;
+    m['i_can_second'] = false;
+    (m['seconded_by'] as List).add('Jane');
+    calls.add('second:$id');
+    return MotionInfo(m);
+  }
+
+  @override
+  Future<MotionInfo> withdrawMotion(String id) async {
+    final m = motionsList.firstWhere((x) => x['id'] == id);
+    m['state'] = 'withdrawn';
+    return MotionInfo(m);
+  }
+
+  @override
+  Future<List<VoteComment>> voteComments(String voteId) async =>
+      [for (final c in commentsList) VoteComment(c)];
+
+  @override
+  Future<VoteComment> comment(String voteId, String text) async {
+    final c = <String, dynamic>{'id': commentsList.length + 1, 'name': 'Jane',
+        'member_code': 'JC-4821-001', 'text': text, 'at': '2026-10-21T10:00:00Z'};
+    commentsList.add(c);
+    calls.add('comment:$voteId:$text');
+    return VoteComment(c);
+  }
+
+  @override
+  Future<String> proposeBill(String billId) async {
+    calls.add('bill:$billId');
+    return 'p-bill';
   }
 }

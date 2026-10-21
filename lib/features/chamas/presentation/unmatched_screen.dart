@@ -60,6 +60,32 @@ class UnmatchedScreen extends ConsumerWidget {
                       ]),
                     ),
                   ]),
+                  // Likely members, with the reasons (smart matching): one tap opens
+                  // the assignment with the member and the reason filled in.
+                  if (bundle != null && bundle.chama.iAmTreasurer &&
+                      line.suggestions.isNotEmpty) ...[
+                    const SizedBox(height: 10),
+                    Text(l.suggestedMembers, style: Theme.of(context).textTheme.labelLarge),
+                    const SizedBox(height: 6),
+                    Wrap(spacing: 8, runSpacing: 6, children: [
+                      for (final sg in line.suggestions)
+                        ActionChip(
+                          key: ValueKey('suggest-${line.id}-${sg.memberCode}'),
+                          avatar: const Icon(Icons.auto_awesome_rounded, size: 18),
+                          label: Text('${sg.name} · ${sg.memberCode}'),
+                          tooltip: suggestionReasons(l, sg),
+                          onPressed: () async {
+                            final done = await showDialog<bool>(
+                              context: context,
+                              builder: (_) => _AssignDialog(line: line, bundle: bundle,
+                                  memberId: sg.membershipId,
+                                  reason: suggestionReasons(l, sg)),
+                            );
+                            if (done == true) ref.invalidate(unmatchedProvider(chamaId));
+                          },
+                        ),
+                    ]),
+                  ],
                   if (bundle != null && bundle.chama.iAmTreasurer) ...[
                     const SizedBox(height: 12),
                     Row(children: [
@@ -102,20 +128,34 @@ class UnmatchedScreen extends ConsumerWidget {
   }
 }
 
+/// Why a member is suggested, in words: also the reason written with the assignment.
+String suggestionReasons(AppLocalizations l, MatchSuggestion s) => [
+      for (final r in s.reasons)
+        switch (r) {
+          'code' => l.sugCode,
+          'name' => l.sugName,
+          'paid_before' => l.sugPaidBefore,
+          _ => l.sugAmount,
+        },
+    ].join(', ');
+
 class _AssignDialog extends ConsumerStatefulWidget {
-  const _AssignDialog({required this.line, required this.bundle});
+  const _AssignDialog({required this.line, required this.bundle, this.memberId,
+      this.reason});
 
   final BankLine line;
   final ChamaBundle bundle;
+  final String? memberId;
+  final String? reason;
 
   @override
   ConsumerState<_AssignDialog> createState() => _AssignDialogState();
 }
 
 class _AssignDialogState extends ConsumerState<_AssignDialog> {
-  final _reason = TextEditingController();
+  late final _reason = TextEditingController(text: widget.reason ?? '');
   final _key = newIdempotencyKey();
-  String? _memberId;
+  late String? _memberId = widget.memberId;
   String? _error;
   bool _busy = false;
 

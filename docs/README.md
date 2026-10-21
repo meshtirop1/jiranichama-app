@@ -10,6 +10,7 @@ it touches.
 - [Chama screens](flows/chama-screens.md): home, create and set up, join, confirm the rules, the active chama, statements, unmatched payments.
 - [Guided tours](flows/tours.md): the pop-up walkthroughs that explain each screen, shown once and replayed with ?.
 - [Home tabs, Settings, Register, Easy to read](flows/settings-registration-a11y.md): the spinning loader, money in/out/fine arrows, the Settings tab with the ID check, registering a chama with the government, and the accessibility sheet.
+- [The chama runs itself](flows/automation-screens.md): the notices bell, Pay now with M-Pesa, "does this phone pay for you?", likely members for unmatched payments, richer votes (abstain, polls, changing a vote, comments), members' motions, and the year-end share-out.
 
 ## Operations
 

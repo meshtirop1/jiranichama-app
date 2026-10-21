@@ -9,6 +9,7 @@ import '../../core/tours.dart';
 import '../../l10n/app_localizations.dart';
 import '../auth/application/session.dart';
 import '../auth/presentation/problem_text.dart';
+import '../automation/notices_screen.dart';
 import '../chamas/data/models.dart';
 import '../registration/registration_screen.dart';
 import '../settings/accessibility_sheet.dart';
@@ -113,6 +114,7 @@ class _ChamasTabState extends ConsumerState<ChamasTab> {
           Flexible(child: Text(l.appName, overflow: TextOverflow.ellipsis)),
         ]),
         actions: [
+          const NoticesButton(),
           const AccessibilityButton(),
           TourButton(steps: _steps),
           IconButton(
