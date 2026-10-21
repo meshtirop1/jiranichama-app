@@ -14,6 +14,7 @@ it touches.
 ## Operations
 
 - [End-to-end test on a device](operations/end-to-end.md): the full Phase 1 walk against a real API, with screenshots.
+- [Efficiency and Play vitals](operations/efficiency.md): battery, start time, jank, app size, release builds.
 
 ## Modules
 
