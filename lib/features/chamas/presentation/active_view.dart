@@ -9,6 +9,10 @@ import '../../../core/providers.dart';
 import '../../../core/tours.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../core/prefs.dart';
+import '../../automation/motions.dart';
+import '../../automation/notices_screen.dart';
+import '../../automation/pay_card.dart';
+import '../../automation/shareout_screen.dart';
 import '../../auth/presentation/problem_text.dart';
 import '../../registration/registration_screen.dart';
 import '../../settings/accessibility_sheet.dart';
@@ -129,8 +133,8 @@ class _ActiveViewState extends ConsumerState<ActiveView> {
         settle: Duration(milliseconds: tab == 1 ? 1800 : 700));
     return Scaffold(
       appBar: AppBar(
-        actions: [const AccessibilityButton(), TourButton(steps: () => _steps(_tab)),
-          const SizedBox(width: 4)],
+        actions: [const NoticesButton(), const AccessibilityButton(),
+          TourButton(steps: () => _steps(_tab)), const SizedBox(width: 4)],
         titleSpacing: 0,
         title: Row(children: [
           Avatar(chama.name, size: 36),
@@ -352,12 +356,16 @@ class _Overview extends ConsumerWidget {
           ),
         _BankCheck(chamaId: chama.id, myRole: chama.myRole),
         _OpenVotes(chamaId: chama.id),
+        PayerLinkQuestion(chamaId: chama.id, myId: me?.id),
         _CashToConfirm(chamaId: chama.id, myId: me?.id),
         _MoneyOutNotices(chamaId: chama.id, moneyOut: chama.mode == 'money_out'),
         if (chama.mode == 'records_only') ...[
           const SizedBox(height: JiraniSpace.s),
           Notice(l.recordsOnlyNote),
         ],
+        PayNowCard(chamaId: chama.id, onPaid: () {
+          if (me != null) ref.invalidate(positionProvider(me.id));
+        }),
         if (account != null && chama.myMemberCode != null) ...[
           const SizedBox(height: JiraniSpace.m),
           SurfaceCard(
@@ -407,6 +415,10 @@ class _Overview extends ConsumerWidget {
           QuickAction(icon: Icons.history_edu_outlined, label: l.openingBalances,
               tone: JiraniTone.neutral,
               onTap: () => context.push('/chamas/${chama.id}/opening')),
+          QuickAction(icon: Icons.savings_outlined, label: l.shrTitle,
+              tone: JiraniTone.good,
+              onTap: () => Navigator.of(context).push(MaterialPageRoute(
+                  builder: (_) => ShareOutScreen(chamaId: chama.id)))),
           if (chama.iAmOfficial || chama.myRole == 'auditor') ...[
             QuickAction(icon: Icons.description_outlined, label: l.statements,
                 tone: JiraniTone.info,
@@ -420,6 +432,7 @@ class _Overview extends ConsumerWidget {
         SectionHeader(l.sectionMore),
         KeyedSubtree(key: tourKeys.more, child: FinesCard(chamaId: chama.id)),
         GovernanceCard(chama: chama),
+        MotionsCard(chamaId: chama.id),
         GrowthCard(chama: chama),
         MeetingsCard(chamaId: chama.id),
         if (chama.loansOn) LoansCard(chamaId: chama.id),

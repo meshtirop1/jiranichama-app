@@ -108,6 +108,21 @@ String problemText(AppLocalizations l, Object error) {
     'typed_lines_do_not_add_up' => l.errTypedDoNotAddUp,
     'typed_lines_incomplete' => l.errTypedIncomplete,
     'typed_line_invalid' => l.errTypedInvalid,
+    // The chama runs itself (2026-10-21).
+    'pay_now_unavailable' => l.errPayNowOff,
+    'prompt_pending' => l.errPromptPending,
+    'mpesa_refused' || 'mpesa_unreachable' => l.errMpesa,
+    'own_motion' => l.errOwnMotion,
+    'already_seconded' => l.errAlreadySeconded,
+    'not_seconding' => l.errNotSeconding,
+    'too_many_motions' => l.errTooManyMotions,
+    'options_invalid' => l.errOptionsInvalid,
+    'question_required' || 'text_required' => l.errFillIn,
+    'choice_invalid' => l.errChoiceInvalid,
+    'shareout_open' => l.errShareOutOpen,
+    'nothing_to_share' => l.errNothingToShare,
+    'invalid_period' => l.errInvalidPeriod,
+    'no_paybill' => l.errNoPaybill,
     _ => l.genericError,
   };
 }

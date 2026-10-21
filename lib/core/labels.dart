@@ -45,6 +45,7 @@ String entryLabelOf(AppLocalizations l, String type, Map<String, Object?> decisi
     };
   }
   if (type == 'vote_result' && decision['lot'] == true) return l.entryLot;
+  if (type == 'payout' && decision['shareout_id'] != null) return l.entryShareOutPaid;
   return entryLabel(l, type);
 }
 
@@ -60,6 +61,8 @@ String entryLabel(AppLocalizations l, String type) => switch (type) {
       'rule_version_adopted' => l.entryRulesAdopted,
       'statement_accepted' => l.entryStatementSealed,
       'bank_mandate' => l.entryBankMandate,
+      'shareout_approved' => l.entryShareOutApproved,
+      'shareout' => l.entryShareOut,
       'cash_banked' => l.entryCashBanked,
       'payment' || 'payout' => l.entryPayment,
       'loan_disbursed' => l.entryLoanOut,

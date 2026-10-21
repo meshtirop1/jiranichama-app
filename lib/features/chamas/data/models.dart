@@ -237,6 +237,23 @@ class BankLine {
   String get narration => json['narration'] as String? ?? '';
   bool get typedIn => json['typed_in'] == true;
   bool get fromMpesa => json['source'] == 'daraja';
+
+  /// Likely members, with reasons (smart matching): the treasurer confirms with a tap.
+  List<MatchSuggestion> get suggestions => [
+        for (final x in json['suggestions'] as List? ?? const [])
+          MatchSuggestion(Json.from(x as Map)),
+      ];
+}
+
+class MatchSuggestion {
+  MatchSuggestion(this.json);
+  final Json json;
+
+  String get membershipId => json['membership_id'] as String;
+  String get memberCode => json['member_code'] as String;
+  String get name => json['name'] as String;
+  int get score => json['score'] as int;
+  List<String> get reasons => (json['reasons'] as List).cast<String>();
 }
 
 class OpeningLine {
@@ -515,6 +532,17 @@ class VoteInfo {
   bool get iVoted => json['i_voted'] == true;
   String? get myChoice => json['my_choice'] as String?;
   String? get receipt => json['result_receipt'] as String?;
+  // Richer voting (2026-10-21): polls, abstaining, changing a vote, members' motions.
+  bool get isPoll => json['kind'] == 'choice';
+  String get details => json['details'] as String? ?? '';
+  List<String> get options => (json['options'] as List? ?? const []).cast<String>();
+  bool get allowChange => json['allow_change'] == true;
+  int? get abstain => json['abstain'] as int?;
+  Map<String, int> get optionCounts =>
+      Map<String, int>.from(json['option_counts'] as Map? ?? const {});
+  int? get winner => json['winner'] as int?;
+  String? get raisedBy => json['raised_by'] as String?;
+  int get comments => json['comments'] as int? ?? 0;
 }
 
 /// The chama's place in a nightly public anchor (jiranichama-api docs/flows/anchoring.md).
