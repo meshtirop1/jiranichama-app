@@ -23,7 +23,27 @@ we care about these numbers twice over.
 - **Compressed downloads.** The API now gzips answers (about 4x smaller), and Dart's HTTP
   client accepts gzip by default.
 
-## Measured
+## Measured on a real phone (2026-10-21)
+
+Samsung Galaxy S23 Ultra, Android 16, arm64 release build against the test server, Impeller
+on Vulkan.
+
+| What | Result | Google's line |
+|---|---|---|
+| Cold start (5 runs) | 0.24-0.53 s | slow at 5 s or more |
+| Return to the app (hot start) | 0.06-0.10 s | slow at 1.5 s or more |
+| Scrolling Overview (338 frames) | 0 janky, 0 dropped | |
+| Scrolling Records, with the chain check (560 frames) | 0 janky, 0 dropped | |
+| Sitting on a screen, untouched, 15 s | 0 frames drawn | |
+| In the background, 60 s | 0 CPU time, no alarms, jobs, services or wake locks | |
+| Download size for this phone | 27.8 MB | |
+
+Frames were read with `dumpsys SurfaceFlinger --timestats` (the `--latency` dump is empty for
+Flutter's surface on Android 16). Background CPU is `/proc/<pid>/stat` fields 14+15, read a
+minute apart. A flagship phone is the easy case. Repeat on a cheap phone (2-3 GB RAM) before
+launch.
+
+## Measured on the emulator
 
 - **Cold start** on the emulator, software rendering (slower than a real phone): 2.7-3.0 s
   from tap to first frame. Google calls 5 s or more slow.
