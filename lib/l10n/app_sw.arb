@@ -1222,5 +1222,12 @@
   "typeAboutTable": "Wanachama wanaweka akiba kila mwezi na kukopa kutoka kwenye mfuko, wakirudisha pamoja na riba.",
   "typeAboutWelfare": "Wanachama wanaweka akiba pamoja kusaidiana wakati mgumu: ugonjwa, misiba, dharura.",
   "typeAboutInvestment": "Wanachama wanaunganisha pesa kuwekeza pamoja, kwenye ardhi, hisa au biashara.",
-  "createNext": "Ifuatayo: unachagua sheria (tunakuanzisha na kiolezo), unaongeza akaunti ya benki na kualika angalau wanachama wanne zaidi. Chama kinaanza wanachama wa kutosha wakikubali sheria."
+  "createNext": "Ifuatayo: unachagua sheria (tunakuanzisha na kiolezo), unaongeza akaunti ya benki na kualika angalau wanachama wanne zaidi. Chama kinaanza wanachama wa kutosha wakikubali sheria.",
+  "packTitle": "Sheria ya {country}",
+  "packIntro": "Kile sheria inataka kwa vikundi vya akiba hapa. Sheria zenu zinaweza kuwa kali zaidi, si dhaifu zaidi.",
+  "packProblems": "Mambo {count} ya kurekebisha ili kufuata sheria hapa",
+  "packSizeMin": "Wanachama: {members}. Kikundi kinahitaji angalau {min} kuanza.",
+  "packSizeRange": "Wanachama: {members}. Sheria hapa inaruhusu wanachama {min} hadi {max}.",
+  "packRateHigh": "Riba ya mkopo iko juu ya {pct}% kwa mwaka, kikomo cha kawaida cha sheria hapa.",
+  "packDisclaimer": "Mwongozo kutoka sheria za umma, si ushauri wa kisheria."
 }

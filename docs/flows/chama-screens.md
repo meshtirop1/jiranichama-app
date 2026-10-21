@@ -435,3 +435,13 @@ After a screen-by-screen pass on the emulator:
 - **Settings:** the profile card shows the phone and the country on their own lines.
 - **Create a chama and Join a chama:** each has a short heading and explanation. Create
   also explains each kind of chama and what comes next.
+
+## The law in your country (2026-10-21)
+
+At the top of the Rules tab, every member sees what their country's law asks of savings groups:
+
+- the group size the law allows;
+- any rule settings the law forbids;
+- duties such as registering, quarterly reports or required officials.
+
+Each item is marked done (green tick), to do (empty circle) or a problem (red or amber). The card says how many things need fixing. Text comes from `GET /chamas/{id}/country-rules/`.

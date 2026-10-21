@@ -41,6 +41,7 @@ abstract class ChamaRepository {
       {required String challengeId, required String code});
   Future<Json> rejectMandate(String mandateId);
   Future<Json> bills(String chamaId);
+  Future<Json> countryRules(String chamaId, String language);
   Future<List<Statement>> statements(String id);
   Future<Statement> uploadStatement(String id, {required String filename,
       required List<int> bytes, required String idempotencyKey});
@@ -316,6 +317,10 @@ class HttpChamaRepository implements ChamaRepository {
           {required String challengeId, required String code}) =>
       _api.post('/bank-mandates/$mandateId/confirm/', auth: true,
           body: {'challenge_id': challengeId, 'code': code});
+
+  @override
+  Future<Json> countryRules(String chamaId, String language) async =>
+      await _api.get('/chamas/$chamaId/country-rules/', query: {'lang': language}) as Json;
 
   @override
   Future<Json> bills(String chamaId) async =>
