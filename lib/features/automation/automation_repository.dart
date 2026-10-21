@@ -28,6 +28,11 @@ abstract class AutomationRepository {
   Future<List<VoteComment>> voteComments(String voteId);
   Future<VoteComment> comment(String voteId, String text);
   Future<String> proposeBill(String billId);
+  // Security and checking (more screens, 2026-10-21).
+  Future<List<Json>> myDevices();
+  Future<void> revokeDevice(String id);
+  Future<void> changePin({required String current, required String pin});
+  Future<Json> verifyDocument(String code);
 }
 
 class HttpAutomationRepository implements AutomationRepository {
@@ -114,6 +119,24 @@ class HttpAutomationRepository implements AutomationRepository {
   Future<String> proposeBill(String billId) async =>
       (await _api.post('/bills/$billId/propose/', auth: true, body: {}))['proposal_id']
           as String;
+
+  @override
+  Future<List<Json>> myDevices() async =>
+      [for (final d in await _api.get('/devices/') as List) Json.from(d as Map)];
+
+  @override
+  Future<void> revokeDevice(String id) async {
+    await _api.post('/devices/$id/revoke/', auth: true, body: {});
+  }
+
+  @override
+  Future<void> changePin({required String current, required String pin}) async {
+    await _api.post('/auth/pin/', auth: true, body: {'pin': pin, 'current_pin': current});
+  }
+
+  @override
+  Future<Json> verifyDocument(String code) async =>
+      Json.from(await _api.get('/verify/${Uri.encodeComponent(code)}/') as Map);
 }
 
 /// The chama repository's test fake also plays this one, so a test that overrides the

@@ -79,6 +79,9 @@ void main() {
     await _open(tester, repo, FakeDocumentSaver(), 'Members');
     await tester.tap(find.text('Jane'));
     await tester.pumpAndSettle();
+    // A member's profile first; their statement is one tap away.
+    await tester.tap(find.byKey(const ValueKey('member-statement')));
+    await tester.pumpAndSettle();
     expect(find.text('Member statement'), findsOneWidget);
     expect(find.text('Get PDF statement'), findsNothing);
     expect(find.textContaining('Only the member or an official'), findsOneWidget);
@@ -88,6 +91,9 @@ void main() {
     final repo = FakeChamaRepository(myRole: 'chair');
     await _open(tester, repo, FakeDocumentSaver(), 'Members');
     await tester.tap(find.text('Wanjiru'));
+    await tester.pumpAndSettle();
+    // A member's profile first; their statement is one tap away.
+    await tester.tap(find.byKey(const ValueKey('member-statement')));
     await tester.pumpAndSettle();
     await tester.tap(find.text('Get PDF statement'));
     await tester.pumpAndSettle();

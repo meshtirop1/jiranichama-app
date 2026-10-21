@@ -10,6 +10,9 @@ import '../../../core/tours.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../core/prefs.dart';
 import '../../automation/motions.dart';
+import '../../more/insight_screens.dart';
+import '../../more/member_screens.dart';
+import '../../more/tools_screens.dart';
 import '../../automation/notices_screen.dart';
 import '../../automation/pay_card.dart';
 import '../../automation/shareout_screen.dart';
@@ -133,8 +136,18 @@ class _ActiveViewState extends ConsumerState<ActiveView> {
         settle: Duration(milliseconds: tab == 1 ? 1800 : 700));
     return Scaffold(
       appBar: AppBar(
-        actions: [const NoticesButton(), const AccessibilityButton(),
-          TourButton(steps: () => _steps(_tab)), const SizedBox(width: 4)],
+        actions: [
+          IconButton(key: const ValueKey('chama-search'), tooltip: l.searchTitle,
+              icon: const Icon(Icons.search_rounded),
+              onPressed: () => Navigator.of(context).push(MaterialPageRoute(
+                  builder: (_) => SearchScreen(chamaId: chama.id)))),
+          const NoticesButton(), const AccessibilityButton(),
+          TourButton(steps: () => _steps(_tab)),
+          IconButton(key: const ValueKey('chama-menu'), tooltip: l.menuTitle,
+              icon: const Icon(Icons.apps_rounded),
+              onPressed: () => Navigator.of(context).push(MaterialPageRoute(
+                  builder: (_) => ChamaMenuScreen(chamaId: chama.id)))),
+          const SizedBox(width: 4)],
         titleSpacing: 0,
         title: Row(children: [
           Avatar(chama.name, size: 36),
@@ -209,9 +222,9 @@ class _MembersTab extends StatelessWidget {
             style: FilledButton.styleFrom(minimumSize: const Size(0, 44)),
             icon: const Icon(Icons.person_add_alt_1_rounded, size: 20),
             label: Text(l.inviteMember),
-            onPressed: () => showModalBottomSheet<void>(
-                context: context, isScrollControlled: true,
-                builder: (_) => _InviteSheet(chamaId: bundle.chama.id)),
+            onPressed: () => Navigator.of(context).push(MaterialPageRoute(
+                builder: (_) => InviteScreen(chamaId: bundle.chama.id,
+                    chamaName: bundle.chama.name))),
           ),
       ]),
       const SizedBox(height: JiraniSpace.m),
@@ -243,8 +256,9 @@ class _MembersTab extends StatelessWidget {
                 const SizedBox(width: 4),
                 const Icon(Icons.chevron_right_rounded),
               ]),
-              onTap: () => context.push(
-                  '/chamas/${bundle.chama.id}/members/${m.id}/statement'),
+              onTap: () => Navigator.of(context).push(MaterialPageRoute(
+                  builder: (_) => MemberProfileScreen(chamaId: bundle.chama.id,
+                      membershipId: m.id))),
             ),
           ],
         ]),
@@ -400,6 +414,10 @@ class _Overview extends ConsumerWidget {
         ],
         SectionHeader(l.sectionShortcuts),
         QuickActions(key: tourKeys.shortcuts, [
+          QuickAction(icon: Icons.apps_rounded, label: l.menuEverything,
+              tone: JiraniTone.brand,
+              onTap: () => Navigator.of(context).push(MaterialPageRoute(
+                  builder: (_) => ChamaMenuScreen(chamaId: chama.id)))),
           if (bundle.rules.rules['rotation'] != null)
             QuickAction(icon: Icons.autorenew_rounded, label: l.merryGoRound,
                 tone: JiraniTone.warning,
@@ -639,7 +657,9 @@ class _BankCheck extends ConsumerWidget {
       padding: const EdgeInsets.only(top: JiraniSpace.m),
       child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
         if (overdue != null) ...[overdue, const SizedBox(height: JiraniSpace.s)],
-        Notice(headline, tone: tone),
+        Notice(key: const ValueKey('bank-check-notice'), headline, tone: tone,
+            onTap: () => Navigator.of(context).push(MaterialPageRoute(
+                builder: (_) => BankCheckScreen(chamaId: chamaId)))),
         for (final line in lines)
           Padding(padding: const EdgeInsets.only(top: JiraniSpace.xs),
               child: Text(line, style: text.bodySmall)),
