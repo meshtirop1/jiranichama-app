@@ -178,7 +178,11 @@ class _MoneyOutScreenState extends ConsumerState<MoneyOutScreen> {
                           const SizedBox(height: JiraniSpace.s),
                           Text(l.consentsSoFar('${s.consents}', '${s.needed}'),
                               style: Theme.of(context).textTheme.titleSmall),
-                          if (official) ...[
+                          if (official && bundle != null && !bundle.chama.mandateSafe) ...[
+                            const SizedBox(height: JiraniSpace.m),
+                            Notice(key: const ValueKey('money-out-needs-mandate'),
+                                l.moneyOutNeedsMandate, tone: NoticeTone.warning),
+                          ] else if (official) ...[
                             const SizedBox(height: JiraniSpace.m),
                             FilledButton(onPressed: _busy ? null : _switchOn,
                                 child: Text(l.switchOnMoneyOut)),

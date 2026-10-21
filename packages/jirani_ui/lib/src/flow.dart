@@ -88,7 +88,10 @@ class FlowTotal extends StatelessWidget {
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
     final text = Theme.of(context).textTheme;
-    final (strong, soft, _) = JiraniStatus.of(context).colors(scheme, FlowArrow.toneOf(flow));
+    // Nothing moved this way: plain, not green or red.
+    final quiet = RegExp(r'^\D*0([.,]0+)?$').hasMatch(value.trim());
+    final (strong, soft, _) = JiraniStatus.of(context).colors(
+        scheme, quiet ? JiraniTone.neutral : FlowArrow.toneOf(flow));
     return Material(
       color: selected ? soft : JiraniStatus.of(context).card,
       shape: RoundedRectangleBorder(

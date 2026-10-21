@@ -81,6 +81,11 @@ class _JoinScreenState extends ConsumerState<JoinScreen> {
           if (invite == null) ...[
             const Align(alignment: Alignment.centerLeft,
                 child: ToneIcon(Icons.group_add_outlined, size: 56)),
+            const SizedBox(height: JiraniSpace.m),
+            Text(l.joinHeading, style: Theme.of(context).textTheme.headlineSmall),
+            const SizedBox(height: JiraniSpace.xs),
+            Text(l.joinIntro, style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                color: Theme.of(context).colorScheme.onSurfaceVariant)),
             const SizedBox(height: JiraniSpace.l),
             TextField(
               controller: _code,

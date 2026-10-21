@@ -60,6 +60,14 @@ class _CreateChamaScreenState extends ConsumerState<CreateChamaScreen> {
       body: ListView(
         padding: const EdgeInsets.all(JiraniSpace.l),
         children: [
+          const Align(alignment: Alignment.centerLeft,
+              child: ToneIcon(Icons.groups_2_outlined, size: 56)),
+          const SizedBox(height: JiraniSpace.m),
+          Text(l.createHeading, style: Theme.of(context).textTheme.headlineSmall),
+          const SizedBox(height: JiraniSpace.xs),
+          Text(l.createIntro, style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              color: Theme.of(context).colorScheme.onSurfaceVariant)),
+          const SizedBox(height: JiraniSpace.l),
           TextField(controller: _name, decoration: InputDecoration(labelText: l.chamaNameLabel)),
           const SizedBox(height: JiraniSpace.m),
           DropdownButtonFormField<String>(
@@ -67,6 +75,16 @@ class _CreateChamaScreenState extends ConsumerState<CreateChamaScreen> {
             decoration: InputDecoration(labelText: l.chamaTypeLabel),
             items: [for (final t in _types) DropdownMenuItem(value: t, child: Text(typeLabel(l, t)))],
             onChanged: (v) => setState(() => _type = v ?? _type),
+          ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(4, JiraniSpace.s, 4, 0),
+            child: Text(switch (_type) {
+              'merry_go_round' => l.typeAboutMerry,
+              'table_banking' => l.typeAboutTable,
+              'welfare' => l.typeAboutWelfare,
+              _ => l.typeAboutInvestment,
+            }, key: const ValueKey('type-about'),
+                style: Theme.of(context).textTheme.bodySmall),
           ),
           const SizedBox(height: JiraniSpace.m),
           DropdownButtonFormField<String>(
@@ -77,6 +95,8 @@ class _CreateChamaScreenState extends ConsumerState<CreateChamaScreen> {
             ],
             onChanged: (v) => setState(() => _role = v ?? _role),
           ),
+          const SizedBox(height: JiraniSpace.m),
+          Notice(l.createNext),
           if (_error != null) ...[
             const SizedBox(height: JiraniSpace.m),
             Notice(_error!, tone: NoticeTone.critical),
