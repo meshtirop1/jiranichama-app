@@ -11,6 +11,7 @@ it touches.
 - [Guided tours](flows/tours.md): the pop-up walkthroughs that explain each screen, shown once and replayed with ?.
 - [Home tabs, Settings, Register, Easy to read](flows/settings-registration-a11y.md): the spinning loader, money in/out/fine arrows, the Settings tab with the ID check, registering a chama with the government, and the accessibility sheet.
 - [The chama runs itself](flows/automation-screens.md): the notices bell, Pay now with M-Pesa, "does this phone pay for you?", likely members for unmatched payments, richer votes (abstain, polls, changing a vote, comments), members' motions, and the year-end share-out.
+- [More screens](flows/more-screens.md): the Everything menu, search, welcome pages, security, my payments, months at a glance, member profiles, record details, check a code, all votes, about the chama, invite with QR, phones that pay, reports with charts, the bank check, what's coming, how records are protected, help.
 
 ## Operations
 

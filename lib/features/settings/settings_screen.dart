@@ -12,6 +12,9 @@ import '../../l10n/app_localizations.dart';
 import '../auth/application/session.dart';
 import '../auth/presentation/problem_text.dart';
 import '../home/home_screen.dart';
+import '../more/help_screen.dart';
+import '../more/security_screen.dart';
+import '../more/verify_screen.dart';
 import 'accessibility_sheet.dart';
 import 'data/account_repository.dart';
 
@@ -69,6 +72,14 @@ class SettingsScreen extends ConsumerWidget {
               _A11yTile(),
             ]),
             _Section(l.settingsPhone, [
+              ListTile(
+                key: const ValueKey('settings-security'),
+                leading: const Icon(Icons.shield_outlined),
+                title: Text(l.secTitle),
+                subtitle: Text(l.secSubtitle),
+                onTap: () => Navigator.of(context).push(
+                    MaterialPageRoute(builder: (_) => const SecurityScreen())),
+              ),
               _SignerTile(),
               ListTile(
                 leading: const Icon(Icons.replay_rounded),
@@ -88,6 +99,24 @@ class SettingsScreen extends ConsumerWidget {
               _InfoTile(Icons.account_balance_wallet_outlined, l.settingsMoney,
                   l.settingsMoneyBody),
               _InfoTile(Icons.link_rounded, l.settingsChain, l.settingsChainBody),
+            ]),
+            _Section(l.helpTitle, [
+              ListTile(
+                key: const ValueKey('settings-help'),
+                leading: const Icon(Icons.help_outline_rounded),
+                title: Text(l.helpTitle),
+                subtitle: Text(l.helpSubtitle),
+                onTap: () => Navigator.of(context).push(
+                    MaterialPageRoute(builder: (_) => const HelpScreen())),
+              ),
+              ListTile(
+                key: const ValueKey('settings-verify'),
+                leading: const Icon(Icons.qr_code_2_rounded),
+                title: Text(l.verTitle),
+                subtitle: Text(l.verSubtitle),
+                onTap: () => Navigator.of(context).push(
+                    MaterialPageRoute(builder: (_) => const VerifyScreen())),
+              ),
             ]),
             _Section(l.settingsAbout, [
               ListTile(

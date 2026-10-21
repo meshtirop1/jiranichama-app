@@ -87,6 +87,11 @@ class DeviceDocumentSaver implements DocumentSaver {
 
 final documentSaverProvider = Provider<DocumentSaver>((ref) => DeviceDocumentSaver());
 
+/// Hands text to the phone's share sheet (an invite to WhatsApp or SMS). A provider, so
+/// tests never open the share sheet.
+final textSharerProvider = Provider<Future<void> Function(String text)>(
+    (ref) => (text) async => SharePlus.instance.share(ShareParams(text: text)));
+
 /// The phone's signing key (6.7): made once, used after a fingerprint, face or PIN.
 /// Remembers which registered device it is, so approvals go to the right key.
 abstract class PhoneSigner {

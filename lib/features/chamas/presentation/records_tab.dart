@@ -13,6 +13,7 @@ import '../../../l10n/app_localizations.dart';
 import '../../auth/presentation/problem_text.dart';
 import '../application/chain_check.dart';
 import '../data/models.dart';
+import '../../more/chama_screens.dart';
 import 'chama_screen.dart';
 
 /// The records as the server sends them, shown at once while the phone checks them.
@@ -57,7 +58,8 @@ final countersignCheckProvider = FutureProvider.autoDispose
 MoneyFlow flowOf(String type) => switch (type) {
       'contribution' || 'contribution_pending_cash' || 'loan_repayment' || 'loan_interest' ||
       'investment_income' || 'opening_balance' => MoneyFlow.incoming,
-      'payment' || 'loan_disbursed' || 'bank_charge' || 'unapproved_debit_detected' ||
+      'payment' || 'payout' || 'loan_disbursed' || 'bank_charge' ||
+      'unapproved_debit_detected' ||
       'investment_recorded' => MoneyFlow.outgoing,
       'fine_raised' || 'fine_paid' || 'fine_waived' => MoneyFlow.fine,
       _ => MoneyFlow.other,
@@ -207,6 +209,7 @@ class _RecordsTabState extends ConsumerState<RecordsTab> {
               final item = newestFirst[index - header.length];
               final tile = _EntryTile(
                 key: ValueKey(item.id),
+                chamaId: id,
                 item: item,
                 isReversed: reversed.contains(item.id),
                 correctsReceipt: item.reverses == null ? null : receiptOf[item.reverses],
@@ -343,9 +346,11 @@ class _RecordsSkeleton extends StatelessWidget {
 }
 
 class _EntryTile extends ConsumerStatefulWidget {
-  const _EntryTile({super.key, required this.item, required this.canSendBack, required this.onSentBack,
-      this.isReversed = false, this.correctsReceipt});
+  const _EntryTile({super.key, required this.chamaId, required this.item,
+      required this.canSendBack, required this.onSentBack, this.isReversed = false,
+      this.correctsReceipt});
 
+  final String chamaId;
   final LedgerItem item;
   final bool isReversed;
   final String? correctsReceipt;
@@ -419,6 +424,8 @@ class _EntryTileState extends ConsumerState<_EntryTile> {
     return SurfaceCard(
       margin: const EdgeInsets.only(bottom: JiraniSpace.s),
       padding: const EdgeInsets.fromLTRB(12, 12, 14, 12),
+      onTap: () => Navigator.of(context).push(MaterialPageRoute(
+          builder: (_) => RecordDetailScreen(chamaId: widget.chamaId, item: i))),
       child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
         flow == MoneyFlow.other
             ? ToneIcon(icon, tone: widget.isReversed ? JiraniTone.neutral : tone, size: 42)

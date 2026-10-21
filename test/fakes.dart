@@ -1750,4 +1750,32 @@ mixin FakeAutomation implements AutomationRepository {
     calls.add('bill:$billId');
     return 'p-bill';
   }
+
+  final devicesList = <Json>[];
+
+  @override
+  Future<List<Json>> myDevices() async => devicesList;
+
+  @override
+  Future<void> revokeDevice(String id) async {
+    devicesList.firstWhere((d) => d['id'] == id)['state'] = 'revoked';
+    calls.add('revoke:$id');
+  }
+
+  @override
+  Future<void> changePin({required String current, required String pin}) async {
+    if (current != '135790') {
+      throw ApiProblem(code: 'pin_wrong', detail: '', status: 400);
+    }
+    calls.add('pin:$pin');
+  }
+
+  @override
+  Future<Json> verifyDocument(String code) async {
+    if (code != 'ABCDE12345') throw ApiProblem(code: 'not_found', detail: '', status: 404);
+    return {'kind': 'member_statement', 'chama_name': 'Umoja Women Group',
+            'member_code': 'JC-4821-001', 'period_from': '2026-01-01',
+            'period_to': '2026-03-31', 'issued_at': '2026-04-01T09:00:00Z',
+            'fingerprint': 'f' * 64, 'sealed': true, 'seal_receipt': 'SEAL1234'};
+  }
 }

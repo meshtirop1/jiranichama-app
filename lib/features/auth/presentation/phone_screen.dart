@@ -8,6 +8,7 @@ import '../../../core/locale.dart';
 import '../../../core/providers.dart';
 import '../../../core/tours.dart';
 import '../../../l10n/app_localizations.dart';
+import '../../more/welcome_screen.dart';
 import '../../settings/accessibility_sheet.dart';
 import 'auth_layout.dart';
 import 'problem_text.dart';
@@ -29,6 +30,22 @@ class _PhoneScreenState extends ConsumerState<PhoneScreen> {
   String? _fieldError;
   String? _error;
   bool _busy = false;
+
+  /// The welcome pages, once per phone, before the first sign-in. Null while unknown.
+  bool? _welcome;
+
+  @override
+  void initState() {
+    super.initState();
+    ref.read(tourMemoryProvider).seen('welcome').then((seen) {
+      if (mounted) setState(() => _welcome = !seen);
+    });
+  }
+
+  void _welcomed() {
+    ref.read(tourMemoryProvider).markSeen('welcome');
+    setState(() => _welcome = false);
+  }
 
   @override
   void dispose() {
@@ -91,7 +108,8 @@ class _PhoneScreenState extends ConsumerState<PhoneScreen> {
     final l = AppLocalizations.of(context);
     final text = Theme.of(context).textTheme;
     final country = countryByCode(ref.watch(countryProvider));
-    showTourOnce(context, ref, 'sign-in', _steps);
+    if (_welcome == true) return WelcomeScreen(onDone: _welcomed);
+    if (_welcome == false) showTourOnce(context, ref, 'sign-in', _steps);
     final language = Localizations.localeOf(context).languageCode;
     return AuthLayout(
       actions: [const AccessibilityButton(), TourButton(steps: _steps)],

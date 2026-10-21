@@ -123,6 +123,7 @@ String problemText(AppLocalizations l, Object error) {
     'nothing_to_share' => l.errNothingToShare,
     'invalid_period' => l.errInvalidPeriod,
     'no_paybill' => l.errNoPaybill,
+    'pin_wrong' => l.errPinWrong,
     _ => l.genericError,
   };
 }
